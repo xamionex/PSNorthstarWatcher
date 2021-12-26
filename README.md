@@ -6,3 +6,5 @@ Please change the start variables before you run.
 Place those files before your Titanfall2 folders. Also make sure your Titanfall folders are numered correctly
 # AHK Files
 These are used for some weird workaround when the server spits message boxes. You need to compile them first.
+# Symbolic Links
+You can create symbolic links to original Titanfall 2 files so you dont need to occupy a lot of disk space.

@@ -1,5 +1,8 @@
 # PSNorthstarWatcher
-fakys really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic and a dev would probably cry when he saw it.
+faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic and a dev would probably cry when he saw it. Absolute minimum effort.
+# L1ghthouse's PS Script
+https://github.com/l1ghthouse/NorthstarScripts
+Its much better, try have a look at it!
 # Change .ps1 before first start
 Please change the start variables before you run.
 # Folder setup

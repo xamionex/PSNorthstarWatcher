@@ -1,5 +1,3 @@
-# PSNorthstarWatcher
-faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic.
 # Features
 - Can watch up to 9 servers (more will be supported soon).
 - Detect if server is running by port actually being used (Auth. port) and restart.
@@ -8,6 +6,8 @@ faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is ve
 - Gather crash logs in a central folder.
 - Can generate an index.html with Server browser info (enabled be default, open index.html).
 - See uptime of your Titanfall servers.
+# PSNorthstarWatcher description
+faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic.
 # L1ghthouse's PS Script
 https://github.com/l1ghthouse/NorthstarScripts
 Its really good, go have a look!

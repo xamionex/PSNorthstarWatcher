@@ -2,39 +2,34 @@
 $originpath = "C:\Server\Origin Games\" # path to the folder where your titanfall servers reside
 $gamedir = "Titanfall2-" #name of your titanfall folders without number, example: Titantall2-n (n is the server number)
 $enginerrorclosepath = "engineerrorclose.exe" # absolute or relative path to your enginerrorclose.exe
-$portarray = @(8081) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
-$udpstartport = 3701 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! works the same as authport (above)
+$portarray = @(8081,8082) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
+$udpstartport = 3703 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
 # $killemptypath = "D:\Games\Origin\restart0players.exe" #obsolete
 $deletelogsafterdays = 1 #how many days until logs get deleted
-$waittimebetweenserverstarts = 60 #time in seconds before server starts, depends on your server speed. recommend values between 30-120
+$waittimebetweenserverstarts = 15 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
 $waittimebetweenloops = 15 #time in seconds after each loop of this script. also refresh rate for index.html default: 15
-$serverbrowserenable = $true #$true to enable, $false to disable
-$serverbrowserfilepath = "index.html" #absolute or relative path to where the index.html should be saved. 
-$restartserverhours = 3 #time in hours to force restart server (kills process) after certain uptime
+$waitwithstartloopscount = 8 # after a server has been started at least wait the defined count of loops to start it again. this prevents accidental server duplicate processes default: 8 (15 second loops * 8 = 120 seconds)
+$serverbrowserenable = $true
+$serverbrowserfilepath = "index.html" #absolute path to where the index.html should be saved. You can put this in like a webserver folder to make it available online. Example: http://51.154.42.207:18880/northstar/serverbrowser/
+$restartserverhours = 4 #time in hours to force restart server (kills process) after certain uptime
 $masterserverlisturl = "https://northstar.tf/client/servers" # url path to master server server list (json format)
-$myserverfilternamearray = @("Kraber ","Dedicated") #put an identifier here to count your slots for serverbrowser .html file
+$myserverfilternamearray = @("Kraber","Unnamed") #put an identifier here to count your slots for serverbrowser .html file
 $showuptimemonitor = $true #starts 2nd powershell process with monitor if true
 $northstarlauncherargs = "-dedicated -multiple -softwared3d11" #when launching server use those args
 $crashlogscollect = $false #$true to collect them, $false to disable
-$crashlogspath = "C:\server\apache\htdocs\northstar\server-crashlogs" #where to export crash logs to collect them
+$crashlogspath = "C:\Server\apache\htdocs\northstar\servercrash-logs" #where to export crash logs to collect them
+$deletelogsminutes = 60 # defines (in minutes) how often this script should search for logfiles and delete them
 ## CONFIG END
 
-$logfilespathstring = "" + $originpath + $gamedir + "`*\R2Northstar\logs\`*"  # dont change this
-if($showuptimemonitor){
-    Start-Process powershell -argumentlist "-File monitor_runtime.ps1"
-}
-$myfilterstring = ""
-foreach($filter in $myserverfilternamearray){$myfilterstring = $myfilterstring + $filter +", "}
-
-do{
-
-    function Check-Listenport([int] $port){
+##functions
+function Check-Listenport([int] $port){
         if ($port -gt 0 -and $port -lt 65535){
-        
+            #port input was in correct range
         }
         else{ #when port is not within 0 or 65535
             throw "Something wrong with the port number"
         }
+
         $netstat = netstat -an
         foreach($line in $netstat){
             if($line.contains("0.0.0.0:$port")){
@@ -46,25 +41,70 @@ do{
             return $false
         }
     }
-    ##
+##
+
+##vars and stuff
+$serverwaitforrestartcounterarray = @()
+$servercount = $portarray.count
+foreach($server in $portarray){ #initialize array for counter
+    $serverwaitforrestartcounterarray = $serverwaitforrestartcounterarray + 0
+}
+$logfilesdeletelastdate = (get-date).AddYears(-5) #make sure logs get cleared on first loop
+cd $originpath
+$logfilespathstring = "" + $originpath + $gamedir + "`*\R2Northstar\logs\`*"  #generate string for searching logfiles later, escaping * with backticks
+if($showuptimemonitor){
+    Start-Process powershell -argumentlist "-File monitor_runtime.ps1"
+}
+$myfilterstring = ""
+foreach($filter in $myserverfilternamearray){$myfilterstring = $myfilterstring + $filter +", "} #generate name for myfilter to display later
+##
+
+##Main loop
+do{ 
+    $serverstartdelay = 0
     foreach($port in $portarray){
+        $portstring = $port.tostring()
+        $servernumber = $portstring.substring(3) #only get latest number of 4 digit port
+        #Write-Host "server $servernumber serverwaitforestartcounterarray" $serverwaitforrestartcounterarray[($servernumber-1)]
         $isrunning = Check-Listenport $port
+
+        if($isrunning -eq $true){
+            $serverwaitforrestartcounterarray[($servernumber-1)] = 0
+        }
+
+        
         if ($isrunning -ne $true){
-            $portstring = $port.tostring()
-            $servernumber = $portstring.substring(3)
-            Write-Host "starting server $servernumber time:" (get-date).hour (get-date).minute
-            #cd "$originpath$gamedir$servernumber"
-            $startprocessstring = "$originpath$gamedir$servernumber" + "\NorthstarLauncher.exe"
-            $argumentliststring = $northstarlauncherargs + " -port " + $udpstartport + $servernumber
-            sleep $waittimebetweenserverstarts
-            Start-Process $startprocessstring -ArgumentList $argumentliststring -WorkingDirectory "$originpath$gamedir$servernumber"
-            if($timeout -eq $false){
-                $logfiles = Get-Childitem "$originpath$gamedir$servernumber"+ "\R2Northstar\logs" -File | sort -Descending LastWriteTime
-                Copy-Item $logfiles[1].fullname $crashlogspath
-                Write-Host "logfile copied to " $crashlogspath
+            $serverstartdelay = $serverstartdelay + $waittimebetweenserverstarts 
+            if($serverwaitforrestartcounterarray[($servernumber-1)] -eq 0){ ##
+                
+                if($timeout -eq $false){ # gather logfiles
+                    $getchilditemstring = "$originpath$gamedir$servernumber"+ "\R2Northstar\logs"
+                    $logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
+                    Copy-Item $logfiles[1].fullname $crashlogspath
+                    Write-Host "serve $servernumber crashed. Logfile copied to " $crashlogspath
+                }
+
+                Write-Host "starting server $servernumber time:" (get-date).hour (get-date).minute
+                $startprocessstring = "$originpath$gamedir$servernumber" + "\NorthstarLauncher.exe"
+                $argumentliststring = $northstarlauncherargs + " -port " + $udpstartport + $servernumber
+                $singlequote = "'"
+                $nspowershellcommand = "-command &{
+                    Write-host Executing startup delay for server $servernumber of $serverstartdelay seconds;
+                    sleep $serverstartdelay ; 
+                    start-process -WorkingDirectory $singlequote`"$originpath$gamedir$servernumber`"$singlequote $singlequote`"$originpath$gamedir$servernumber\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
+                }"
+                Write-Host "Starting server $severnumber using additional powershell process"
+                Start-Process powershell -argumentlist $nspowershellcommand
+                $serverwaitforrestartcounterarray[($servernumber-1)] = $waitwithstartloopscount
             }
+            else{
+                Write-Host "Waiting to start server $servernumber again for loops:" $serverwaitforrestartcounterarray[($servernumber-1)]
+            }
+
+        $serverwaitforrestartcounterarray[($servernumber-1)] = $serverwaitforrestartcounterarray[($servernumber-1)] -1 
         }
     }
+    $serverstartdelay = 0 #reset delay for next loop
     
     start-process $enginerrorclosepath #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
@@ -117,11 +157,11 @@ do{
     }
 
     if($serverbrowserenable -eq $true){
-    $htmlpath = $serverbrowserfilepath
-    if(Test-Path $serverbrowserfilepath){
-        remove-item $htmlpath #remove index.html
-    }
-    $file = @"
+		$htmlpath = $serverbrowserfilepath
+		if(Test-Path $serverbrowserfilepath){
+			remove-item $htmlpath #remove index.html
+		}
+		$file = @"
 <!DOCTYPE html>
 <head>
 
@@ -165,47 +205,44 @@ Other regions: $ucount / $uslots <br><br>
 <tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>
 "@
 
-    $file | Out-File -Filepath $htmlpath
-    ForEach($server in $serverlist){
-        "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
-    }
+		$file | Out-File -Filepath $htmlpath
+		ForEach($server in $serverlist){
+			"<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
+		}
 
-    $file = @"
+		$file = @"
 </tbody>
 </table>
 </body>
 </html>
 "@
-    $file | Out-File -Append -Filepath $htmlpath
-    Remove-Variable file
-    
+		$file | Out-File -Append -Filepath $htmlpath
 
-
-    #$serverlist = Invoke-RestMethod https://northstar.tf/client/servers
-
-#write-host "fakys slots" $fakyplayercount "/" $fakyslots
-#write-host "public slots" $playercountpublic "/" $totalslots
-#write-host "EU+UK slots" $euplayercount "/" $euslots
-clear-variable fakyplayercount 
-clear-variable playercountpublic
-clear-variable totalslots
-clear-variable fakyslots
-clear-variable euslots
-clear-variable euplayercount
-clear-variable usslots
-clear-variable usplayercount
-clear-variable euslots
-clear-variable euplayercount
-clear-variable ucount
-clear-variable uslots
-clear-variable totalplayercount
-clear-variable servercount
+		Remove-Variable file
+		clear-variable fakyplayercount 
+		clear-variable playercountpublic
+		clear-variable totalslots
+		clear-variable fakyslots
+		clear-variable euslots
+		clear-variable euplayercount
+		clear-variable usslots
+		clear-variable usplayercount
+		clear-variable euslots
+		clear-variable euplayercount
+		clear-variable ucount
+		clear-variable uslots
+		clear-variable totalplayercount
+		clear-variable servercount
 }
 
-#log cleanup
-$logfiles = get-childitem -recurse -include ('*.txt','*.dmp') -Path "$logfilespathstring"
-$logfilesdelete = $logfiles | Where-Object { $_.LastWriteTime -lt ((Get-Date).AddDays(-($deletelogsafterdays)))}
-$logfilesdelete | Remove-Item -Verbose
-
+    #log cleanup
+    #if(((get-date) - $logfilesdeletelastdate) -ge $deletelogsminutes){
+    if((get-date) -ge $logfilesdeletelastdate.AddMinutes($deletelogsminutes)){
+        Write-Host "Checking/clearing logfiles because they haven't been cleared for $deletelogsminutes minutes or script was just started"
+        $logfiles = get-childitem -recurse -include ('*.txt','*.dmp') -Path "$logfilespathstring"
+        $logfilesdelete = $logfiles | Where-Object { $_.LastWriteTime -lt ((Get-Date).AddDays(-($deletelogsafterdays)))}
+        $logfilesdelete | Remove-Item -Verbose
+        $logfilesdeletelastdate = get-date
+    }
 }
-while($true)
+while($true) #execute forever

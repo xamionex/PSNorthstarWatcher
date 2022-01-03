@@ -10,7 +10,7 @@ $enginerrorclosepath = "engineerrorclose.exe" # absolute or relative path to you
 $portarray = @(8081,8082) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
 $udpstartport = 3701 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
 $deletelogsafterdays = 1 #how many days until logs get deleted
-$waittimebetweenserverstarts = 5 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
+$waittimebetweenserverstarts = 15 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
 $waittimebetweenloops = 15 #time in seconds after each loop of this script. also refresh rate for index.html default: 15
 $waitwithstartloopscount = 8 # after a server has been started at least wait the defined count of loops to start it again. this prevents accidental server duplicate processes default: 8 (15 second loops * 8 = 120 seconds)
 $serverbrowserenable = $true

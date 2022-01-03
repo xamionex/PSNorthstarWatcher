@@ -54,10 +54,6 @@ Northstar is awesome!! https://northstar.tf"
 Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
-#changelog
-<#
-    added support for more than 9 servers
-#>
 
 #region includes
 if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
@@ -71,11 +67,11 @@ if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
 else{
     throw "Config file not found!"
 }
-#region includes
+#endregion includes
 
 #region configtest
 try{
-if ($portarray){
+if ($portarray -or $gamedir){
     throw "You are using a config file format not supported anymore since v0.1.3. Please migrate your configuration."
 }
 if($originpath){
@@ -97,6 +93,11 @@ else{
 if($udpportarray){
     if($tcpportarray.count -ne $udpportarray.count){
         throw "UDP and TCP port amount set not equal."
+    }
+}
+if($gamedirs){
+    if($gamedirs.count -ne $tcpportarray.count -or $gamedirs.count -ne $udpportarray.count){
+        throw "You need to set the same amount of TCP ports, UDP ports and game directories."
     }
 }
 else{
@@ -212,7 +213,7 @@ foreach($server in $tcpportarray){ #initialize array for counter
 }
 $logfilesdeletelastdate = (get-date).AddYears(-5) #make sure logs get cleared on first loop
 cd $originpath
-$logfilespathstring = "" + $originpath + $gamedir + "`*\R2Northstar\logs\`*"  #generate string for searching logfiles later, escaping * with backticks
+$logfilespathstring = "" + $originpath + "`*`\" + "R2Northstar\logs\`*"  #generate string for searching logfiles later, escaping * with backticks
 $myfilterstring = ""
 foreach($filter in $myserverfilternamearray){$myfilterstring = $myfilterstring + $filter +", "} #generate name for myfilter to display later
 $singlequote = "'"
@@ -250,7 +251,7 @@ do{
                 
                 if($timeout -eq $false){ # gather logfiles
 					if($crashlogscollect){
-						$getchilditemstring = "$originpath$gamedir$servernumber"+ "\R2Northstar\logs"
+						$getchilditemstring = "$originpath$($gamedirs[$servernumber])"+ "\R2Northstar\logs"
 						$logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
 						Copy-Item $logfiles[1].fullname $crashlogspath
 						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed. Logfile copied to " $crashlogspath
@@ -260,12 +261,12 @@ do{
 					}
                 }
 
-                $startprocessstring = "$originpath$gamedir$servernumber" + "\NorthstarLauncher.exe"
+                $startprocessstring = "$originpath$($gamedirs[$i])" + "\NorthstarLauncher.exe"
                 $argumentliststring = $northstarlauncherargs + " -port " + $udpportarray[$i]
                 $nspowershellcommand = "-command &{ 
                     write-host (get-date -Format HH:mm:ss) Executing startup delay for server $servernumber of $serverstartdelay seconds;
                     sleep $serverstartdelay; 
-                    start-process -WindowStyle hidden -WorkingDirectory $singlequote`"$originpath$gamedir$servernumber`"$singlequote $singlequote`"$originpath$gamedir$servernumber\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
+                    start-process -WindowStyle hidden -WorkingDirectory $singlequote`"$originpath$($gamedirs[$i])`"$singlequote $singlequote`"$originpath$($gamedirs[$i])\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
                 }" # Dont ask! ;-) only took me 2 hours to figure out
                 write-host (get-date -Format HH:mm:ss) "Starting server $servernumber using additional (non visible) Powershell process with delay $serverstartdelay seconds."
                 Start-Process -WindowStyle hidden powershell -argumentlist $nspowershellcommand

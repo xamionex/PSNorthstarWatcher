@@ -1,9 +1,9 @@
 ﻿## CONFIG START: PLEASE EDIT
 $originpath = "C:\Server\Origin Games\" # path to the folder where your titanfall servers reside. Needs ending "\" !!!!!!!!!!!!!!!!!!!
-$gamedir = "Titanfall2-" #name of your titanfall folders without number, example: Titantall2-n (n is the server number). If your server folders are just named "1", "2" just leave this empty
+$gamedir = "Titanfall2-" #name/prefix of your titanfall folders inside $originpath without number, example: Titantall2-n (n is the server number). If your server folders are just named "1", "2" (without prefix) just leave this empty
 $enginerrorclosepath = "engineerrorclose.exe" # absolute or relative path to your enginerrorclose.exe
-$portarray = @(8081,8082) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
-$udpstartport = 3701 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
+$tcpportarray = @(8081,8082) #auth ports you want to use for your titanfall servers.
+$udpportarray = @(37015,37016) #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
 $deletelogsafterdays = 1 #how many days until logs get deleted
 $waittimebetweenserverstarts = 15 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
 $waittimebetweenloops = 15 #time in seconds after each loop of this script. also refresh rate for index.html default: 15

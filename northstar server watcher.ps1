@@ -1,12 +1,65 @@
-﻿#changelog
+﻿#region script greeting
+Write-Host "
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXK000KK0xl:,',,,,,:oxO000000KNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNK00O000Oko:,',,'',,'''',:okO0OOOO0KXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMWWXK0OkOOOkxoc,''''',''''''''''',codkkOkkkOKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMWNK0Okkkkkxdl;,''''''''''''''''''''''',;coxkkxxkk0KNWMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMWX0kxxxxxxoc;,''''''''''''''''''''''''''''',;codxxxdxkOKNMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMWNX0kxdddddoc;,''''''''''''''''''''''''''''''''''',;coddddddk0XNWMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMWNKOxddoddoc:;,'''':xdllc,'''''''''''''''''',:lcodc,''''';:coodoodxO0NWMMMMMMMMMMMMMMM
+MMMMMMMMMMMMNKOxdoooooc:,'.'''''c0WWNWXk:,'''''''''',;''':xXNNNWXo'''''''',;cloooodxOXNMMMMMMMMMMMMM
+MMMMMMMMMWXOxdoooooc:,'....''''',l0WWWWWXd;'',:cllc:::'':OWWWWWXd;'''''.....',:cooooodx0XWMMMMMMMMMM
+MMMMMMMMMNOdooolc;,'........''''''ckKNWWWNOkO0XWWWNXKOkk0WWWNK0o,'''''.........',;:looodONMMMMMMMMMM
+MMMMMMMMMNOdlc;,............''''''',;cld0WMMMMMMMMMMMMMMWKxlc;,''''''''............';cloONMMMMMMMMMM
+MMMMMMMMWKo:,.............'''''''''''',ckNMMMMMMMMMMMMMMWOl;'''''''''''''.............,:oONMMMMMMMMM
+MMMMMNKOo;'.............''''''''''',;,lXWMMMMMMMMMMMMMMMMWNx,,;,'''''''''''..............,cx0NWMMMMM
+MMN0d:,................'''''''''';lO0kONMMMMMMMMMMMMMMMMMMW0ox0k:,''''''''''................';oOXWMM
+Kxc'.................''''''''''';xXWWWWMMMMMMMMMMMMMMMMMMMWWWWWW0l,'''''''''''..................;d0N
+x:'................'''''''''',,,c0WWWWWWMMMMMMMMMMMMMMMMMMWWWNNWNk:,,,'''''''''..................;dX
+WN0xc'............''''''''',,;;:kNWXXWWNXWMMMMMMMMMMMMMMWXNWWKxKWKo;:;''''''''''''...........':dOXWM
+MMMMNKxc,.......''''''''',,,,:oONW0llddc:kWMWMMMMMMMMMMWKocddc;lKWXxoc,,,''''''''''.......':d0NMMMMM
+MMMMMMMWKx:'...'''''''',,,,,,dXWNXd;,....cxk0KWMMMMWX0Oxo;....';kNWNXx;,,,,''''''''''..';oONWMMMMMMM
+MMMMMMMMMMNOc''''''''',,,,,,:ONWXOc,,,loc,..,dXWWWMNk;'.':ol;..,o0NNN0c,,,,,,''''''''':kXWMMMMMMMMMM
+MMMMMMMMMMMWx,'''''',,,,,,,,c0WN0o;;l0NWNx,.;OWWWWWWK:..:0WNKd'':xXNWKl,,,,,,,''''''''lXMMMMMMMMMMMM
+MMMMMMMMMMMWd,''''',,,,,,,,;dXWKl;;:kWWWWNOodKWWWWWWXxld0WWWWXl',:xXNXd;,,,,,,,,''''''lXMMMMMMMMMMMM
+MMMMMMMMMMMWx,''',,,,,,,,;,c0NXx:;,:0WWWWWXKKNWWWWWWNX0KNWWWWNx'';cONNOc,,,,,,,,,'''''oXMMMMMMMMMMMM
+MMMMMMMMMMMWx,'',,,,,,,,;;;xXXxc;;':0WWWWNk::xXXXXKXOc;l0NWNNXd,.,;lONKl;;;,,,,,,,,'',oXMMMMMMMMMMMM
+MMMMMMMMMMMWx,',,,,,,,;;;;oKNOc;:,.;ONNNW0:..:occccoc...lXNNNKd,.';;lOXOc;;;,,,,,,,,',oXMMMMMMMMMMMM
+MMMMMMMMMMMWx,'',,,,,;;;;cONXkc:;'.:0NNNXd'..';;;;;;'...;ONNNNk,..,::xXXx:;;;;,,,,,'',oXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......';;;:o0NX0kxc'.;ONNNNx'.............:ONNNNx'.':dkOXXOl;;;;,'......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd.......';;;:d0XXxlol;.,xNNNNx'.............;ONNNKc..:loodKKOo:;;;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......';;;:cokKx:'...'dXNNNx,.............:ONNNk,.....,d0koc:;;;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......';;;:::ckk:.....;o0NNKc............'oXNKx:'.....,xkc:::;;;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,;;:::::od;.......oKNXk:'........';o0NXd'.......ckd:::::;;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,;::::::::'.......cKNXX0o,......'lOKXXKo'.......,::::::::;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,;:::::::,.......'dXXXXXOc'.....;kXXXXXx,.........,::::::;,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,;::::::,.........;kXXXXd,'''..',oKXXXO:..........';::::::,.......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,;:::::;'.........,dKXX0l;c:'..;coOXXXk;...........,::::::,'......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,::::::,..........;d0X0xllo:'..;lox0KKx;...........';:::::;'......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,:::::;'..........;xKK0xoll:'.';lodOKKk:............,:::::;'......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,:::::,........''.;kXK0dlll:'.';lldOKKOl,'..........';::::;'......lXMMMMMMMMMMMM
+MMMMMMMMMMMWd'......,::::;'......'.'';lOKKOdll:,''.';coOKK0dc:,'.''......';:::;'.....'lXMMMMMMMMMMMM
+MMMMMMMMMMMWXko:,'.',:::;'...'''''',:coOKK0o;,'''''''':kKK0dlcc;,''''''..',:::;'..';lxKWMMMMMMMMMMMM
+MMMMMMMMMMMMMMWN0dc,,::;,'''''''';:cdxk0KK0d,'''''''',o0KK0Okdlcc;,'''''''';::;,:okKWMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMWNKkdl;''''''',:cccoxxdoool;'''''''',coolodxocccc:;,'''''',:ok0XWMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMWXkoc;,',:cccccc:;,''''''''''''''''''',;:cccccc:;,',:lx0NMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMWNKOxoc:ccc:;,'''''''''''''''''''''''',:ccc:clok0NWMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMWN0kdl:,''''''''''''''''''''''''''',;:ldOKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNKkl:,''''''''''''''''''''''',,:dOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+Northstar is awesome!! https://northstar.tf"
+Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
+write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
+#endregion script greeting
+#changelog
 <#
-    use external config file to make updates easier.
-    check all config variables
-    added regions to script
+    added support for more than 9 servers
 #>
 
-#region configtest
-try{
+#region includes
 if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
     Write-Host "Please rename example config file!"
     throw "Example config not renamed. Please rename config file, edit config variables and start again."
@@ -18,7 +71,13 @@ if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
 else{
     throw "Config file not found!"
 }
+#region includes
 
+#region configtest
+try{
+if ($portarray){
+    throw "You are using a config file format not supported anymore since v0.1.3. Please migrate your configuration."
+}
 if($originpath){
     if($originpath[$originpath.length-1] -ne '\'){
         throw "Last character of origin path has to be a backslash!"
@@ -28,17 +87,17 @@ else{
     throw "Origin path not set!"
 }
 
-if($portarray){
-    if($portarray.Count -gt 9){
-        throw "Added more than 9 Auth. ports. Only 9 are supported."
-    }
+if($tcpportarray){
+
 }
 else{
     throw "port array not set!"
 }
 
-if($udpstartport){
- 
+if($udpportarray){
+    if($tcpportarray.count -ne $udpportarray.count){
+        throw "UDP and TCP port amount set not equal."
+    }
 }
 else{
     throw "UDP start port not set!"
@@ -145,81 +204,10 @@ function Check-Listenport([int] $port){
     }
 #endregion functions
 
-#region objects
-class TitanfallServer{
-    [int]$UDPPort
-    [int]$TCPPort #Auth. Port
-    [string]$ServerName
-    [string]$ServerDescription
-    [int]$MaxRuntime
-    [string]$ServerDirectory #Server directory relative to Server root folder
-}
-
-
-
-#endregion objects
-
-#region script greeting
-Write-Host "
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXK000KK0xl:,',,,,,:oxO000000KNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNK00O000Oko:,',,'',,'''',:okO0OOOO0KXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMWWXK0OkOOOkxoc,''''',''''''''''',codkkOkkkOKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMWNK0Okkkkkxdl;,''''''''''''''''''''''',;coxkkxxkk0KNWMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMWX0kxxxxxxoc;,''''''''''''''''''''''''''''',;codxxxdxkOKNMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMWNX0kxdddddoc;,''''''''''''''''''''''''''''''''''',;coddddddk0XNWMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMWNKOxddoddoc:;,'''':xdllc,'''''''''''''''''',:lcodc,''''';:coodoodxO0NWMMMMMMMMMMMMMMM
-MMMMMMMMMMMMNKOxdoooooc:,'.'''''c0WWNWXk:,'''''''''',;''':xXNNNWXo'''''''',;cloooodxOXNMMMMMMMMMMMMM
-MMMMMMMMMWXOxdoooooc:,'....''''',l0WWWWWXd;'',:cllc:::'':OWWWWWXd;'''''.....',:cooooodx0XWMMMMMMMMMM
-MMMMMMMMMNOdooolc;,'........''''''ckKNWWWNOkO0XWWWNXKOkk0WWWNK0o,'''''.........',;:looodONMMMMMMMMMM
-MMMMMMMMMNOdlc;,............''''''',;cld0WMMMMMMMMMMMMMMWKxlc;,''''''''............';cloONMMMMMMMMMM
-MMMMMMMMWKo:,.............'''''''''''',ckNMMMMMMMMMMMMMMWOl;'''''''''''''.............,:oONMMMMMMMMM
-MMMMMNKOo;'.............''''''''''',;,lXWMMMMMMMMMMMMMMMMWNx,,;,'''''''''''..............,cx0NWMMMMM
-MMN0d:,................'''''''''';lO0kONMMMMMMMMMMMMMMMMMMW0ox0k:,''''''''''................';oOXWMM
-Kxc'.................''''''''''';xXWWWWMMMMMMMMMMMMMMMMMMMWWWWWW0l,'''''''''''..................;d0N
-x:'................'''''''''',,,c0WWWWWWMMMMMMMMMMMMMMMMMMWWWNNWNk:,,,'''''''''..................;dX
-WN0xc'............''''''''',,;;:kNWXXWWNXWMMMMMMMMMMMMMMWXNWWKxKWKo;:;''''''''''''...........':dOXWM
-MMMMNKxc,.......''''''''',,,,:oONW0llddc:kWMWMMMMMMMMMMWKocddc;lKWXxoc,,,''''''''''.......':d0NMMMMM
-MMMMMMMWKx:'...'''''''',,,,,,dXWNXd;,....cxk0KWMMMMWX0Oxo;....';kNWNXx;,,,,''''''''''..';oONWMMMMMMM
-MMMMMMMMMMNOc''''''''',,,,,,:ONWXOc,,,loc,..,dXWWWMNk;'.':ol;..,o0NNN0c,,,,,,''''''''':kXWMMMMMMMMMM
-MMMMMMMMMMMWx,'''''',,,,,,,,c0WN0o;;l0NWNx,.;OWWWWWWK:..:0WNKd'':xXNWKl,,,,,,,''''''''lXMMMMMMMMMMMM
-MMMMMMMMMMMWd,''''',,,,,,,,;dXWKl;;:kWWWWNOodKWWWWWWXxld0WWWWXl',:xXNXd;,,,,,,,,''''''lXMMMMMMMMMMMM
-MMMMMMMMMMMWx,''',,,,,,,,;,c0NXx:;,:0WWWWWXKKNWWWWWWNX0KNWWWWNx'';cONNOc,,,,,,,,,'''''oXMMMMMMMMMMMM
-MMMMMMMMMMMWx,'',,,,,,,,;;;xXXxc;;':0WWWWNk::xXXXXKXOc;l0NWNNXd,.,;lONKl;;;,,,,,,,,'',oXMMMMMMMMMMMM
-MMMMMMMMMMMWx,',,,,,,,;;;;oKNOc;:,.;ONNNW0:..:occccoc...lXNNNKd,.';;lOXOc;;;,,,,,,,,',oXMMMMMMMMMMMM
-MMMMMMMMMMMWx,'',,,,,;;;;cONXkc:;'.:0NNNXd'..';;;;;;'...;ONNNNk,..,::xXXx:;;;;,,,,,'',oXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......';;;:o0NX0kxc'.;ONNNNx'.............:ONNNNx'.':dkOXXOl;;;;,'......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd.......';;;:d0XXxlol;.,xNNNNx'.............;ONNNKc..:loodKKOo:;;;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......';;;:cokKx:'...'dXNNNx,.............:ONNNk,.....,d0koc:;;;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......';;;:::ckk:.....;o0NNKc............'oXNKx:'.....,xkc:::;;;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,;;:::::od;.......oKNXk:'........';o0NXd'.......ckd:::::;;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,;::::::::'.......cKNXX0o,......'lOKXXKo'.......,::::::::;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,;:::::::,.......'dXXXXXOc'.....;kXXXXXx,.........,::::::;,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,;::::::,.........;kXXXXd,'''..',oKXXXO:..........';::::::,.......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,;:::::;'.........,dKXX0l;c:'..;coOXXXk;...........,::::::,'......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,::::::,..........;d0X0xllo:'..;lox0KKx;...........';:::::;'......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,:::::;'..........;xKK0xoll:'.';lodOKKk:............,:::::;'......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,:::::,........''.;kXK0dlll:'.';lldOKKOl,'..........';::::;'......lXMMMMMMMMMMMM
-MMMMMMMMMMMWd'......,::::;'......'.'';lOKKOdll:,''.';coOKK0dc:,'.''......';:::;'.....'lXMMMMMMMMMMMM
-MMMMMMMMMMMWXko:,'.',:::;'...'''''',:coOKK0o;,'''''''':kKK0dlcc;,''''''..',:::;'..';lxKWMMMMMMMMMMMM
-MMMMMMMMMMMMMMWN0dc,,::;,'''''''';:cdxk0KK0d,'''''''',o0KK0Okdlcc;,'''''''';::;,:okKWMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMWNKkdl;''''''',:cccoxxdoool;'''''''',coolodxocccc:;,'''''',:ok0XWMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMWXkoc;,',:cccccc:;,''''''''''''''''''',;:cccccc:;,',:lx0NMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMWNKOxoc:ccc:;,'''''''''''''''''''''''',:ccc:clok0NWMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMWN0kdl:,''''''''''''''''''''''''''',;:ldOKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNKkl:,''''''''''''''''''''''',,:dOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-Northstar is awesome!! https://northstar.tf"
-Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
-#endregion script greeting
-
 #region vars and stuff
-write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
+
 $serverwaitforrestartcounterarray = @()
-$servercount = $portarray.count
-foreach($server in $portarray){ #initialize array for counter
+foreach($server in $tcpportarray){ #initialize array for counter
     $serverwaitforrestartcounterarray = $serverwaitforrestartcounterarray + 0
 }
 $logfilesdeletelastdate = (get-date).AddYears(-5) #make sure logs get cleared on first loop
@@ -237,10 +225,11 @@ write-host (get-date -Format HH:mm:ss) "Starting main loop."
 do{ 
     $serverstartdelay = 0
     #region Serverrestart
-    foreach($port in $portarray){
-        $portstring = $port.tostring()
-        $servernumber = $portstring.substring(3) #only get latest number of 4 digit port
-        $isrunning = Check-Listenport $port
+    #foreach($port in $tcpportarray){
+    for($i=0;$i -lt $tcpportarray.count;$i++){
+        $portstring = $tcpportarray[$i].tostring()
+        $servernumber = $i+1 
+        $isrunning = Check-Listenport $tcpportarray[$i]
 
         if($isrunning -eq $true){
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
@@ -272,7 +261,7 @@ do{
                 }
 
                 $startprocessstring = "$originpath$gamedir$servernumber" + "\NorthstarLauncher.exe"
-                $argumentliststring = $northstarlauncherargs + " -port " + $udpstartport + $servernumber
+                $argumentliststring = $northstarlauncherargs + " -port " + $udpportarray[$i]
                 $nspowershellcommand = "-command &{ 
                     write-host (get-date -Format HH:mm:ss) Executing startup delay for server $servernumber of $serverstartdelay seconds;
                     sleep $serverstartdelay; 

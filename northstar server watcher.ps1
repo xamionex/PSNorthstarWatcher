@@ -1,11 +1,16 @@
 ﻿## CONFIG START: PLEASE EDIT
-$originpath = "C:\Server\Origin Games\" # path to the folder where your titanfall servers reside
-$gamedir = "Titanfall2-" #name of your titanfall folders without number, example: Titantall2-n (n is the server number)
+<#Todo: 
+add support for 99 servers / add config array for servers / object?
+add checks: folder exists $gamedir/$originpath, northstar launcher, check for process + port running at start to see if port already used
+detect multiple server instances / dont allow.
+#>
+$originpath = "C:\Server\Origin Games\" # path to the folder where your titanfall servers reside. Needs ending "\" !!!!!!!!!!!!!!!!!!!
+$gamedir = "Titanfall2-" #name of your titanfall folders without number, example: Titantall2-n (n is the server number). If your server folders are just named "1", "2" just leave this empty
 $enginerrorclosepath = "engineerrorclose.exe" # absolute or relative path to your enginerrorclose.exe
 $portarray = @(8081,8082) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
-$udpstartport = 3703 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
+$udpstartport = 3701 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
 $deletelogsafterdays = 1 #how many days until logs get deleted
-$waittimebetweenserverstarts = 15 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
+$waittimebetweenserverstarts = 5 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
 $waittimebetweenloops = 15 #time in seconds after each loop of this script. also refresh rate for index.html default: 15
 $waitwithstartloopscount = 8 # after a server has been started at least wait the defined count of loops to start it again. this prevents accidental server duplicate processes default: 8 (15 second loops * 8 = 120 seconds)
 $serverbrowserenable = $true
@@ -14,9 +19,10 @@ $restartserverhours = 4 #time in hours to force restart server (kills process) a
 $masterserverlisturl = "https://northstar.tf/client/servers" # url path to master server server list (json format)
 $myserverfilternamearray = @("Kraber","Gun") #put an identifier here to count your slots for serverbrowser .html file
 $showuptimemonitor = $true #starts 2nd powershell process with monitor if true
-$northstarlauncherargs = "-dedicated -multiple -softwared3d11" #when launching server use those args
+$showuptimemonitorafterloops = 60 #after how many loops should it show uptime. default: 60 makes it display every 15 minutes
+$northstarlauncherargs = "-dedicated -multiple -softwared3d11" #when launching servers use those args
 $crashlogscollect = $false #$true to collect them, $false to disable
-$crashlogspath = "C:\Server\apache\htdocs\northstar\servercrash-logs" #where to export crash logs to collect them
+$crashlogspath = "C:\apache\htdocs\northstar\servercrash-logs" #where to export crash logs to collect them
 $deletelogsminutes = 60 # defines (in minutes) how often this script should search for logfiles and delete them
 ## CONFIG END
 
@@ -106,12 +112,10 @@ foreach($server in $portarray){ #initialize array for counter
 $logfilesdeletelastdate = (get-date).AddYears(-5) #make sure logs get cleared on first loop
 cd $originpath
 $logfilespathstring = "" + $originpath + $gamedir + "`*\R2Northstar\logs\`*"  #generate string for searching logfiles later, escaping * with backticks
-if($showuptimemonitor){
-    Start-Process powershell -argumentlist "-File monitor_runtime.ps1"
-}
 $myfilterstring = ""
 foreach($filter in $myserverfilternamearray){$myfilterstring = $myfilterstring + $filter +", "} #generate name for myfilter to display later
 $singlequote = "'"
+$showuptimeloopcounter = 0
 ##
 
 ##Main loop
@@ -122,16 +126,15 @@ do{
     foreach($port in $portarray){
         $portstring = $port.tostring()
         $servernumber = $portstring.substring(3) #only get latest number of 4 digit port
-        #write-host (get-date -Format HH:mm:ss) "server $servernumber serverwaitforestartcounterarray" $serverwaitforrestartcounterarray[($servernumber-1)]
         $isrunning = Check-Listenport $port
 
         if($isrunning -eq $true){
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
-				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is detected running again."
+				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running again."
 			}
 			else{
 				if($firstloop){
-					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is detected running."
+					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running."
 				}
 			}
             $serverwaitforrestartcounterarray[($servernumber-1)] = 0
@@ -159,10 +162,10 @@ do{
                 $nspowershellcommand = "-command &{ 
                     write-host (get-date -Format HH:mm:ss) Executing startup delay for server $servernumber of $serverstartdelay seconds;
                     sleep $serverstartdelay; 
-                    start-process -WorkingDirectory $singlequote`"$originpath$gamedir$servernumber`"$singlequote $singlequote`"$originpath$gamedir$servernumber\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
+                    start-process -WindowStyle hidden -WorkingDirectory $singlequote`"$originpath$gamedir$servernumber`"$singlequote $singlequote`"$originpath$gamedir$servernumber\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
                 }" # Dont ask! ;-) only took me 2 hours to figure out
-                write-host (get-date -Format HH:mm:ss) "Starting server $servernumber using additional Powershell process."
-                Start-Process powershell -argumentlist $nspowershellcommand
+                write-host (get-date -Format HH:mm:ss) "Starting server $servernumber using additional (non visible) Powershell process with delay $serverstartdelay seconds."
+                Start-Process -WindowStyle hidden powershell -argumentlist $nspowershellcommand
                 $serverwaitforrestartcounterarray[($servernumber-1)] = $waitwithstartloopscount
             }
             else{
@@ -176,53 +179,117 @@ do{
     
     start-process $enginerrorclosepath #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
-    $processes = get-process -name titanfall2-unpacked| select id,starttime
+    
     $date = get-date
     $timeout = $false 
+	$processes = get-process -name titanfall2-unpacked
     foreach($process in $processes){
+		if($showuptimemonitor){
+			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
+				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  " is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes"
+                Write-Host "---------"
+			}
+		}
+		
         if(($date - $process.StartTime).hours -ge $restartserverhours){
             Stop-Process $process.id
-            write-host (get-date -Format HH:mm:ss) "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
+            write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
             $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
         }
     }
+	if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
+		$showuptimeloopcounter = 0
+	}
+	$showuptimeloopcounter = $showuptimeloopcounter + 1
+	
 
-
+    $myserverlist = @()
     $serverlist = Invoke-RestMethod $masterserverlisturl #get serverlist from master server
     $serverlist = $serverlist | sort playercount -Descending # sort by player count
+    ForEach($filter in $myserverfilternamearray){
+        $filteredserverlist = $serverlist | where -property name -match $filter
+        $myserverlist = $myserverlist + $filteredserverlist
+        $serverlist = $serverlist | where -property name -notmatch $filter
+    }
 
-    $fakyplayercount = 0
-    $fakyslots = 0
+	$fakyplayercount = 0
+	$playercountpublic = 0
+	$totalslots = 0
+	$fakyslots = 0
+	$euslots = 0
+	$euplayercount = 0
+	$usslots = 0
+	$usplayercount = 0
+	$euslots = 0
+	$euplayercount = 0
+	$ucount = 0
+	$uslots = 0
+	$totalplayercount = 0
+	$servercount = 0
+    $asiaplayercount = 0
+    $asiaslots = 0
+    $rusplayercount = 0
+    $russlots = 0
+    $ausplayercount = 0
+    $ausslots = 0
+    $saplayercount = 0
+    $saslots = 0
+
+    ForEach($server in $myserverlist){
+        $servercount = $servercount +1
+        $totalplayercount = $totalplayercount + $server.playerCount
+        $fakyplayercount = $fakyplayercount + $server.playerCount
+        $fakyslots = $fakyslots + $server.maxPlayers
+    }
 
     ForEach($server in $serverlist){
         $servercount = $servercount +1
         $totalplayercount = $totalplayercount + $server.playerCount
-        foreach($myserverfiltername in $myserverfilternamearray){
-            if($server.name -match $myserverfiltername){
-                $fakyplayercount = $fakyplayercount + $server.playerCount
-                $fakyslots = $fakyslots + $server.maxPlayers
-		        #write-host (get-date -Format HH:mm:ss) $server.name $server.playerCount "/" $server.maxPlayers $server.map
-            }
-        }
         if($server.hasPassword -eq $false){
             $playercountpublic = $playercountpublic + $server.playerCount
             $totalslots = $totalslots + $server.maxPlayers
-    
         }
-	    if($server.name -match "EU" -or $server.name -match  "UK" -or $server.name -match "LONDON" -or $server.name -match "Softballpit"){
+
+	    if($server.name -match "EU" -or $server.name -match  "UK" -or $server.name -match "LONDON" -or $server.name -match "Softballpit" -or $server.name -match '\[GER'){ #EU
             $euplayercount = $euplayercount + $server.playerCount
             $euslots = $euslots + $server.maxPlayers
         }
-        if($server.name -match "US-" -or $server.name -match "US " -or $server.name -match "NA " -or $server.name -match "NA-"){
-            $usplayercount = $usplayercount + $server.playerCount
-            $usslots = $usslots + $server.maxPlayers
-        }
-        if(!($server.name -match "EU" -or $server.name -match  "UK" -or $server.name -match "LONDON" -or $server.name -match "Softballpit" -or $server.name -match "US-" -or $server.name -match "US " -or $server.name -match "NA " -or $server.name -match "NA-" -or $server.name -match "EU" -or $server.name -match  "UK" -or $server.name -match "LONDON" -or $server.name -match "Softballpit")){
-            $ucount = $ucount + $server.playerCount
-            $uslots = $uslots + $server.maxPlayers
+        else{
+            if($server.name -match "US-" -or $server.name -match '\[US' -or $server.name -match "NA " -or $server.name -match "NA-"){ #US / North America
+                $usplayercount = $usplayercount + $server.playerCount
+                $usslots = $usslots + $server.maxPlayers
+            }
+            else{
+                if($server.name -match '\[AUS\]' -or $server.name -match '\[AU\]'){ #AUS
+                    $ausplayercount = $ausplayercount + $server.playerCount
+                    $ausslots = $ausslots + $server.maxPlayers
+                }
+                else{
+                    if($server.name -match '\[ASIA\]' -or $server.name -match '\[JPN\]' ){ #ASIA
+                        $asiaplayercount = $asiaplayercount + $server.playerCount
+                        $asiaslots = $asiaslots + $server.maxPlayers
+                    }
+                    else{
+                        if($server.name -match '\[RU' ){ #RUS
+                            $rusplayercount = $rusplayercount + $server.playerCount
+                            $russlots = $russlots + $server.maxPlayers
+                        }
+                        else{
+                            if($server.name -match '\[South-America'-or $server.name -match '\[South america' -or $server.name -match '\[ZA' -or $server.name -match '\[Brazil') # SA
+                            {
+                                $saplayercount = $saplayercount + $server.playerCount
+                                $saslots = $saslots + $server.maxPlayers 
+                            }
+                            else{
+                                $ucount = $ucount + $server.playerCount
+                                $uslots = $uslots + $server.maxPlayers
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
-
     if($serverbrowserenable -eq $true){
 		$htmlpath = $serverbrowserfilepath
 		if(Test-Path $serverbrowserfilepath){
@@ -262,45 +329,69 @@ Total players: $totalplayercount<br>
 Public slots: $playercountpublic / $totalslots <br>
 $myfilterstring slots: $fakyplayercount / $fakyslots <br>
 EU slots: $euplayercount / $euslots <br>
-US slots: $usplayercount / $usslots <br>
-Other regions: $ucount / $uslots <br><br>
+NA slots: $usplayercount / $usslots <br>
+Asia slots: $asiaplayercount / $asiaslots <br>
+RUS slots: $rusplayercount / $russlots <br>
+AUS slots: $ausplayercount / $ausslots <br>
+SA slots: $saplayercount / $saslots <br>
+Other / unknown regions: $ucount / $uslots <br><br>
 <button type="button" onclick="reloadPage();">Refresh</button>   
 <input id="myInput" type="text" placeholder="Search..">
 </p>
+<p>Your servers based on config myserverfilternamearray</p>
 <table>
 <tbody id="myTable">
 <tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>
 "@
 
-		$file | Out-File -Filepath $htmlpath
-		ForEach($server in $serverlist){
-			"<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
-		}
+	    $file | Out-File -Filepath $htmlpath
+        ForEach($server in $myserverlist){
+            "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
+        }
 
-		$file = @"
+        '</tbody>
+</table>
+<br>
+<table>
+<tbody id="myTable">
+<tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>' | Out-File -Append -FilePath $htmlpath
+
+	    ForEach($server in $serverlist){
+		    "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
+	    }
+
+	    $file = @"
 </tbody>
 </table>
 </body>
 </html>
 "@
-		$file | Out-File -Append -Filepath $htmlpath
+	    $file | Out-File -Append -Filepath $htmlpath
 
-		clear-variable file
-		clear-variable fakyplayercount 
-		clear-variable playercountpublic
-		clear-variable totalslots
-		clear-variable fakyslots
-		clear-variable euslots
-		clear-variable euplayercount
-		clear-variable usslots
-		clear-variable usplayercount
-		clear-variable euslots
-		clear-variable euplayercount
-		clear-variable ucount
-		clear-variable uslots
-		clear-variable totalplayercount
-		clear-variable servercount
-}
+	    clear-variable file
+	    clear-variable fakyplayercount 
+	    clear-variable playercountpublic
+	    clear-variable totalslots
+	    clear-variable fakyslots
+	    clear-variable euslots
+	    clear-variable euplayercount
+	    clear-variable usslots
+	    clear-variable usplayercount
+	    clear-variable euslots
+	    clear-variable euplayercount
+	    clear-variable ucount
+	    clear-variable uslots
+	    clear-variable totalplayercount
+	    clear-variable servercount
+        clear-variable asiaplayercount
+        clear-variable asiaslots
+        clear-variable rusplayercount
+        clear-variable russlots
+        clear-variable ausplayercount
+        clear-variable ausslots
+        clear-variable saplayercount
+        clear-variable saslots
+    }
 
     #log cleanup
     if((get-date) -ge $logfilesdeletelastdate.AddMinutes($deletelogsminutes)){

@@ -145,7 +145,21 @@ function Check-Listenport([int] $port){
     }
 #endregion functions
 
-#region vars and stuff
+#region objects
+class TitanfallServer{
+    [int]$UDPPort
+    [int]$TCPPort #Auth. Port
+    [string]$ServerName
+    [string]$ServerDescription
+    [int]$MaxRuntime
+    [string]$ServerDirectory #Server directory relative to Server root folder
+}
+
+
+
+#endregion objects
+
+#region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -197,9 +211,11 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMWN0kdl:,''''''''''''''''''''''''''',;:ldOKNMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNKkl:,''''''''''''''''''''''',,:dOXWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
-Northstar is awesome!! https://northstar.tf
-"
+Northstar is awesome!! https://northstar.tf"
 Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
+#endregion script greeting
+
+#region vars and stuff
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 $serverwaitforrestartcounterarray = @()
 $servercount = $portarray.count

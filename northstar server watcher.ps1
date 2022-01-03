@@ -2,8 +2,10 @@
 <#
     use external config file to make updates easier.
     check all config variables
+    added regions to script
 #>
 
+#region configtest
 try{
 if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
     Write-Host "Please rename example config file!"
@@ -119,8 +121,9 @@ if($deletelogsminutes){
 else{
     throw "$deletelogsminutes not set! "
 }
+#endregion configtest
 
-##functions
+#region functions
 function Check-Listenport([int] $port){
         if ($port -gt 0 -and $port -lt 65535){
             #port input was in correct range
@@ -140,9 +143,9 @@ function Check-Listenport([int] $port){
             return $false
         }
     }
-##
+#endregion functions
 
-##vars and stuff
+#region vars and stuff
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -196,7 +199,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 Northstar is awesome!! https://northstar.tf
 "
-Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord"
+Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 $serverwaitforrestartcounterarray = @()
 $servercount = $portarray.count
@@ -210,13 +213,14 @@ $myfilterstring = ""
 foreach($filter in $myserverfilternamearray){$myfilterstring = $myfilterstring + $filter +", "} #generate name for myfilter to display later
 $singlequote = "'"
 $showuptimeloopcounter = 0
-##
+#endregion vars and stuff
 
-##Main loop
+#region Main loop
 $firstloop = $true
 write-host (get-date -Format HH:mm:ss) "Starting main loop."
 do{ 
     $serverstartdelay = 0
+    #region Serverrestart
     foreach($port in $portarray){
         $portstring = $port.tostring()
         $servernumber = $portstring.substring(3) #only get latest number of 4 digit port
@@ -270,10 +274,12 @@ do{
         }
     }
     $serverstartdelay = 0 #reset delay for next loop
-    
+    #endregion Serverrestart
+
     start-process $enginerrorclosepath #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
     
+    #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
 	$processes = get-process -name titanfall2-unpacked
@@ -295,8 +301,9 @@ do{
 		$showuptimeloopcounter = 0
 	}
 	$showuptimeloopcounter = $showuptimeloopcounter + 1
-	
+	#endregion Monitor uptime and close after certain uptime
 
+    #region Serverbrowser
     $myserverlist = @()
     $serverlist = Invoke-RestMethod $masterserverlisturl #get serverlist from master server
     $serverlist = $serverlist | sort playercount -Descending # sort by player count
@@ -486,8 +493,9 @@ Other / unknown regions: $ucount / $uslots <br><br>
         clear-variable saplayercount
         clear-variable saslots
     }
+    #endregion Serverbrowser
 
-    #log cleanup
+    #region log cleanup
     if((get-date) -ge $logfilesdeletelastdate.AddMinutes($deletelogsminutes)){
         write-host (get-date -Format HH:mm:ss) "Checking/clearing logfiles because they haven't been cleared for $deletelogsminutes minutes or script was just started."
         $logfiles = get-childitem -recurse -include ('*.txt','*.dmp') -Path "$logfilespathstring"
@@ -495,11 +503,12 @@ Other / unknown regions: $ucount / $uslots <br><br>
         $logfilesdelete | Remove-Item -Verbose
         $logfilesdeletelastdate = get-date
     }
-	$firstloop = $false
+    #endregion log cleanup
+    $firstloop = $false #setting to false so we know that first loop is over
 }
 while($true) #execute forever
-##
 }
+#endregion mainloop
 
 catch{
     Write-Host "Error occured!"

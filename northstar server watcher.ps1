@@ -1,30 +1,124 @@
-﻿## CONFIG START: PLEASE EDIT
-<#Todo: 
-add support for 99 servers / add config array for servers / object?
-add checks: folder exists $gamedir/$originpath, northstar launcher, check for process + port running at start to see if port already used
-detect multiple server instances / dont allow.
+﻿#changelog
+<#
+    use external config file to make updates easier.
+    check all config variables
 #>
-$originpath = "C:\Server\Origin Games\" # path to the folder where your titanfall servers reside. Needs ending "\" !!!!!!!!!!!!!!!!!!!
-$gamedir = "Titanfall2-" #name of your titanfall folders without number, example: Titantall2-n (n is the server number). If your server folders are just named "1", "2" just leave this empty
-$enginerrorclosepath = "engineerrorclose.exe" # absolute or relative path to your enginerrorclose.exe
-$portarray = @(8081,8082) #auth ports you want to use for your titanfall servers, also: last number is used to detect server number Titanfall2-n (eg 8081 => Titanfall 2-1), at the moment restricted to 9 servers!
-$udpstartport = 3701 #specify startport without latest number (37031=> 3703). Dont forget to adjust your portforwarding!!! 
-$deletelogsafterdays = 1 #how many days until logs get deleted
-$waittimebetweenserverstarts = 15 #time in seconds before server starts, depends on your server speed. recommend values between 5-30 seconds
-$waittimebetweenloops = 15 #time in seconds after each loop of this script. also refresh rate for index.html default: 15
-$waitwithstartloopscount = 8 # after a server has been started at least wait the defined count of loops to start it again. this prevents accidental server duplicate processes default: 8 (15 second loops * 8 = 120 seconds)
-$serverbrowserenable = $true
-$serverbrowserfilepath = "index.html" #absolute path to where the index.html should be saved. 
-$restartserverhours = 4 #time in hours to force restart server (kills process) after certain uptime
-$masterserverlisturl = "https://northstar.tf/client/servers" # url path to master server server list (json format)
-$myserverfilternamearray = @("Kraber","Gun") #put an identifier here to count your slots for serverbrowser .html file
-$showuptimemonitor = $true #starts 2nd powershell process with monitor if true
-$showuptimemonitorafterloops = 60 #after how many loops should it show uptime. default: 60 makes it display every 15 minutes
-$northstarlauncherargs = "-dedicated -multiple -softwared3d11" #when launching servers use those args
-$crashlogscollect = $false #$true to collect them, $false to disable
-$crashlogspath = "C:\apache\htdocs\northstar\servercrash-logs" #where to export crash logs to collect them
-$deletelogsminutes = 60 # defines (in minutes) how often this script should search for logfiles and delete them
-## CONFIG END
+
+try{
+if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
+    Write-Host "Please rename example config file!"
+    throw "Example config not renamed. Please rename config file, edit config variables and start again."
+}
+
+if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
+    . ("$PSScriptRoot\northstar server watcher-config.ps1")
+}
+else{
+    throw "Config file not found!"
+}
+
+if($originpath){
+    if($originpath[$originpath.length-1] -ne '\'){
+        throw "Last character of origin path has to be a backslash!"
+    }
+}
+else{
+    throw "Origin path not set!"
+}
+
+if($portarray){
+    if($portarray.Count -gt 9){
+        throw "Added more than 9 Auth. ports. Only 9 are supported."
+    }
+}
+else{
+    throw "port array not set!"
+}
+
+if($udpstartport){
+ 
+}
+else{
+    throw "UDP start port not set!"
+}
+
+if($deletelogsafterdays){
+    
+}
+else{
+    throw "deletelogsafterdays not set!"
+}
+
+if($waittimebetweenserverstarts){
+    
+}
+else{
+    throw "waittimebetweenserverstarts not set!"
+} 
+
+if($waittimebetweenloops){
+    
+}
+else{
+    throw "waittimebetweenloops not set!"
+}
+
+if($waitwithstartloopscount){
+
+}
+else{
+    throw "waitwithstartloopscount not set!"
+}
+
+if($serverbrowserenable){
+    if($serverbrowserfilepath){
+        
+    }
+    else{
+        throw "serverbrowserenable is true but you did not set a path!"
+    }
+}
+else{
+    throw "serverbrowserenable not set!"
+}
+
+if($restartserverhours){
+
+}
+else{
+    throw "restartserverhours not set!"
+}
+
+if($showuptimemonitor = $true){
+    if($showuptimemonitorafterloops){
+
+    }
+    else{
+        throw "showuptimemonitor is true but did not set showuptimemonitorafterloops!"
+    }
+}
+
+if($northstarlauncherargs){
+    
+}
+else{
+    throw "northstarlauncherargs not set!"
+} 
+if($crashlogscollect){
+    if($crashlogspath){
+
+    }
+    else{
+        throw "crashlogscollect is true but did not set crashlogspath!"
+    }
+} 
+
+if($deletelogsminutes){
+    
+}
+else{
+    throw "$deletelogsminutes not set! "
+}
 
 ##functions
 function Check-Listenport([int] $port){
@@ -405,3 +499,14 @@ Other / unknown regions: $ucount / $uslots <br><br>
 }
 while($true) #execute forever
 ##
+}
+
+catch{
+    Write-Host "Error occured!"
+    $Error
+    $Error.clear()
+}
+
+finally{
+    pause
+}

@@ -55,6 +55,8 @@ Write-Host "Thanks for using this Powershell script. If you need help just @faky
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
 
+#region configtest
+try{
 #region includes
 if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
     Write-Host "Please rename example config file!"
@@ -68,9 +70,6 @@ else{
     throw "Config file not found!"
 }
 #endregion includes
-
-#region configtest
-try{
 if ($portarray -or $gamedir){
     throw "You are using a config file format not supported anymore since v0.1.3. Please migrate your configuration."
 }
@@ -248,10 +247,10 @@ do{
         if ($isrunning -ne $true){
             $serverstartdelay = $serverstartdelay + $waittimebetweenserverstarts 
             if($serverwaitforrestartcounterarray[($servernumber-1)] -eq 0){ ##
-                
+                #region gather logfiles
                 if($timeout -eq $false){ # gather logfiles
 					if($crashlogscollect){
-						$getchilditemstring = "$originpath$($gamedirs[$servernumber])"+ "\R2Northstar\logs"
+						$getchilditemstring = "$originpath$($gamedirs[$i])"+ "\R2Northstar\logs"
 						$logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
 						Copy-Item $logfiles[1].fullname $crashlogspath
 						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed. Logfile copied to " $crashlogspath
@@ -260,7 +259,7 @@ do{
 						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed."
 					}
                 }
-
+                #endregion gather logfiles
                 $startprocessstring = "$originpath$($gamedirs[$i])" + "\NorthstarLauncher.exe"
                 $argumentliststring = $northstarlauncherargs + " -port " + $udpportarray[$i]
                 $nspowershellcommand = "-command &{ 

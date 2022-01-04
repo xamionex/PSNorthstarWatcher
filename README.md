@@ -21,7 +21,7 @@ Then you create new subfolders (eg Origin\Titanfall2-1, Titanfall2-2) for each s
 2) Rename `example-northstar server watcher-config.ps1` to `northstar server watcher-config.ps1` 
 3) Open `northstar server watcher-config.ps1` with a text editor (notepad).
 4) Edit following variables:
-5) `$originpath = "+setplaylistvaroverrides"`
+5) `$originpath = "C:\Program Files (x86)\Origin\"`
 6) `$gamedirs = @("Titanfall2-1","Titanfall2-2")` add folder name for each Titanfall2 instance.
 7) `$tcpportarray = @(8081,8082)` add TCP port for each Titanfall2 instance.
 8) `$udpportarray = @(37015,37016)` add UDP port for each Titanfall2 instance.

@@ -217,7 +217,7 @@ function Check-Listenport([int] $port){
 #endregion functions
 
 #region vars and stuff
-
+$timeout = $false
 $serverwaitforrestartcounterarray = @()
 foreach($server in $tcpportarray){ #initialize array for counter
     $serverwaitforrestartcounterarray = $serverwaitforrestartcounterarray + 0
@@ -261,6 +261,7 @@ do{
             if($serverwaitforrestartcounterarray[($servernumber-1)] -eq 0){ ##
                 #region gather logfiles
                 if($timeout -eq $false){ # gather logfiles
+                    Write-Host "timeout "$timeout
 					if($crashlogscollect){
 						$getchilditemstring = "$originpath$($gamedirs[$i])"+ "\R2Northstar\logs"
 						$logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
@@ -312,7 +313,7 @@ do{
     #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
-	$processes = get-process -name titanfall2-unpacked
+	$processes = get-process -name titanfall2-unpacked -ErrorAction SilentlyContinue
     foreach($process in $processes){
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){

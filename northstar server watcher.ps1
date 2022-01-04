@@ -58,16 +58,17 @@ write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #region configtest
 try{
 #region includes
-if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
-    Write-Host "Please rename example config file!"
-    throw "Example config not renamed. Please rename config file, edit config variables and start again."
-}
-
 if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
     . ("$PSScriptRoot\northstar server watcher-config.ps1")
 }
 else{
-    throw "Config file not found!"
+    if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
+        Write-Host "Please rename example config file!"
+        throw "Example config not renamed. Please rename config file, edit config variables and start again."
+    }
+    else{
+        throw "Config file not found! Make sure northstar server watcher-config.ps1 is in the same directory."
+    }
 }
 #endregion includes
 if ($portarray -or $gamedir){

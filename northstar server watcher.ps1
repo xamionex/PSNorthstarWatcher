@@ -1,4 +1,6 @@
-﻿#region script greeting
+﻿$logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
+Start-Transcript $logfilename
+#region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -543,4 +545,5 @@ catch{
 
 finally{
     pause
+    Stop-Transcript
 }

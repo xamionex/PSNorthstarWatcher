@@ -35,9 +35,9 @@ So folder structure should look like this:
   - `northstar server watcher-config.ps1`
   - `northstar server watcher.ps1`
   - `engineerrorclose.exe`
-  - `Titanfall2`
-  - `Titanfall2-1\R2Northstar`
-  - `Titanfall2-2\R2Northstar`
+  - `\Titanfall2`
+  - `\Titanfall2-1\R2Northstar`
+  - `\Titanfall2-2\R2Northstar`
 
 12) Now start `run Northstar Server Watcher.bat`. Now a Powershell command prompt should appear. 
 13) If no window appears: Start Powershell as admin, type `Set-Executionpolicy -Executionpolicy Unrestricted`. Accept. This enables scripts without valid certificates to be executed.

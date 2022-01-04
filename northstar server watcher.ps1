@@ -234,11 +234,11 @@ do{
 
         if($isrunning -eq $true){
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
-				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running again."
+				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running again. Gamedir: $($gamedirs[$i])"
 			}
 			else{
 				if($firstloop){
-					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running."
+					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running.  Gamedir: $($gamedirs[$i])"
 				}
 			}
             $serverwaitforrestartcounterarray[($servernumber-1)] = 0
@@ -254,10 +254,10 @@ do{
 						$getchilditemstring = "$originpath$($gamedirs[$i])"+ "\R2Northstar\logs"
 						$logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
 						Copy-Item $logfiles[1].fullname $crashlogspath
-						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed. Logfile copied to " $crashlogspath
+						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed. Gamedir $($gamedirs[$i]). Logfile copied to " $crashlogspath
 					}
 					else{
-						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed."
+						write-host (get-date -Format HH:mm:ss) "Server $servernumber crashed. Gamedir $($gamedirs[$i])."
 					}
                 }
                 #endregion gather logfiles
@@ -268,7 +268,7 @@ do{
                     sleep $serverstartdelay; 
                     start-process -WindowStyle hidden -WorkingDirectory $singlequote`"$originpath$($gamedirs[$i])`"$singlequote $singlequote`"$originpath$($gamedirs[$i])\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
                 }" # Dont ask! ;-) only took me 2 hours to figure out
-                write-host (get-date -Format HH:mm:ss) "Starting server $servernumber using additional (non visible) Powershell process with delay $serverstartdelay seconds."
+                write-host (get-date -Format HH:mm:ss) "Starting server $servernumber (gamedir $($gamedirs[$i])) using additional (non visible) Powershell process with delay $serverstartdelay seconds."
                 Start-Process -WindowStyle hidden powershell -argumentlist $nspowershellcommand
                 $serverwaitforrestartcounterarray[($servernumber-1)] = $waitwithstartloopscount
             }

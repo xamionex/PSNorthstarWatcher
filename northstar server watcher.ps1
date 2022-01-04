@@ -1,5 +1,7 @@
-﻿$logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
-Start-Transcript $logfilename
+﻿if($enablelogging){
+    $logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
+    Start-Transcript $logfilename
+}
 #region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -54,6 +56,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 Northstar is awesome!! https://northstar.tf"
 Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
+Write-Host "To gracefully close this script press CTRL+C"
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
 
@@ -544,6 +547,8 @@ catch{
 }
 
 finally{
+    if($enablelogging){
+        Stop-Transcript
+    }
     pause
-    Stop-Transcript
 }

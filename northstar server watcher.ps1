@@ -71,6 +71,12 @@ else{
     }
 }
 #endregion includes
+if($allowargumentoverride){
+    Write-Host "allowargumentoverride set to true, r2ds.bat will override starting arguments, if it exists."
+}
+else{
+    
+}
 if ($portarray -or $gamedir){
     throw "You are using a config file format not supported anymore since v0.1.3. Please migrate your configuration."
 }
@@ -262,7 +268,20 @@ do{
                 }
                 #endregion gather logfiles
                 $startprocessstring = "$originpath$($gamedirs[$i])" + "\NorthstarLauncher.exe"
-                $argumentliststring = $northstarlauncherargs + " -port " + $udpportarray[$i]
+                if($allowargumentoverride){
+                    Write-Host (get-date -Format HH:mm:ss) "Using starting arguments for server $servernumber / gamedir $($gamedirs[$i]) from r2ds.bat because override flag was set."
+                    $r2dsbat = Get-Content "$($gamedirs[$i])\r2ds.bat"
+                    if($r2dsbat -match " -port"){
+                        $argumentliststring = $r2dsbat
+                    }
+                    else{
+                        $argumentliststring = $r2dsbat +  " -port " + $udpportarray[$i]
+                    }
+                }
+                else{
+                    $argumentliststring = $northstarlauncherargs + " -port " + $udpportarray[$i]
+                }
+                
                 $nspowershellcommand = "-command &{ 
                     write-host (get-date -Format HH:mm:ss) Executing startup delay for server $servernumber of $serverstartdelay seconds;
                     sleep $serverstartdelay; 

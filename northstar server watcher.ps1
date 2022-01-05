@@ -336,8 +336,13 @@ do{
 
     #region Serverbrowser
     $myserverlist = @()
-
-    try{Invoke-RestMethod $masterserverlisturl -ErrorAction SilentlyContinue}catch{Write-Host "Could not query master server. Can not get server list for server browser";$masterservernotreachable = $true}finally{} #get serverlist from master server
+    $masterservernotreachable = $false
+    try{Invoke-RestMethod $masterserverlisturl -ErrorAction SilentlyContinue}
+    catch{
+        Write-Host "Could not query master server. Can not get server list for server browser from $masterserverlisturl"
+        $masterservernotreachable = $true
+    }
+    finally{} #get serverlist from master server
     $serverlist = $serverlist | sort playercount -Descending # sort by player count
     ForEach($filter in $myserverfilternamearray){
         $filteredserverlist = $serverlist | where -property name -match $filter
@@ -480,7 +485,7 @@ Other / unknown regions: $ucount / $uslots <br><br>
             "Could not query master server $masterserverlisturl" | Out-File -Filepath $htmlpath
         }
 
-	    $file | Out-File -Filepath $htmlpath
+	    $file | Out-File -Append -Filepath $htmlpath
         ForEach($server in $myserverlist){
             "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
         }

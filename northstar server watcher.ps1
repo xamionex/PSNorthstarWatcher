@@ -260,7 +260,7 @@ do{
             $serverstartdelay = $serverstartdelay + $waittimebetweenserverstarts 
             if($serverwaitforrestartcounterarray[($servernumber-1)] -eq 0){ ##
                 #region gather logfiles
-                if($timeout -eq $false){ # gather logfiles
+                if($timeout){ # gather logfiles
                     Write-Host "timeout "$timeout
 					if($crashlogscollect){
 						$getchilditemstring = "$originpath$($gamedirs[$i])"+ "\R2Northstar\logs"

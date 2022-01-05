@@ -1,4 +1,8 @@
-﻿#region script greeting
+﻿if($enablelogging){
+    $logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
+    Start-Transcript $logfilename
+}
+#region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -52,6 +56,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 Northstar is awesome!! https://northstar.tf"
 Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
+Write-Host "To gracefully close this script press CTRL+C"
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
 
@@ -212,7 +217,7 @@ function Check-Listenport([int] $port){
 #endregion functions
 
 #region vars and stuff
-
+$timeout = $false
 $serverwaitforrestartcounterarray = @()
 foreach($server in $tcpportarray){ #initialize array for counter
     $serverwaitforrestartcounterarray = $serverwaitforrestartcounterarray + 0
@@ -255,7 +260,8 @@ do{
             $serverstartdelay = $serverstartdelay + $waittimebetweenserverstarts 
             if($serverwaitforrestartcounterarray[($servernumber-1)] -eq 0){ ##
                 #region gather logfiles
-                if($timeout -eq $false){ # gather logfiles
+                if($timeout){ # gather logfiles
+                    Write-Host "timeout "$timeout
 					if($crashlogscollect){
 						$getchilditemstring = "$originpath$($gamedirs[$i])"+ "\R2Northstar\logs"
 						$logfiles = Get-Childitem $getchilditemstring -File | sort -Descending LastWriteTime
@@ -307,7 +313,7 @@ do{
     #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
-	$processes = get-process -name titanfall2-unpacked
+	$processes = get-process -name titanfall2-unpacked -ErrorAction SilentlyContinue
     foreach($process in $processes){
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
@@ -330,7 +336,13 @@ do{
 
     #region Serverbrowser
     $myserverlist = @()
-    $serverlist = Invoke-RestMethod $masterserverlisturl #get serverlist from master server
+    $masterservernotreachable = $false
+    try{$serverlist = Invoke-RestMethod $masterserverlisturl -ErrorAction SilentlyContinue}
+    catch{
+        Write-Host "Could not query master server. Can not get server list for server browser from $masterserverlisturl"
+        $masterservernotreachable = $true
+    }
+    finally{} #get serverlist from master server
     $serverlist = $serverlist | sort playercount -Descending # sort by player count
     ForEach($filter in $myserverfilternamearray){
         $filteredserverlist = $serverlist | where -property name -match $filter
@@ -469,8 +481,11 @@ Other / unknown regions: $ucount / $uslots <br><br>
 <tbody id="myTable">
 <tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>
 "@
+        if($masterservernotreachable){
+            "Could not query master server $masterserverlisturl" | Out-File -Filepath $htmlpath
+        }
 
-	    $file | Out-File -Filepath $htmlpath
+	    $file | Out-File -Append -Filepath $htmlpath
         ForEach($server in $myserverlist){
             "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
         }
@@ -542,5 +557,8 @@ catch{
 }
 
 finally{
+    if($enablelogging){
+        Stop-Transcript
+    }
     pause
 }

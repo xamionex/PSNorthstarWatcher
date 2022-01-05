@@ -337,7 +337,7 @@ do{
     #region Serverbrowser
     $myserverlist = @()
     $masterservernotreachable = $false
-    try{Invoke-RestMethod $masterserverlisturl -ErrorAction SilentlyContinue}
+    try{$serverlist = Invoke-RestMethod $masterserverlisturl -ErrorAction SilentlyContinue}
     catch{
         Write-Host "Could not query master server. Can not get server list for server browser from $masterserverlisturl"
         $masterservernotreachable = $true

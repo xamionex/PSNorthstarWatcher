@@ -112,7 +112,7 @@ if($gamedirs){
     }
 }
 else{
-    throw "UDP start port not set!"
+    throw "UDP ports not set!"
 }
 
 if($deletelogsafterdays){
@@ -291,7 +291,7 @@ do{
                 $nspowershellcommand = "-command &{ 
                     write-host (get-date -Format HH:mm:ss) Executing startup delay for server $servernumber of $serverstartdelay seconds;
                     sleep $serverstartdelay; 
-                    start-process -WindowStyle hidden -WorkingDirectory $singlequote`"$originpath$($gamedirs[$i])`"$singlequote $singlequote`"$originpath$($gamedirs[$i])\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
+                    start-process -WindowStyle Minimized -WorkingDirectory $singlequote`"$originpath$($gamedirs[$i])`"$singlequote $singlequote`"$originpath$($gamedirs[$i])\NorthstarLauncher.exe`"$singlequote `" -argumentlist $singlequote `"$argumentliststring `" $singlequote;
                 }" # Dont ask! ;-) only took me 2 hours to figure out
                 write-host (get-date -Format HH:mm:ss) "Starting server $servernumber (gamedir $($gamedirs[$i])) using additional (non visible) Powershell process with delay $serverstartdelay seconds."
                 Start-Process -WindowStyle hidden powershell -argumentlist $nspowershellcommand
@@ -313,7 +313,7 @@ do{
     #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
-	$processes = get-process -name titanfall2-unpacked -ErrorAction SilentlyContinue
+	$processes = get-process -name NorthstarLauncher.exe -ErrorAction SilentlyContinue
     foreach($process in $processes){
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
@@ -560,5 +560,6 @@ finally{
     if($enablelogging){
         Stop-Transcript
     }
+    remove-item $htmlpath
     pause
 }

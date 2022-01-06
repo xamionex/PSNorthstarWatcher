@@ -313,7 +313,7 @@ do{
     #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
-	$processes = get-process -name titanfall2-unpacked -ErrorAction SilentlyContinue
+	$processes = get-process -name NorthstarLauncher.exe -ErrorAction SilentlyContinue
     foreach($process in $processes){
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){

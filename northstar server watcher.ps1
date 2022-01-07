@@ -306,7 +306,7 @@ do{
     }
     $serverstartdelay = 0 #reset delay for next loop
     #endregion Serverrestart
-    try{start-process $enginerrorclosepath -ErrorAction SilentlyContinue}catch{}{finally} #send enter to window "Engine Error" to close it properly if crashed with msgbox
+    try{start-process $enginerrorclosepath -ErrorAction SilentlyContinue}catch{}finally{} #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
     
     #region Monitor uptime and close after certain uptime
@@ -481,12 +481,12 @@ Other / unknown regions: $ucount / $uslots <br><br>
 <tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>
 "@
         if($masterservernotreachable){
-            "Could not query master server $masterserverlisturl" | Out-File -Filepath $htmlpath
+            "Could not query master server $masterserverlisturl" | Out-File -Encoding utf8 -Filepath $htmlpath
         }
 
-	    $file | Out-File -Append -Filepath $htmlpath
+	    $file | Out-File -Encoding utf8 -Append -Filepath $htmlpath
         ForEach($server in $myserverlist){
-            "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
+            "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Encoding utf8 -Append -FilePath $htmlpath
         }
 
         '</tbody>
@@ -494,10 +494,10 @@ Other / unknown regions: $ucount / $uslots <br><br>
 <br>
 <table>
 <tbody id="myTable">
-<tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>' | Out-File -Append -FilePath $htmlpath
+<tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Password</th><th>Description</th></tr>' | Out-File -encoding utf8 -Append -FilePath $htmlpath
 
 	    ForEach($server in $serverlist){
-		    "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Append -FilePath $htmlpath
+		    "<tr><td>" + $server.name + "</td><td>"+ $server.playlist +"</td><td>" + $server.map + "</td><td>" +$server.playerCount + "</td><td>" + $server.maxPlayers +"</td><td>" +$server.hasPassword + "</td><td>" +$server.description + "</td></tr>" | Out-File -Encoding utf8 -Append -FilePath $htmlpath
 	    }
 
 	    $file = @"
@@ -506,7 +506,7 @@ Other / unknown regions: $ucount / $uslots <br><br>
 </body>
 </html>
 "@
-	    $file | Out-File -Append -Filepath $htmlpath
+	    $file | Out-File -Encoding utf8 -Append -Filepath $htmlpath
 
 	    clear-variable file
 	    clear-variable fakyplayercount 

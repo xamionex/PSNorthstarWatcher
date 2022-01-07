@@ -222,10 +222,10 @@ class Installer {
     #$readezmode = Read-Host "$($spacer)Do you want to use EASY mode? EASY mode doesn't ask for technical stuff and uses default ports. $defaultstring [Y]"
 
     [void]GetUserInputConfig(){
-        switch($this.GetUserInput($this.EZMode,"Do you want to enable EASY mode?`nEasy mode does not ask for: TCP/UDP Ports, Directory paths, playlist overrides, playerscanchangelobby","YesNoNoInstallerVar")){
+        <#switch($this.GetUserInput($this.EZMode,"Do you want to enable EASY mode?`nEasy mode does not ask for: TCP/UDP Ports, Directory paths, playlist overrides, playerscanchangelobby","YesNoNoInstallerVar")){
             "Y"{$this.EZMode = $True}
             "N"{$this.EZMode = $False}
-        }
+        }#>
         # $this.GetUserInput($this.,"TEXT","String")
         $this.ServerCount = [int]($this.GetUserInput($this.ServerCount,"How many servers do you want to install?","String"))
         $this.TitanfallSourceDir = $this.GetUserInput($this.TitanfallSourceDir,"Where is your Titanfall2 game directory?","String")
@@ -439,5 +439,6 @@ Switch($startpsnswatcher){
 Write-Host "Your WAN IP is: $wanip"
 Write-Host "Your Router's LAN IP is: $routerip"
 Write-Host "Your LAN IP is: $lanip"
+Start-Process explorer -ArgumentList $installer.InstallDir
 pause
 #endregion process

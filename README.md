@@ -13,8 +13,11 @@ faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is ve
 # L1ghthouse's PS Script
 https://github.com/l1ghthouse/NorthstarScripts
 Its really good, go have a look!
-
-# How-To
+# How-To automatic mode
+1) Double click `start PSNorthstarSetup`
+2) Follow the instructions
+3) If you want to start the servers again start `run Northstar Server Watcher`
+# How-To (manual server and script setup)
 For this example we are going to assume your Titanfall2 Game is at `C:\Program Files (x86)\Origin\Titanfall2`.
 Then you create new subfolders (eg Origin\Titanfall2-1, Titanfall2-2) for each server. I recommend using symbolic links instead of copying the entire Titanfall2 folder.
 1) Copy zip files to -> C:\Program Files (x86)\Origin.

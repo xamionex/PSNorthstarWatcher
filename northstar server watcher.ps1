@@ -306,14 +306,13 @@ do{
     }
     $serverstartdelay = 0 #reset delay for next loop
     #endregion Serverrestart
-
-    start-process $enginerrorclosepath #send enter to window "Engine Error" to close it properly if crashed with msgbox
+    try{start-process $enginerrorclosepath -ErrorAction SilentlyContinue}catch{}{finally} #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
     
     #region Monitor uptime and close after certain uptime
     $date = get-date
     $timeout = $false 
-	$processes = get-process -name NorthstarLauncher.exe -ErrorAction SilentlyContinue
+	$processes = get-process -name NorthstarLauncher -ErrorAction SilentlyContinue
     foreach($process in $processes){
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){

@@ -62,7 +62,7 @@ class NorthstarServer {
     [int]$net_data_block_enabled = 0
     [int]$host_skip_client_dll_crc = 1
     [int]$everything_unlocked = 1
-    [int]$ns_erase_auth_info = 0
+    [int]$ns_erase_auth_info = 1
     [int]$ns_report_sp_server_to_masterserver = 0
 
     [System.Collections.ArrayList]$autoexec_ns_server = @()
@@ -233,9 +233,15 @@ class Installer {
         $this.PSNSWatcherConfig.originpath = "$($this.InstallDir)\"
         $this.StartingArgsAll = $this.GetUserInput($this.StartingArgsAll,"What starting arguments do you want to use? Default strongly recommended!","String")
         $this.UDPStartPort = [int]($this.GetUserInput($this.UDPStartPort,"Please type in the first UDP port you want to use.","String"))
-        $this.UDPEndPort = [int]($this.GetUserInput($this.UDPEndPort,"Please type in the last UDP port you want to use of your range.","String"))
+        if($this.ServerCount -gt 1){
+            $this.UDPEndPort = [int]($this.GetUserInput($this.UDPEndPort,"Please type in the last UDP port you want to use of your range.","String"))
+        }
+       
         $this.TCPStartPort = [int]($this.GetUserInput($this.TCPStartPort,"Please type in the first TCP port you want to use.","String"))
-        $this.TCPEndPort = [int]($this.GetUserInput($this.TCPEndPort,"Please type in the last TCP port you want to use of your range.","String"))
+        if($this.ServerCount -gt 1){
+            $this.TCPEndPort = [int]($this.GetUserInput($this.TCPEndPort,"Please type in the last TCP port you want to use of your range.","String"))
+        }
+        
         $this.ServerNamePrefix = $this.GetUserInput($this.ServerNamePrefix,"What server name prefix do you want to use for all your servers?","String")
         
         $this.PSNSWatcherConfig.myserverfilternamearray = $this.PSNSWatcherConfig.myserverfilternamearray + @($this.ServerNamePrefix)

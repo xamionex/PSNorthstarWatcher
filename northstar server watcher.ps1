@@ -306,7 +306,8 @@ do{
     }
     $serverstartdelay = 0 #reset delay for next loop
     #endregion Serverrestart
-    try{start-process $enginerrorclosepath -ErrorAction SilentlyContinue}catch{}{finally} #send enter to window "Engine Error" to close it properly if crashed with msgbox
+
+    start-process $enginerrorclosepath -ErrorAction SilentlyContinue #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
     
     #region Monitor uptime and close after certain uptime

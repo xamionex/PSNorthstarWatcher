@@ -11,17 +11,19 @@ if($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administr
 
 #region vars
 Write-Host "Preparing...."
+$ezmode = $False
 $defaultstring = "`nPress Enter for default`n`n"
 $spacer = "`n`n---------------------`n"
 $usingdefault = "Using default value."
 #$gamemodearray = @("tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm")
 #[System.Collections.ArrayList]$northstarservers = @() #Initialize as arraylist to add easier later
-$installer = [Installer]::new() #initializ with defaults
 $wanip = (Resolve-DnsName -NoRecursion -Server resolver1.opendns.com -Name myip.opendns.com).IPAddress
 $routerip = (Test-NetConnection -TraceRoute 8.8.8.8).Traceroute[0]
 $routeripsplit = $routerip.split(".")
 $lanip = Get-NetIPConfiguration | findstr ("$($routeripsplit[0]).$($routeripsplit[1]).$($routeripsplit[2])") | findstr "IPv4Address"
+try{$titanfall2path = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'}catch{Write-Host "Could not get Titanfall2 folder by registry. You have to set it manually later in the process."}finally{}
 
+$installer = [Installer]::new($titanfall2path) #initializ with defaults
 #endregion var definition
 
 #region functions
@@ -162,84 +164,80 @@ class Installer {
     [int]$TCPStartPort = 8081
     [int]$TCPEndPort = 8089
 
-    [PSNSWatcherConfig]$PSNSWatcherConfig = [PSNSWatcherConfig]::new($this.InstallDir)
+    [bool]$EZMode = $True
 
-    [void]GetUserInputConfig(){
-        $defaultstring = "`nPress Enter for default`n`n"
-    $spacer = "`n`n---------------------`n"
-    $usingdefault = "Using default value."
-        <# = Read-Host "$($spacer)TEXT $defaultstring []"
-        if (HasNoUserInput $){
-            Write-Host $usingdefault
-        }#>
-
-        $readservercount = Read-Host "$($spacer)How many servers do you want to install? $defaultstring [1]"
-        if (HasNoUserInput $readservercount){
-            Write-Host $usingdefault
-        }else{
-            $this.ServerCount = [int]$readservercount
-        }
-        $readtf2path = Read-Host "$($spacer)Please type in your Titanfall2 path $defaultstring [`$env`:ProgramFiles(x86)\Origin\Titanfall2]"
-        if (HasNoUserInput $readtf2path){
-            Write-Host $usingdefault
-        }else{
-            $this.TitanfallSourceDir = $readtf2path
-        }
-
-        $readnspath = Read-Host "$($spacer)Please type in the directory where you want to install Northstar Server(s) (without quotes). $defaultstring [`$env:localappdata\Northstar-Server]"
-        if (HasNoUserInput $readnspath){
-            Write-Host $usingdefault
-        }else{
-            $this.InstallDir = $readnspath
-        }
-        $this.PSNSWatcherConfig.originpath = "$($this.InstallDir)\"
-
-        $readstartargs = Read-Host "$($spacer)Please type in the starting arguments for all servers. $defaultstring [+setplaylist private_match -dedicated -multiple -softwared3d11]"
-        if (HasNoUserInput $readstartargs){
-            Write-Host $usingdefault
-        }else{
-            $this.StartingArgsAll = $readstartargs
-        }
-
-
-        $readudpstart = Read-Host "$($spacer)Please type in the starting UDP port you want to use. $defaultstring [37015]"
-        if (HasNoUserInput $readudpstart){
-            Write-Host $usingdefault
+    Installer($inputTitanfall2Path){
+        if($inputTitanfall2Path){
+            $this.TitanfallSourceDir = $inputTitanfall2Path
+            Write-Host "Titanfall2 directory could be read from registry. You should be safe to use default value later."
         }
         else{
-            $this.UDPStartPort = [int]$readudpstart
+            Write-Host "Titanfall2 directory could NOT be read from registry.You have to set it manually later in the process."
         }
-        if($readservercount -gt 1){
-            $readudpend = Read-Host "$($spacer)Please type in the ending UDP port you want to use. $defaultstring [37019]"
-            if (HasNoUserInput $readudpend){
-                Write-Host $usingdefault
-            }
-            else{
-                $this.UDPEndPort = [int]$readudpend
-            }
-        }
+    }
 
-        $readtcpstart = Read-Host "$($spacer)Please type in the starting TCP port you want to use. $defaultstring [8081]"
-        if (HasNoUserInput $readtcpstart){
-            Write-Host $usingdefault
-        }else{
-            $this.TCPStartPort = [int]$readtcpstart
-        }
-        if($readservercount -gt 1){
-            $readtcpend = Read-Host "$($spacer)Please type in the ending TCP port you want to use. $defaultstring [8085]"
-            if (HasNoUserInput $readtcpend){
-            Write-Host $usingdefault
-            }else{
-                $this.TCPEndPort = [int]$readtcpend
+    [PSNSWatcherConfig]$PSNSWatcherConfig = [PSNSWatcherConfig]::new($this.InstallDir)
+    
+
+    [string]GetUserInput($installervar,$message,$inputtype){
+        
+        $defaultstring = "`nPress Enter for default`n`n"
+        $spacer = "`n`n---------------------`n"
+        $usingdefault = "Using default value."
+        $config = ""
+
+
+        Switch($inputtype){
+            "YesNoNoInstallerVar"{
+                $userinput = Read-Host "$($spacer)$message $defaultstring [Y]"
+                if(HasNoUserInput $userinput){
+                    Write-Host "$usingdefault : [Y]"
+                    return "Y"
+                }else{
+                    return $userinput
+                }
+             }
+
+             "String"{
+                $userinput = Read-Host "$($spacer)$message $defaultstring [$installervar]"
+                if(HasNoUserInput $userinput){
+                    Write-Host "$usingdefault : $installervar"
+                    return "$installervar"
+                }else{
+                    return $userinput
+                }
+             }
+            default{
+                throw "Wrong inputtype for GetUserInputConfig selected."
             }
         }
+        return ""
+    }
+    
+    <# = Read-Host "$($spacer)TEXT $defaultstring []"
+    if (HasNoUserInput $){
+        Write-Host $usingdefault
+    }#>
 
-        $readnameprefix = Read-Host "$($spacer)Please type in the prefix you want to use for the servers name. $defaultstring [Northstar Server generated by PowerShell]"
-        if (HasNoUserInput $readnameprefix){
-            Write-Host $usingdefault
-        }else{
-            $this.ServerNamePrefix = $readnameprefix
+    #$readezmode = Read-Host "$($spacer)Do you want to use EASY mode? EASY mode doesn't ask for technical stuff and uses default ports. $defaultstring [Y]"
+
+    [void]GetUserInputConfig(){
+        switch($this.GetUserInput($this.EZMode,"Do you want to enable EASY mode?`nEasy mode does not ask for: TCP/UDP Ports, Directory paths, playlist overrides, playerscanchangelobby","YesNoNoInstallerVar")){
+            "Y"{$this.EZMode = $True}
+            "N"{$this.EZMode = $False}
         }
+        # $this.GetUserInput($this.,"TEXT","String")
+        $this.ServerCount = [int]($this.GetUserInput($this.ServerCount,"How many servers do you want to install?","String"))
+        $this.TitanfallSourceDir = $this.GetUserInput($this.TitanfallSourceDir,"Where is your Titanfall2 game directory?","String")
+        $this.InstallDir = $this.GetUserInput($this.InstallDir,"Where do you want to install NorthstarServers to?","String")
+        $this.PSNSWatcherConfig.originpath = "$($this.InstallDir)\"
+        $this.StartingArgsAll = $this.GetUserInput($this.StartingArgsAll,"What starting arguments do you want to use? Default strongly recommended!","String")
+        $this.UDPStartPort = [int]($this.GetUserInput($this.UDPStartPort,"Please type in the first UDP port you want to use.","String"))
+        $this.UDPEndPort = [int]($this.GetUserInput($this.UDPEndPort,"Please type in the last UDP port you want to use of your range.","String"))
+        $this.TCPStartPort = [int]($this.GetUserInput($this.TCPStartPort,"Please type in the first TCP port you want to use.","String"))
+        $this.TCPEndPort = [int]($this.GetUserInput($this.TCPEndPort,"Please type in the last TCP port you want to use of your range.","String"))
+        $this.ServerNamePrefix = $this.GetUserInput($this.ServerNamePrefix,"What server name prefix do you want to use for all your servers?","String")
+        
         $this.PSNSWatcherConfig.myserverfilternamearray = $this.PSNSWatcherConfig.myserverfilternamearray + @($this.ServerNamePrefix)
         
         $this.PSNSWatcherConfig.northstarlauncherargs = $this.PSNSWatcherConfig.northstarlauncherargs + @($this.StartingArgsAll)
@@ -266,15 +264,20 @@ class Installer {
             if($tcpport -gt $this.TCPEndPort){
                 throw "Not enough TCP Ports available for the amount of servers. Servercount: "+$this.ServerCount+" TCP Start port: "+$this.TCPStartPort+" TCP end port: "+$this.TCPEndPort
             }
-            
-            $readgamemode = Read-Host "$($spacer)What gamemode would you like to run on Server" $this.NorthstarServers[$servercounter].ns_server_name " $defaultstring [tdm]"
+            $this.NorthstarServers[$servercounter].LastGamemode = $this.GetUserInput($this.NorthstarServers[$servercounter].LastGamemode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter]).ns_server_name","String")
+            Switch(($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings,"Do you want players to be able to change map and mode in lobby on Server","YesNoNoInstallerVar"))){
+                "Y"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 0}
+                "N"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 2}
+            }
+
+            <#$readgamemode = Read-Host "$($spacer)What gamemode would you like to run on Server" $this.NorthstarServers[$servercounter].ns_server_name " $defaultstring [tdm]"
             if (HasNoUserInput $readgamemode){
                 Write-Host $usingdefault
             }else{
                 $this.NorthstarServers[$servercounter].LastGamemode = $readgamemode
-            }
+            }#>
 
-            $readlobbycanchange = Read-Host "$($spacer)Do you want players to be able to change map and mode in lobby on Server" $this.NorthstarServers[$servercounter].ns_server_name " $defaultstring [N]"
+            <#$readlobbycanchange = Read-Host "$($spacer)Do you want players to be able to change map and mode in lobby on Server" $this.NorthstarServers[$servercounter].ns_server_name " $defaultstring [N]"
             if (HasNoUserInput $readlobbycanchange){
                 Write-Host $usingdefault
             }else{
@@ -282,7 +285,7 @@ class Installer {
                     "N" {$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 2}
                     "Y" {$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 0}
                 }
-            }
+            }#>
             $udpport++
             $tcpport++
         }
@@ -341,6 +344,7 @@ class Installer {
             $server.WriteConfiguration()
         }
     }
+
 }
 
 class PSNSWatcherConfig{
@@ -412,12 +416,8 @@ class PSNSWatcherConfig{
         $this.ConfigLinesArray | Out-file -Encoding utf8 -FilePath "$($PSScriptRoot)\northstar server watcher-config.ps1"
     }
 }
-
 #endregion classes
 ## DONT FORGET -maxplayersplaylist => add to code
-
-
-
 
 #region process
 cd $PSScriptRoot
@@ -425,40 +425,17 @@ $installer.GetUserInputConfig()
 $installer.Install()
 $installer.WriteConfigurationAll()
 Write-Host "Config written!"
-<#$startservers = Read-Host "$($spacer)Do you want to start all servers we just set up? `[Y]"
-        if (HasNoUserInput $startservers){
-            Write-Host $usingdefault
-            ForEach($server in $installer.NorthstarServers){
-                $server.Start()
-            }
-        }else{
-            switch($startservers){
-                "Y"{
-                    ForEach($server in $installer.NorthstarServers){
-                        $server.Start()
-                    }
-                }
-                "N"{Write-Host "Not starting servers. :-("}
-            }
-        }#>
+$generatepsmswatcherconf = $installer.GetUserInput("","Do you want to generate a config file for faky's PSNorthstarWatcher script/servers?","YesNoNoInstallerVar")
+Switch($generatepsmswatcherconf){
+    "Y"{$installer.PSNSWatcherConfig.WriteConfig()}
+    "N"{Write-Host "Not writing config for PSNorthstarWatcher."}
+}
 
-
-$generatepsmswatcherconf = Read-Host "$($spacer)Do you want to generate a config file for faky's PSNorthstarWatcher and start the script/servers? $defaultstring [Y]"
-        if (HasNoUserInput $generatepsmswatcherconf){
-            Write-Host $usingdefault
-            $installer.PSNSWatcherConfig.WriteConfig()
-            start-process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\northstar server watcher.ps1`""
-        }else{
-            Switch($generatepsmswatcherconf){
-                "Y"{
-                    $installer.PSNSWatcherConfig.WriteConfig()
-                    #Start-Process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\PSNorthstarSetup.ps1`"" -Verb runas 
-                    start-process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\northstar server watcher.ps1`""
-                }
-                "N"{}
-            }
-        }
-
+$startpsnswatcher = $installer.GetUserInput("","Do you want to Start PSNorthstarWatcher Script and all servers?","YesNoNoInstallerVar")
+Switch($startpsnswatcher){
+    "Y"{start-process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\northstar server watcher.ps1`""}
+    "N"{Write-Host "Not starting PSNorthstarWatcher Script."}
+}
 Write-Host "Your WAN IP is: $wanip"
 Write-Host "Your Router's LAN IP is: $routerip"
 Write-Host "Your LAN IP is: $lanip"

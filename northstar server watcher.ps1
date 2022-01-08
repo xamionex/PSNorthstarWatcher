@@ -1,7 +1,4 @@
-﻿if($enablelogging){
-    $logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
-    Start-Transcript $logfilename
-}
+﻿
 #region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -62,6 +59,15 @@ write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 
 #region configtest
 try{
+
+if($enablelogging){
+    $logfilename = "psnswatcher"+(get-date -Format "yyyy-MM-dd-HH-mm") + ".log"
+    Start-Transcript $logfilename
+    Write-Host "Logging enabled. Logging to $logfilename"
+}else{
+    Write-Host "Log file disabled."
+}
+
 #region includes
 if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
     . ("$PSScriptRoot\northstar server watcher-config.ps1")
@@ -82,6 +88,12 @@ if($allowargumentoverride){
 else{
     
 }
+if(Test-Path $originpath){
+    Write-Host "Write-Host `$originpath path exists. Value: $originpath"
+}else{
+    throw "`$originpath folder does not exist. Value: $originpath"
+}
+
 if ($portarray -or $gamedir){
     throw "You are using a config file format not supported anymore since v0.1.3. Please migrate your configuration."
 }
@@ -91,7 +103,7 @@ if($originpath){
     }
 }
 else{
-    throw "Origin path not set!"
+    throw "`$originpath path not set!"
 }
 
 if($tcpportarray){
@@ -109,6 +121,13 @@ if($udpportarray){
 if($gamedirs){
     if($gamedirs.count -ne $tcpportarray.count -or $gamedirs.count -ne $udpportarray.count){
         throw "You need to set the same amount of TCP ports, UDP ports and game directories."
+    }
+    ForEach($gamedir in $gamedirs){
+        if(Test-Path $gamedir){
+            Write-Host "Found server directory $($gamedir) in $originpath"
+        }else{
+            throw "Directory specified in `$gamedirs was not found. Directory: $gamedir"
+        }
     }
 }
 else{
@@ -130,7 +149,9 @@ else{
 } 
 
 if($waittimebetweenloops){
-    
+    if($waittimebetweenloops -lt 5 -or $waittimebetweenloops -gt 30){
+        Write-Host "Warning. You set `$waittimebetweenloops to a value which is not recommended. Value: $waittimebetweenloops"
+    }
 }
 else{
     throw "waittimebetweenloops not set!"
@@ -145,10 +166,10 @@ else{
 
 if($serverbrowserenable){
     if($serverbrowserfilepath){
-        
+        Write-Host "Server browser enabled. Path: $serverbrowserfilepath"
     }
     else{
-        throw "serverbrowserenable is true but you did not set a path!"
+        throw "`$serverbrowserenable is true but you did not set a path!"
     }
 }
 else{
@@ -156,7 +177,7 @@ else{
 }
 
 if($restartserverhours){
-
+    Write-Host "Server restart after $($restartserverhours) hours."
 }
 else{
     throw "restartserverhours not set!"
@@ -172,7 +193,7 @@ if($showuptimemonitor = $true){
 }
 
 if($northstarlauncherargs){
-    
+    Write-Host "`$northstarlauncherargs value: $northstarlauncherargs"
 }
 else{
     throw "northstarlauncherargs not set!"

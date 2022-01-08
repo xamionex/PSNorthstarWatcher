@@ -1,4 +1,6 @@
 ﻿#northstarsetup
+try{
+Add-Type -AssemblyName System.Windows.Forms
 
 $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
@@ -17,10 +19,12 @@ $spacer = "`n`n---------------------`n"
 $usingdefault = "Using default value."
 #$gamemodearray = @("tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm")
 #[System.Collections.ArrayList]$northstarservers = @() #Initialize as arraylist to add easier later
+try{
 $wanip = (Resolve-DnsName -NoRecursion -Server resolver1.opendns.com -Name myip.opendns.com).IPAddress
 $routerip = (Test-NetConnection -TraceRoute 8.8.8.8).Traceroute[0]
 $routeripsplit = $routerip.split(".")
 $lanip = Get-NetIPConfiguration | findstr ("$($routeripsplit[0]).$($routeripsplit[1]).$($routeripsplit[2])") | findstr "IPv4Address"
+}catch{}finally{}
 try{$titanfall2path = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'}catch{Write-Host "Could not get Titanfall2 folder by registry. You have to set it manually later in the process."}finally{}
 
 $installer = [Installer]::new($titanfall2path) #initializ with defaults
@@ -132,9 +136,9 @@ class SetplaylistVarOverrides {
     [int]$featured_mode_shotguns_snipers
     [int]$iron_rules
 
-    [int]$riff_player_bleedout  #datatype right?
+    [int]$riff_player_bleedout
     [int]$player_bleedout_forceHolster
-    [int]$player_bleedout_forceDeathOnTeamBleedout  #datatype right?
+    [int]$player_bleedout_forceDeathOnTeamBleedout
     [int]$player_bleedout_bleedoutTime
     [int]$player_bleedout_firstAidTime
     [int]$player_bleedout_firstAidTimeSelf
@@ -143,10 +147,10 @@ class SetplaylistVarOverrides {
 }
 
 class TickRate {
-    [double]$base_tickinterval_mp = 0.016666667
+    [double]$base_tickinterval_mp = 0.016666667 # default for 60  tick server / 20 tick client
     [int]$rate = 786432
-    [int]$sv_updaterate_mp = 20 #default 60 for 60 tick
-    [int]$sv_minupdaterate = 20 #default 60 for 60 tick
+    [int]$sv_updaterate_mp = 20 # default for 60  tick server / 20 tick client
+    [int]$sv_minupdaterate = 20 # default for 60  tick server / 20 tick client
     [int]$sv_max_snapshots_multiplayer = 300 # updaterate * 15
 }
 
@@ -270,8 +274,8 @@ class Installer {
             if($tcpport -gt $this.TCPEndPort){
                 throw "Not enough TCP Ports available for the amount of servers. Servercount: "+$this.ServerCount+" TCP Start port: "+$this.TCPStartPort+" TCP end port: "+$this.TCPEndPort
             }
-            $this.NorthstarServers[$servercounter].LastGamemode = $this.GetUserInput($this.NorthstarServers[$servercounter].LastGamemode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter]).ns_server_name","String")
-            Switch(($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings,"Do you want players to be able to change map and mode in lobby on Server","YesNoNoInstallerVar"))){
+            $this.NorthstarServers[$servercounter].LastGamemode = $this.GetUserInput($this.NorthstarServers[$servercounter].LastGamemode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter].ns_server_name)","String")
+            Switch(($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings,"Do you want players to be able to change map and mode in lobby on Server $($this.NorthstarServers[$servercounter].ns_server_name)","YesNoNoInstallerVar"))){
                 "Y"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 0}
                 "N"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 2}
             }
@@ -337,7 +341,22 @@ class Installer {
             Write-Host "Creating symbolic links for Titanfall2 files in $($this.installdir)\$($server.Directory)"
             $tffiles = Get-Childitem $this.TitanfallSourceDir
             ForEach($file in $tffiles){
-                New-Item -ItemType SymbolicLink -Path "$($this.installdir)\$($server.Directory)\$($file.name)" -Value $file.fullname
+                if(Test-Path "$($this.installdir)\$($server.Directory)\$($file.name)"){ #does the item exist at the target, where the symbolic link should be placed?
+                    $target = get-item "$($this.installdir)\$($server.Directory)\$($file.name)" #put target in an item object
+                    Write-Host "Cannot create symbolic link at $target because it already exists."
+                    if($target.LinkType -eq "SymbolicLink"){
+                        Write-Host "$target is a symbolic link."
+                        if($target.Target -eq $file.fullname){ #is it pointing to the right target?
+                            Write-Host "$target symbolic link does point to the right file/directory."
+                        }
+                        else{throw "$target link is not correct, please delete it and run setup again."}
+                    }else{
+                        Write-Host "Target is $target"
+                        Write-Host '$target.LinkType -eq "SymbolicLink"'  + " is " + ($target.LinkType -eq "SymbolicLink")
+                        throw "$target is not a link, please inspect that file and eventually remove it. Then run setup again."}
+                }else{
+                    New-Item -ItemType SymbolicLink -Path "$($this.installdir)\$($server.Directory)\$($file.name)" -Value $file.fullname
+                }
             }
 
             Write-Host "Copying files from Northstar Source to Destination"
@@ -432,19 +451,25 @@ $installer.Install()
 $installer.WriteConfigurationAll()
 Write-Host "Config written!"
 $generatepsmswatcherconf = $installer.GetUserInput("","Do you want to generate a config file for faky's PSNorthstarWatcher script/servers?","YesNoNoInstallerVar")
+$startpsnswatcher = $installer.GetUserInput("","Do you want to Start PSNorthstarWatcher Script and all servers?","YesNoNoInstallerVar")
+$messageboxstring = "Your WAN IP is: $wanip`nYour Router's LAN IP is: $routerip`nYour LAN IP is: $lanip`nPSNorthstarSetup has now finished setting up your servers and Watcher script`nWill now open your Northstar server folder and start the Watcher script if previously selected."
+[System.Windows.Forms.MessageBox]::Show($messageboxstring,"PSNorthstarSetup completed successfully.",0)
 Switch($generatepsmswatcherconf){
     "Y"{$installer.PSNSWatcherConfig.WriteConfig()}
     "N"{Write-Host "Not writing config for PSNorthstarWatcher."}
 }
-
-$startpsnswatcher = $installer.GetUserInput("","Do you want to Start PSNorthstarWatcher Script and all servers?","YesNoNoInstallerVar")
 Switch($startpsnswatcher){
     "Y"{start-process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\northstar server watcher.ps1`""}
     "N"{Write-Host "Not starting PSNorthstarWatcher Script."}
 }
-Write-Host "Your WAN IP is: $wanip"
-Write-Host "Your Router's LAN IP is: $routerip"
-Write-Host "Your LAN IP is: $lanip"
 Start-Process explorer -ArgumentList $installer.InstallDir
-pause
+#pause
 #endregion process
+}
+Catch{
+    Write-Host "Debug errors`n`n"
+    Write-Host $Error
+}
+Finally{
+    pause
+}

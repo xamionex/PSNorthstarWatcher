@@ -110,14 +110,17 @@ if($tcpportarray){
 
 }
 else{
-    throw "port array not set!"
+    throw "UDP ports not set! Please edit your config at `$tcpportarray"
 }
 
 if($udpportarray){
     if($tcpportarray.count -ne $udpportarray.count){
-        throw "UDP and TCP port amount set not equal."
+        throw "UDP and TCP port count is not the same. Please edit your config. UDP Count: $udpportarray.count / TCP Count: $tcpportarray.count"
     }
+}else{
+    throw "UDP ports not set! Please edit your config at `$udpportarray"
 }
+
 if($gamedirs){
     if($gamedirs.count -ne $tcpportarray.count -or $gamedirs.count -ne $udpportarray.count){
         throw "You need to set the same amount of TCP ports, UDP ports and game directories."
@@ -125,20 +128,22 @@ if($gamedirs){
     ForEach($gamedir in $gamedirs){
         if(Test-Path $gamedir){
             Write-Host "Found server directory $($gamedir) in $originpath"
+            if(Test-Path "$($gamedir)\NorthstarLauncher.exe"){
+                Write-Host "Found NorthstarLauncher.exe in $gamedir"
+            }else{
+                throw "Could not find NorthstarLauncher.exe in $($gamedir). Please check path or config."
+            }
         }else{
             throw "Directory specified in `$gamedirs was not found. Directory: $gamedir"
         }
     }
 }
-else{
-    throw "UDP ports not set!"
-}
 
 if($deletelogsafterdays){
-    
+    Write-Host "Will delete Northstar logs after $deletelogsafterdays days."
 }
 else{
-    throw "deletelogsafterdays not set!"
+    throw "`$deletelogsafterdays not set!"
 }
 
 if($waittimebetweenserverstarts){
@@ -166,7 +171,7 @@ else{
 
 if($serverbrowserenable){
     if($serverbrowserfilepath){
-        Write-Host "Server browser enabled. Path: $serverbrowserfilepath"
+        Write-Host "Server browser enabled. Path: $($serverbrowserfilepath). You can open it using your browser."
     }
     else{
         throw "`$serverbrowserenable is true but you did not set a path!"
@@ -203,7 +208,7 @@ if($crashlogscollect){
 
     }
     else{
-        throw "crashlogscollect is true but did not set crashlogspath!"
+        throw "`$crashlogscollect is true but did not set `$crashlogspath! Please edit your config."
     }
 } 
 
@@ -557,7 +562,7 @@ Other / unknown regions: $ucount / $uslots <br><br>
 
     #region log cleanup
     if((get-date) -ge $logfilesdeletelastdate.AddMinutes($deletelogsminutes)){
-        write-host (get-date -Format HH:mm:ss) "Checking/clearing logfiles because they haven't been cleared for $deletelogsminutes minutes or script was just started."
+        write-host (get-date -Format HH:mm:ss) "Checking/clearing Northstar logfiles because they haven't been cleared for $deletelogsminutes minutes or script was just started."
         $logfiles = get-childitem -recurse -include ('*.txt','*.dmp') -Path "$logfilespathstring"
         $logfilesdelete = $logfiles | Where-Object { $_.LastWriteTime -lt ((Get-Date).AddDays(-($deletelogsafterdays)))}
         $logfilesdelete | Remove-Item -Verbose
@@ -580,6 +585,8 @@ finally{
     if($enablelogging){
         Stop-Transcript
     }
-    remove-item $htmlpath
+    if(Test-Path $htmlpath){
+        remove-item $htmlpath
+    }
     pause
 }

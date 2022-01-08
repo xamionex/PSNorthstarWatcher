@@ -585,8 +585,10 @@ finally{
     if($enablelogging){
         Stop-Transcript
     }
-    if(Test-Path $htmlpath){
-        remove-item $htmlpath
+    if($htmlpath){
+        if(Test-Path $htmlpath){
+            remove-item $htmlpath
+        }
     }
     pause
 }

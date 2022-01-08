@@ -55,7 +55,7 @@ class NorthstarServer {
     [int]$ns_auth_allow_insecure = 0 #cfg
     [int]$ns_should_return_to_lobby = 0 #cfg
     [int]$ns_private_match_only_host_can_change_settings = 0#cfg
-    [ValidateSet("tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm")][string]$LastGamemode = "tdm" #cfg
+    [ValidateSet('"tdm"', '"cp"','"ctf"','"lts"','"ps"','"ffa"','"speedball"','"mfd"','"ttdm"','"fra"','"gg"','"inf"','"tt"','"kr"','"fastball"','"arena"','"ctf_comp"','"attdm"')][string]$ns_private_match_last_mode = '"tdm"' #cfg
     [string]$ns_server_password = '""' #cfg
     [SetplaylistVarOverrides]$SetplaylistVarOverrides #
     [Tickrate]$TickRate #cf
@@ -274,7 +274,7 @@ class Installer {
             if($tcpport -gt $this.TCPEndPort){
                 throw "Not enough TCP Ports available for the amount of servers. Servercount: "+$this.ServerCount+" TCP Start port: "+$this.TCPStartPort+" TCP end port: "+$this.TCPEndPort
             }
-            $this.NorthstarServers[$servercounter].LastGamemode = $this.GetUserInput($this.NorthstarServers[$servercounter].LastGamemode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter].ns_server_name)","String")
+            $this.NorthstarServers[$servercounter].ns_private_match_last_mode = '"' + ($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_last_mode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter].ns_server_name)","String")) + '"'
             Switch(($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings,"Do you want players to be able to change map and mode in lobby on Server $($this.NorthstarServers[$servercounter].ns_server_name)","YesNoNoInstallerVar"))){
                 "Y"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 0}
                 "N"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 2}
@@ -452,7 +452,7 @@ $installer.WriteConfigurationAll()
 Write-Host "Config written!"
 $generatepsmswatcherconf = $installer.GetUserInput("","Do you want to generate a config file for faky's PSNorthstarWatcher script/servers?","YesNoNoInstallerVar")
 $startpsnswatcher = $installer.GetUserInput("","Do you want to Start PSNorthstarWatcher Script and all servers?","YesNoNoInstallerVar")
-$messageboxstring = "Your WAN IP is: $wanip`nYour Router's LAN IP is: $routerip`nYour LAN IP is: $lanip`nPSNorthstarSetup has now finished setting up your servers and Watcher script`nWill now open your Northstar server folder and start the Watcher script if previously selected."
+$messageboxstring = "Your WAN IP is: $wanip`nYour Router's LAN IP is: $routerip`nYour LAN IP is: $lanip`nPSNorthstarSetup has now finished setting up your servers and Watcher script`nWill now open your Northstar server folder and start the Watcher script if previously selected.`nWhen you restart your computer use `"run Northstar Server Watcher`" to launch servers again."
 [System.Windows.Forms.MessageBox]::Show($messageboxstring,"PSNorthstarSetup completed successfully.",0)
 Switch($generatepsmswatcherconf){
     "Y"{$installer.PSNSWatcherConfig.WriteConfig()}

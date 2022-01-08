@@ -126,9 +126,9 @@ if($gamedirs){
         throw "You need to set the same amount of TCP ports, UDP ports and game directories."
     }
     ForEach($gamedir in $gamedirs){
-        if(Test-Path $gamedir){
+        if(Test-Path "$($originpath)$($gamedir)"){
             Write-Host "Found server directory $($gamedir) in $originpath"
-            if(Test-Path "$($gamedir)\NorthstarLauncher.exe"){
+            if(Test-Path "$($originpath)$($gamedir)\NorthstarLauncher.exe"){
                 Write-Host "Found NorthstarLauncher.exe in $gamedir"
             }else{
                 throw "Could not find NorthstarLauncher.exe in $($gamedir). Please check path or config."

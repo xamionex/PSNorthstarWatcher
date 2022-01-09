@@ -51,7 +51,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNKkl:,''''''''''''''''''''''',,:dOXWMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 Northstar is awesome!! https://northstar.tf"
-Write-Host "Thanks for using this Northstar Server Watcher v0.1.3.4.4 script. If you need help just @faky me on Northstar Discord."
+Write-Host "Thanks for using this Northstar Server Watcher v0.1.4 script. If you need help just @faky me on Northstar Discord."
 Write-Host "To gracefully close this script press CTRL+C"
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
@@ -88,7 +88,7 @@ else{
     
 }
 if(Test-Path $originpath){
-    Write-Host "Write-Host `$originpath path exists. Value: $originpath"
+    Write-Host "`$originpath path exists. Value: $originpath"
 }else{
     throw "`$originpath folder does not exist. Value: $originpath"
 }
@@ -367,12 +367,13 @@ do{
 
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
-				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  " is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes and has $players playing on it."
-                    if($showmonitorgreeting){
+                $virtualmemory = [math]::round(([int64]$process.VirtualMemorySize64 / 1024 / 1024 / 1024),1)
+				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  "is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes and has $players players playing on it. Virtual Memory: $($virtualmemory)GB"
+                if($showmonitorgreeting){
+                    Write-Host "Sending greeting message to server."
                     Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 1`""
                     Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"script foreach `(entity player in GetPlayerArray`(`)`) SendHudMessage`( player, `"`"Server Message Thanks for playing on faky`"'`"s servers`"`", -1, 0.4, 0, 255, 0, 3000, 0.5, 2.0, 1 )`""
                     Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 0`""
-                    Write-Host "---------"
                 }
 			}
 		}

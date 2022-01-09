@@ -284,6 +284,7 @@ do{
         $isrunning = Check-Listenport $tcpportarray[$i]
 
         if($isrunning -eq $true){
+            $pidbyports = Get-PIDByPorts $tcpportarray[$i] $udpportarray[$i]
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
 				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running again. Gamedir: $($gamedirs[$i])"
 			}
@@ -379,10 +380,8 @@ do{
                 $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
                 #$srvalreadynotifiedplayers = $false
             }else{
-                if(!($srvalreadynotifiedplayers)){
-                    Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for $restartserverhours hours. Will not terminate server because there are players on it."
-                    #$srvalreadynotifiedplayers = $true
-                }
+                Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for $restartserverhours hours. Will not terminate server because there are $players players on it."
+                #$srvalreadynotifiedplayers = $true
             }
         }
     }
@@ -623,5 +622,6 @@ finally{
             remove-item $htmlpath
         }
     }
+    Write-Host "Northstar Watcher terminated. Please close your severs manually."
     pause
 }

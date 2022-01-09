@@ -1,13 +1,13 @@
 # Features
 - Can watch multiple servers.
 - Detect if server is running by port actually being used (Auth. port) and restart.
-- Restart your servers after a certain amount of time.
+- Restart your servers after a certain amount of time, if there's less than 2 players on it.
 - Log cleanup. Don't let the logs fill up your disk space.
 - Gather crash logs in a central folder.
 - Can generate an index.html with Server browser info (enabled be default, open index.html).
-- See uptime of your Titanfall servers.
+- See uptime and virtual memory consumption of your Titanfall servers.
 - Display player count in script output
-- Server restart waits until players left server. Server gets gracefully shut down using quit command.
+- Will check if authentication and UDP ports match (in case a port is taken).
 
 # PSNorthstarWatcher description
 faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic.

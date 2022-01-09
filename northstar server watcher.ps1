@@ -286,11 +286,11 @@ do{
         if($isrunning -eq $true){
             $pidbyports = Get-PIDByPorts $tcpportarray[$i] $udpportarray[$i]
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
-				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running again. Gamedir: $($gamedirs[$i])"
+				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber (PID: $($pidbyports)) is running again. Gamedir: $($gamedirs[$i])"
 			}
 			else{
 				if($firstloop){
-					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber is running.  Gamedir: $($gamedirs[$i])"
+					Write-Host (get-date -Format HH:mm:ss) "Server $servernumber (PID: $($pidbyports)) is running.  Gamedir: $($gamedirs[$i])"
 				}
 			}
             $serverwaitforrestartcounterarray[($servernumber-1)] = 0

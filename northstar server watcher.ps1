@@ -368,7 +368,12 @@ do{
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
 				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  " is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes and has $players playing on it."
-                Write-Host "---------"
+                    if($showmonitorgreeting){
+                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 1`""
+                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"script foreach `(entity player in GetPlayerArray`(`)`) SendHudMessage`( player, `"`"Server Message Thanks for playing on faky`"'`"s servers`"`", -1, 0.4, 0, 255, 0, 3000, 0.5, 2.0, 1 )`""
+                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 0`""
+                    Write-Host "---------"
+                }
 			}
 		}
 		

@@ -1,5 +1,4 @@
-﻿
-#region script greeting
+﻿#region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -52,7 +51,7 @@ MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNKkl:,''''''''''''''''''''''',,:dOXWMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWX0xl:,,','''''''''''',,:ok0XWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMN0o;,''',,,,,,,,,,:dKNMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 Northstar is awesome!! https://northstar.tf"
-Write-Host "Thanks for using this Powershell script. If you need help just @faky me on Northstar Discord."
+Write-Host "Thanks for using this Northstar Server Watcher v0.1.3.4.4 script. If you need help just @faky me on Northstar Discord."
 Write-Host "To gracefully close this script press CTRL+C"
 write-host (get-date -Format HH:mm:ss) "Starting Northstar Server Watcher"
 #endregion script greeting
@@ -240,6 +239,21 @@ function Check-Listenport([int] $port){
             return $false
         }
     }
+function Get-PIDByPorts([int]$tcpport, [int]$udpport){
+    $localporttcp = Get-NetTCPConnection -State "Listen" | Where-Object -Property "LocalPort" -eq $tcpport
+    $localportudp = Get-NetUDPEndpoint | Where-Object -Property localport -eq $udpport
+    if($localporttcp){
+        if($localporttcp.OwningProcess -eq $localportudp.OwningProcess){
+            #ports belong to same process!
+            return $localporttcp.OwningProcess
+        }else{
+            Write-Host "Warning: UDP port $udpport (used by PID: $($localportudp.OwningProcess)) and TCP port $tcpport (used byPID: $($localporttcp.OwningProcess)) are not being used by the same process. There might be something wrong with your port configuration in your Norhtstar server or another application is using your UDP port."
+            return 0
+        }
+    }else{
+        return 0
+    }
+}
 #endregion functions
 
 #region vars and stuff
@@ -340,17 +354,36 @@ do{
     $timeout = $false 
 	$processes = get-process -name NorthstarLauncher -ErrorAction SilentlyContinue
     foreach($process in $processes){
+        $windowtitle = $process.MainWindowTitle
+        $maxplayers = 0
+        $players = 0
+        if($windowtitle -match "Titanfall 2 dedicated server - "){
+            $windowtitle1 = ($windowtitle.split("/"))[0]
+            $windowtitle2 = ($windowtitle.split("/"))[1]
+            $maxplayers = ($windowtitle2.substring((0),2))
+            $players = ($windowtitle1.substring(($windowtitle1.length-2),2))
+        }
+
 		if($showuptimemonitor){
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
-				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  " is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes"
+				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  " is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes and has $players playing on it."
                 Write-Host "---------"
 			}
 		}
 		
         if(($date - $process.StartTime).hours -ge $restartserverhours){
-            Stop-Process $process.id
-            write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
-            $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
+            if($players -lt 2){
+                #Stop-Process $process.id
+                Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Argumentlist "$($process.ID) quit"
+                write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
+                $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
+                #$srvalreadynotifiedplayers = $false
+            }else{
+                if(!($srvalreadynotifiedplayers)){
+                    Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for $restartserverhours hours. Will not terminate server because there are players on it."
+                    #$srvalreadynotifiedplayers = $true
+                }
+            }
         }
     }
 	if($showuptimeloopcounter -ge $showuptimemonitorafterloops){

@@ -6,6 +6,8 @@
 - Gather crash logs in a central folder.
 - Can generate an index.html with Server browser info (enabled be default, open index.html).
 - See uptime of your Titanfall servers.
+- Display player count in script output
+- Server restart waits until players left server. Server gets gracefully shut down using quit command.
 
 # PSNorthstarWatcher description
 faky's really bad Powershell Northstar Server Watcher. Use at own risk. It is very minimalistic.

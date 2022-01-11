@@ -1,4 +1,9 @@
-﻿#region script greeting
+﻿if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
+ { $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
+ else
+ { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
+     if (!$ScriptPath){ $ScriptPath = "." } }
+#region script greeting
 Write-Host "
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNNXXXXXXKKKKKKKKKXNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMWNXKKKKKK0xolclox0KKKKKKXNNWMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
@@ -68,14 +73,14 @@ if($enablelogging){
 }
 
 #region includes
-if(Test-Path "northstar server watcher-config.ps1" -ErrorAction Stop){
-    . ("$PSScriptRoot\northstar server watcher-config.ps1")
+if(Test-Path "$ScriptPath\northstar server watcher-config.ps1" -ErrorAction Stop){
+    . ("$ScriptPath\northstar server watcher-config.ps1")
 }
 else{
-    if(Test-Path "example-northstar server watcher-config.ps1" -ErrorAction Stop){
-        Write-Host "Please rename example config file!"
-        throw "Example config not renamed. Please rename config file, edit config variables and start again."
-    }
+    #if(Test-Path "$ScriptPath\scripts\example-northstar server watcher-config.ps1" -ErrorAction Stop){
+       # Write-Host "Please rename example config file!"
+       # throw "Example config not renamed. Please rename config file, edit config variables and start again."
+   # }
     else{
         throw "Config file not found! Make sure northstar server watcher-config.ps1 is in the same directory."
     }
@@ -247,8 +252,8 @@ function Get-PIDByPorts([int]$tcpport, [int]$udpport){
             #ports belong to same process!
             return $localporttcp.OwningProcess
         }else{
-            Write-Host "Warning: UDP port $udpport (used by PID: $($localportudp.OwningProcess)) and TCP port $tcpport (used byPID: $($localporttcp.OwningProcess)) are not being used by the same process. There might be something wrong with your port configuration in your Norhtstar server or another application is using your UDP port."
-            return 0
+            #Write-Host "Warning: UDP port $udpport (used by PID: $($localportudp.OwningProcess)) and TCP port $tcpport (used byPID: $($localporttcp.OwningProcess)) are not being used by the same process. There might be something wrong with your port configuration in your Norhtstar server or another application is using your UDP port."
+            return $localporttcp.OwningProcess
         }
     }else{
         return 0
@@ -285,6 +290,9 @@ do{
 
         if($isrunning -eq $true){
             $pidbyports = Get-PIDByPorts $tcpportarray[$i] $udpportarray[$i]
+            if($pidbyports -eq 0){
+               # Write-Host "Warning. Could not get the PID by udp + tcp ports. This usually happens when UDP or TCP ports were not closed fast enough. Increase `$waittimebetweenserverstarts or `$waitwithstartloopscount"
+            }
 			if ($serverwaitforrestartcounterarray[($servernumber-1)] -gt 0){
 				Write-Host (get-date -Format HH:mm:ss) "Server $servernumber (PID: $($pidbyports)) is running again. Gamedir: $($gamedirs[$i])"
 			}
@@ -347,7 +355,7 @@ do{
     }
     $serverstartdelay = 0 #reset delay for next loop
     #endregion Serverrestart
-    try{start-process $enginerrorclosepath -ErrorAction SilentlyContinue}catch{}finally{} #send enter to window "Engine Error" to close it properly if crashed with msgbox
+    try{start-process "$ScriptPath\$enginerrorclosepath" -ErrorAction SilentlyContinue}catch{}finally{} #send enter to window "Engine Error" to close it properly if crashed with msgbox
     sleep $waittimebetweenloops
     
     #region Monitor uptime and close after certain uptime
@@ -369,24 +377,24 @@ do{
 			if($showuptimeloopcounter -ge $showuptimemonitorafterloops){
                 $virtualmemory = [math]::round(([int64]$process.VirtualMemorySize64 / 1024 / 1024 / 1024),1)
 				write-host (get-date -Format HH:mm:ss) Process $process.path "PID" $process.id  "is running for" ($date - $process.StartTime).hours "hours and" ($date - $process.StartTime).minutes "minutes and has $players players playing on it. Virtual Memory: $($virtualmemory)GB"
-                if($showmonitorgreeting){
+                <#if($showmonitorgreeting){
                     Write-Host "Sending greeting message to server."
-                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 1`""
-                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"script foreach `(entity player in GetPlayerArray`(`)`) SendHudMessage`( player, `"`"Server Message Thanks for playing on faky`"'`"s servers`"`", -1, 0.4, 0, 255, 0, 3000, 0.5, 2.0, 1 )`""
-                    Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 0`""
-                }
+                    Start-Process "$ScriptPath\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 1`""
+                    Start-Process "$ScriptPath\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"script foreach `(entity player in GetPlayerArray`(`)`) SendHudMessage`( player, `"`"Server Message Thanks for playing on faky`"'`"s servers`"`", -1, 0.4, 0, 255, 0, 3000, 0.5, 2.0, 1 )`""
+                    Start-Process "$ScriptPath\sendcommandtopid.exe" -Wait -argumentlist "$($process.ID) `"sv_cheats 0`""
+                }#>
 			}
 		}
 		
         if(($date - $process.StartTime).hours -ge $restartserverhours){
             if($players -lt 2){
                 #Stop-Process $process.id
-                Start-Process "$PSScriptRoot\sendcommandtopid.exe" -Argumentlist "$($process.ID) quit"
+                Start-Process "$ScriptPath\sendcommandtopid.exe" -Argumentlist "$($process.ID) quit"
                 write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
                 $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
                 #$srvalreadynotifiedplayers = $false
             }else{
-                Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for $restartserverhours hours. Will not terminate server because there are $players players on it."
+                Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for at least $restartserverhours hours. Will not terminate server because there are $players players on it."
                 #$srvalreadynotifiedplayers = $true
             }
         }

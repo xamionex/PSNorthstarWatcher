@@ -385,17 +385,18 @@ do{
                 }#>
 			}
 		}
-		
-        if(($date - $process.StartTime).hours -ge $restartserverhours){
-            if($players -lt 2){
-                #Stop-Process $process.id
-                Start-Process "$ScriptPath\sendcommandtopid.exe" -Argumentlist "$($process.ID) quit"
-                write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
-                $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
-                #$srvalreadynotifiedplayers = $false
-            }else{
-                Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for at least $restartserverhours hours. Will not terminate server because there are $players players on it."
-                #$srvalreadynotifiedplayers = $true
+		if($process.Starttime){
+            if(($date - $process.StartTime).hours -ge $restartserverhours){
+                if($players -lt 2){
+                    #Stop-Process $process.id
+                    Start-Process "$ScriptPath\sendcommandtopid.exe" -Argumentlist "$($process.ID) quit"
+                    write-host (get-date -Format HH:mm:ss) $process.path "Stopping server because it is runnig for at least $restartserverhours hours. PID: " $process.id
+                    $timeout = $true #set timeout $true so we know we did kill that server and it did not crash, so it doesnt copy logfile
+                    #$srvalreadynotifiedplayers = $false
+                }else{
+                    Write-Host (get-date -Format HH:mm:ss) "$($process.path) is running for at least $restartserverhours hours. Will not terminate server because there are $players players on it."
+                    #$srvalreadynotifiedplayers = $true
+                }
             }
         }
     }

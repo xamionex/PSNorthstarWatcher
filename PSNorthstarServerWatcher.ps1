@@ -368,10 +368,31 @@ Class UserInputConfig{
     [string]$gamemode = "tdm"
     [string]$udpport = "37015"
     [bool]$epilogue = $false
-
+    [bool]$boosts = $false
+    [bool]$overridemaxplayers = $false
+    [bool]$floorislava = $false
+    [string]$airacceleration
+    [string]$roundscorelimit
+    [string]$scorelimit
+    [string]$timelimit
+    [string]$maxplayers
+    [string]$playerhealthmulti
+    [bool]$aegisupgrade = $false
+    [bool]$classicmp = $false
+    [bool]$playerbleed = $false
+    [string]$tcpport = "8081"
+    [bool]$reporttomasterserver = $true
+    [bool]$softwared3d11 = $true
+    [bool]$allowinsecure = $false
+    [bool]$returntolobby = $false
+    [bool]$playercanchangemap = $false
+    [bool]$playercanchangemode = $false
+    [double]$tickrate = 60
 }
 
 #region window logic
+$titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
+$northstarpath.text = "Northstar"
 [System.Collections.ArrayList]$userinputarray = @()
 [System.Collections.ArrayList]$userinputconfignames = @("servername","gamemode","epilogue","boosts","overridemaxplayers","floorislava","airacceleration","roundscorelimit","scorelimit","timelimit","maxplayers","playerhealthmulti","aegisupgrade","classicmp","playerbleed","tcpport","udpport","reporttomasterserver","softwared3d11","allowinsecure","returntolobby","playercanchangemap","playercanchangemode","tickrate")
 
@@ -382,14 +403,6 @@ $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server1"
 $userinputarray[0].servername = "new Server1"
 $serverdropdown.Text = "new Server"
 #$serverdropdown.SelectedValue.Content = "new Server"
-[string]$servercount.Content = [int]$servercount.content +1
-
-$userinputarray.add([UserInputConfig]::new())
-$serverdropdown.Items.add([System.Windows.Controls.ListBoxItem]::new())
-$serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server2"
-$userinputarray[1].servername = "new Server2"
-#$serverdropdown.Text = "new Server2"
-#$serverdropdown.SelectedValue.Content = "new Server2"
 [string]$servercount.Content = [int]$servercount.content +1
 
 #load all variables into forms in window
@@ -403,19 +416,15 @@ function CvarsToForm{
         if(((Get-Variable "$cvar").Value).gettype().Name -eq "Checkbox"){
             (Get-Variable "$cvar").Value.isChecked = $cvararray[$serverdropdown.SelectedIndex]."$cvar"
         }else{
-            (Get-Variable "$cvar").value.text = [string]$cvararray[$serverdropdown.SelectedIndex]."$cvar"
+            if(((Get-Variable "$cvar").Value).gettype().Name -eq "Slider"){
+                ((Get-Variable "$cvar").value).value = [double]$cvararray[$serverdropdown.SelectedIndex]."$cvar"
+            }else{
+               (Get-Variable "$cvar").value.text = [string]$cvararray[$serverdropdown.SelectedIndex]."$cvar" 
+            }
         }
     }
 }
 
-
-
-    
-
-<#$serverCount.add_ValueChanged({
-    #Update slider label
-    $serverCountLabel.content = "Server count: $([int]$serverCount.Value)"
-})#>
 
 #Click on Add Server
 $addserver.add_Click({
@@ -424,6 +433,13 @@ $addserver.add_Click({
     $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server"
     [string]$servercount.Content = [int]$servercount.content +1
 })
+
+$removeserver.add_Click({
+    $userinputarray.RemoveAt(($serverdropdown.SelectedIndex))
+    $serverdropdown.Items.RemoveAt(($serverdropdown.SelectedIndex))
+    [string]$servercount.Content = [int]$servercount.content -1
+})
+
 
 #update window after servername change
 $servername.add_LostFocus({
@@ -457,52 +473,85 @@ $epilogue.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].epilogue = $epilogue.IsChecked
 })
 
-$boosts.add_Checked({
-    
+$boosts.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].boosts = $boosts.IsChecked
 })
 
 $overridemaxplayers.add_Click({
-    
+    $userinputarray[$serverdropdown.SelectedIndex].overridemaxplayers = $overridemaxplayers.IsChecked
 })
 
-$floorislava.add_Checked({
-    
+$floorislava.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].floorislava = $floorislava.IsChecked
 })
 
-$aegisupgrade.add_Checked({
-    
+$aegisupgrade.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].aegisupgrade = $aegisupgrade.IsChecked
 })
 
-$classicmp.add_Checked({
-    
+$classicmp.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].classicmp = $classicmp.IsChecked
 })
 
-$playerbleed.add_Checked({
-    
+$playerbleed.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].playerbleed = $playerbleed.IsChecked
 })
 
-$reporttomasterserver.add_Checked({
-    
+$reporttomasterserver.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].reporttomasterserver = $reporttomasterserver.IsChecked
 })
 
-$softwared3d11.add_Checked({
-    
+$softwared3d11.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].softwared3d11 = $softwared3d11.IsChecked
 })
 
-$allowinsecure.add_Checked({
-    
+$allowinsecure.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].allowinsecure = $allowinsecure.IsChecked
 })
 
-$returntolobby.add_Checked({
-    
+$returntolobby.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].returntolobby = $returntolobby.IsChecked
 })
 
-$playercanchangemap.add_Checked({
-    
+$playercanchangemap.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $playercanchangemap.IsChecked
 })
 
-$playercanchangemode.add_Checked({
-    
+$playercanchangemode.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $playercanchangemode.IsChecked
+})
+
+$airacceleration.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].airacceleration = $airacceleration.Text
+})
+
+$roundscorelimit.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].roundscorelimit = $roundscorelimit.Text
+})
+
+$scorelimit.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].scorelimit = $scorelimit.Text
+})
+
+$timelimit.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].timelimit = $timelimit.Text
+})
+
+$maxplayers.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].maxplayers = $maxplayers.Text
+})
+
+$playerhealthmulti.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].playerhealthmulti = $playerhealthmulti.Text
+})
+
+$tcpport.add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].tcpport = $tcpport.Text
+})
+
+$tickrate.add_ValueChanged({
+    $userinputarray[$serverdropdown.SelectedIndex].tickrate = $tickrate.value
+    [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
 })
 
 #endregion window logic

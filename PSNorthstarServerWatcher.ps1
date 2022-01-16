@@ -95,6 +95,7 @@ class NorthstarServer {
 
 class Server{
     [string]$BasePath
+    [System.Collections.ArrayList]$NorthstarServers = @()
 }
 
 class SetplaylistVarOverrides {
@@ -343,7 +344,7 @@ class TickRate {
 
 #region XAML
 
-[xml]$xmlWPF = Get-Content -Path "C:\Server\Origin Games\PSScripts\window.xaml"
+[xml]$global:xmlWPF = Get-Content -Path "C:\Server\Origin Games\PSScripts\window.xaml"
 #Add WPF and Windows Forms assemblies
 try{
 	Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,system.windows.forms
@@ -352,14 +353,21 @@ try{
 }
 
 #Create the XAML reader using a new XML node reader
-$reader = New-Object System.Xml.XmlNodeReader $xmlWPF 
-$xamGUI = [Windows.Markup.XamlReader]::Load( $reader )
+$global:reader = New-Object System.Xml.XmlNodeReader $xmlWPF 
+$global:xamGUI = [Windows.Markup.XamlReader]::Load( $reader )
 #$Global:xamGUI = [Windows.Markup.XamlReader]::Load((new-object System.Xml.XmlNodeReader $xmlWPF))
 
 #Create hooks to each named object in the XAML
 
 $xmlWPF.SelectNodes("//*[@Name]") | %{
-	Set-Variable -Name ($_.Name) -Value $xamGUI.FindName($_.Name)
+	Set-Variable -Name ($_.Name) -Value $xamGUI.FindName($_.Name) -Scope Global
+} 
+
+[xml]$global:xmlWPF2 = Get-Content -Path "C:\Server\Origin Games\PSScripts\monitor.xaml"
+$global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2 
+$global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
+$xmlWPF2.SelectNodes("//*[@Name]") | %{
+	Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
 } 
 
 #endregion XAML
@@ -390,13 +398,23 @@ Class UserInputConfig{
     [double]$tickrate = 60
 }
 
+class MonitorVars{
+    [string]$MONramlimit = "8"
+    [string]$MONvmemlimit = "25"
+    [string]$MONrestarthours = "4"
+    [double]$MONrefreshrate = "10"
+    [string]$MONservernamelabel = "servernamelabel"
+}
+
 #region window logic
 $titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
-$northstarpath.text = "Northstar"
+$northstarpath.text = "Northstar\"
+$serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer\"
 [System.Collections.ArrayList]$userinputarray = @()
+[System.Collections.ArrayList]$monitorvararray = @()
 [System.Collections.ArrayList]$userinputconfignames = @("servername","gamemode","epilogue","boosts","overridemaxplayers","floorislava","airacceleration","roundscorelimit","scorelimit","timelimit","maxplayers","playerhealthmulti","aegisupgrade","classicmp","playerbleed","tcpport","udpport","reporttomasterserver","softwared3d11","allowinsecure","returntolobby","playercanchangemap","playercanchangemode","tickrate")
 
-#add first two servers to dropdown. if only 1 is added dropdown is really buggy. could not figure out why!
+#add first server automatically
 $userinputarray.add([UserInputConfig]::new())
 $serverdropdown.Items.add([System.Windows.Controls.ListBoxItem]::new())
 $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server1"
@@ -409,17 +427,25 @@ $serverdropdown.Text = "new Server"
 #this function puts cvars from an array of [UserInputConfig] to the form. [UserInputConfig] property names, form variables MUST have the same name.
 function CvarsToForm{
     param(
-        [System.Collections.ArrayList]$cvararray
+        [System.Collections.ArrayList]$cvararray ,
+        $dropdown
     )
-    $userinputcvars = (($cvararray | Get-Member) | where-object -Property MemberType -eq Property) | foreach-object{$($_.Definition).split(" ")[1]}
+    if($cvararray){
+        $userinputcvars = (($cvararray | Get-Member) | where-object -Property MemberType -eq Property) | foreach-object{$($_.Definition).split(" ")[1]}
+    }
+    
     ForEach($cvar in $userinputcvars){
         if(((Get-Variable "$cvar").Value).gettype().Name -eq "Checkbox"){
-            (Get-Variable "$cvar").Value.isChecked = $cvararray[$serverdropdown.SelectedIndex]."$cvar"
+            (Get-Variable "$cvar").Value.isChecked = $cvararray[$dropdown.SelectedIndex]."$cvar"
         }else{
             if(((Get-Variable "$cvar").Value).gettype().Name -eq "Slider"){
-                ((Get-Variable "$cvar").value).value = [double]$cvararray[$serverdropdown.SelectedIndex]."$cvar"
+                ((Get-Variable "$cvar").value).value = [double]$cvararray[$dropdown.SelectedIndex]."$cvar"
             }else{
-               (Get-Variable "$cvar").value.text = [string]$cvararray[$serverdropdown.SelectedIndex]."$cvar" 
+               if(((Get-Variable "$cvar").Value).gettype().Name -eq "Label"){
+                    ((Get-Variable "$cvar").value).content = [string]$cvararray[$dropdown.SelectedIndex]."$cvar"
+               }else{
+                    (Get-Variable "$cvar").value.text = [string]$cvararray[$dropdown.SelectedIndex]."$cvar" 
+               }
             }
         }
     }
@@ -435,16 +461,18 @@ $addserver.add_Click({
 })
 
 $removeserver.add_Click({
-    $userinputarray.RemoveAt(($serverdropdown.SelectedIndex))
-    $serverdropdown.Items.RemoveAt(($serverdropdown.SelectedIndex))
-    [string]$servercount.Content = [int]$servercount.content -1
+    if(($servercount.content -gt 0) -and $serverdropdown.SelectedItem){
+        $userinputarray.RemoveAt(($serverdropdown.SelectedIndex))
+        $serverdropdown.Items.RemoveAt(($serverdropdown.SelectedIndex))
+        [string]$servercount.Content = [int]$servercount.content -1
+    }
 })
 
 
 #update window after servername change
 $servername.add_LostFocus({
     $serverdropdown.Items[$serverdropdown.SelectedIndex].Content = $servername.text
-    $serverdropdown.UpdateLayout()
+    #$serverdropdown.UpdateLayout()
 })
 
 #update config after servername change
@@ -466,7 +494,7 @@ $serverdropdown.add_DropDownClosed({
     ForEach($cvar in $userinputcvars){
          (Get-Variable "$cvar").value.text = [string]$userinputarray[$serverdropdown.SelectedIndex]."$cvar"
     }#>
-    CvarsToForm -cvararray $userinputarray
+    CvarsToForm -cvararray $userinputarray -dropdown $serverdropdown
 })
 
 $epilogue.add_Click({
@@ -554,6 +582,93 @@ $tickrate.add_ValueChanged({
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
 })
 
+$start.add_Click({
+    $xmlWPF2.SelectNodes("//*[@Name]") | %{
+	   Remove-Variable -Name ($_.Name) -Scope Global
+    }
+    Remove-Variable "xmlWPF2" -Scope Global
+    Remove-Variable "reader2" -Scope Global
+    Remove-Variable "xamGUI2" -Scope Global
+    
+    [xml]$global:xmlWPF2 = Get-Content -Path "C:\Server\Origin Games\PSScripts\monitor.xaml"
+    $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2 
+    $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
+    $xmlWPF2.SelectNodes("//*[@Name]") | %{
+	    Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
+    }
+    ForEach($item in $serverdropdown.Items){
+        $monitorvararray.add([MonitorVars]::new())
+        $MONserverdrop.Items.add([System.Windows.Controls.ListBoxItem]::new())
+        $MONserverdrop.Items[$MONserverdrop.Items.Count-1].Content = $item.content
+        [string]$MONservercount.Content = [int]$MONservercount.content +1
+        $monitorvararray[$MONserverdrop.Items.Count-1].MONservernamelabel = $item.content
+    }
+    #$MONservernamelabel.Content = $serverdropdown.Items[0].Content
+    CvarsToForm -cvararray $monitorvararray $MONserverdrop
+
+    $refreshrate = New-Object System.Windows.Forms.Timer
+    $refreshrate.Interval = 10000
+    $refreshrate.start()
+
+    $refreshrate.add_Tick({
+        Write-Host "refreshrate Tick"
+        
+        #check PID
+
+        #check TCP
+
+        #check UDP
+
+        #check for window with engineerorclose
+
+        #check RAM + total RAM
+
+        #check VRAM + total VRAM
+
+        #check map
+
+        #check players
+
+        #check uptime
+
+        #
+    })
+
+    $MONserverdrop.add_DropDownClosed({
+        CvarsToForm -cvararray $monitorvararray $MONserverdrop
+    })
+
+    $MONrefreshrate.add_ValueChanged({
+        [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
+        Write-Host "refreshrate is now "$refreshrate.interval
+        $refreshrate.Stop()
+        $refreshrate.start()
+    })
+
+    $server = [Server]::new()
+    $server.BasePath = $serverdirectory.text
+
+    #create server object
+    ForEach($item in $MONserverdrop.Items){
+        $server.NorthstarServers.Add([NorthstarServer]::new())
+    }
+
+    #transfer vars from UI class to NorthstarServer class
+    $uitransfercounter = 0
+    ForEach($NorthstarServer in $server.NorthstarServers){
+        $NorthstarServer.AbsolutePath = $serverdirectory.Text + $NorthstarServer.Directory
+
+        $NorthstarServer.ns_server_name = $userinputarray[$uitransfercounter].servername
+        $NorthstarServer.UDPPort = $userinputarray[$uitransfercounter].udpport
+        $NorthstarServer.ns_player_auth_port = $userinputarray[$uitransfercounter].tcppoprt
+        
+        $uitransfercounter++
+    }
+    $xamGUI2.ShowDialog()
+    $refreshrate.stop()
+})
+
 #endregion window logic
+
 
 $xamGUI.ShowDialog()

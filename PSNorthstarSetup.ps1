@@ -55,7 +55,7 @@ class NorthstarServer {
     [int]$ns_auth_allow_insecure = 0 #cfg
     [int]$ns_should_return_to_lobby = 0 #cfg
     [int]$ns_private_match_only_host_can_change_settings = 0#cfg
-    [ValidateSet('"tdm"', '"cp"','"ctf"','"lts"','"ps"','"ffa"','"speedball"','"mfd"','"ttdm"','"fra"','"gg"','"inf"','"tt"','"kr"','"fastball"','"arena"','"ctf_comp"','"attdm"')][string]$ns_private_match_last_mode = '"tdm"' #cfg
+    [ValidateSet('tdm', 'cp','ctf','lts','ps','ffa','speedball','mfd','ttdm','fra','gg','inf','tt','kr','fastball','arena','ctf_comp','attdm')][string]$ns_private_match_last_mode = 'tdm' #cfg
     [string]$ns_server_password = '""' #cfg
     [SetplaylistVarOverrides]$SetplaylistVarOverrides #
     [Tickrate]$TickRate #cf
@@ -274,7 +274,7 @@ class Installer {
             if($tcpport -gt $this.TCPEndPort){
                 throw "Not enough TCP Ports available for the amount of servers. Servercount: "+$this.ServerCount+" TCP Start port: "+$this.TCPStartPort+" TCP end port: "+$this.TCPEndPort
             }
-            $this.NorthstarServers[$servercounter].ns_private_match_last_mode = '"' + ($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_last_mode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter].ns_server_name)","String")) + '"'
+            $this.NorthstarServers[$servercounter].ns_private_match_last_mode = '' + ($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_last_mode,"What gamemode would you like to run on Server $($this.NorthstarServers[$servercounter].ns_server_name)","String")) + ''
             Switch(($this.GetUserInput($this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings,"Do you want players to be able to change map and mode in lobby on Server $($this.NorthstarServers[$servercounter].ns_server_name)","YesNoNoInstallerVar"))){
                 "Y"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 0}
                 "N"{$this.NorthstarServers[$servercounter].ns_private_match_only_host_can_change_settings = 2}

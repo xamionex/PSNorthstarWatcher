@@ -17,9 +17,9 @@
         <Button Name="MONstopwhenempty" Content="Stop Server When Players Have Left" HorizontalAlignment="Left" Margin="807,246,0,0" VerticalAlignment="Top"/>
         <Button Name="MONstop" Content="Stop Server" HorizontalAlignment="Left" Margin="935,187,0,0" VerticalAlignment="Top"/>
         <Button Name="MONstart" Content="Start Server" HorizontalAlignment="Left" Margin="932,152,0,0" VerticalAlignment="Top"/>
-        <GroupBox Header="Server Browser Preview" Margin="0,513,0,0">
+        <GroupBox Header="Server Browser" Margin="0,513,0,0">
             <Grid>
-                <WebBrowser Source="about:blank"/>
+                <WebBrowser Source="file:///C:\Server\Origin Games\PSScripts\test.html"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Server Status" Margin="0,0,238,523">

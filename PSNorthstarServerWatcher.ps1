@@ -1,4 +1,5 @@
-﻿#Add to use forms
+﻿#Todo
+#Add to use forms
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -46,6 +47,7 @@ class NorthstarServer {
     [ValidateSet(0,1)][int]$ns_auth_allow_insecure = 0 
     
     [string]$ns_server_password = '""' #cfg
+    [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() #
     [Tickrate]$TickRate = [Tickrate]::new()#cf
 
@@ -100,16 +102,17 @@ class Server{
 
 class SetplaylistVarOverrides {
     [string]$maxplayersplaylist = "-maxplayersplaylist" # should always be "-maxplayersplaylist"
+    [int]$max_players
     [int]$custom_air_accel_pilot
-    [int]$pilot_health_multiplier
+    [double]$pilot_health_multiplier
     [int]$run_epilogue
     [int]$respawn_delay
 
     [int]$boosts_enabled
     [int]$earn_meter_pilot_overdrive 
-    [int]$earn_meter_pilot_multiplier
+    [double]$earn_meter_pilot_multiplier
 
-    [int]$earn_meter_titan_multiplier
+    [double]$earn_meter_titan_multiplier
     [int]$aegis_upgrades  
     [int]$infinite_doomed_state
     [int]$titan_shield_regen  
@@ -545,6 +548,19 @@ $playercanchangemap.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $playercanchangemap.IsChecked
 })
 
+$playercanchangemap.add_Unchecked({
+    if($playercanchangemode.IsChecked -eq $True){
+        $playercanchangemode.IsChecked = $False
+        $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $false
+        $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $false
+    }
+})
+
+$playercanchangemode.add_Checked({
+    $playercanchangemap.IsChecked = $True
+    $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $True
+})
+
 $playercanchangemode.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $playercanchangemode.IsChecked
 })
@@ -645,7 +661,7 @@ $start.add_Click({
         $refreshrate.start()
     })
 
-    $server = [Server]::new()
+    $global:server = [Server]::new()
     $server.BasePath = $serverdirectory.text
 
     #create server object
@@ -661,7 +677,57 @@ $start.add_Click({
         $NorthstarServer.ns_server_name = $userinputarray[$uitransfercounter].servername
         $NorthstarServer.UDPPort = $userinputarray[$uitransfercounter].udpport
         $NorthstarServer.ns_player_auth_port = $userinputarray[$uitransfercounter].tcppoprt
-        
+        $NorthstarServer.ns_auth_allow_insecure = $userinputarray[$uitransfercounter].allowinsecure
+        $NorthstarServer.ns_report_server_to_masterserver = $userinputarray[$uitransfercounter].reporttomasterserver
+        #Password missing
+        #lastmap missing
+        $NorthstarServer.ns_private_match_last_mode = $userinputarray[$uitransfercounter].gamemode
+        $NorthstarServer.ns_should_return_to_lobby = $userinputarray[$uitransfercounter].returntolobby
+        if($userinputarray[$uitransfercounter].playercanchangemap -eq 1){
+            $NorthstarServer.ns_private_match_only_host_can_change_settings = 1
+        }else{
+            $NorthstarServer.ns_private_match_only_host_can_change_settings = 2
+        }
+        if($userinputarray[$uitransfercounter].playercanchangemode -eq 1){
+            $NorthstarServer.ns_private_match_only_host_can_change_settings = 0
+        }
+        #everything unlocked missing
+        $NorthstarServer.SetplaylistVarOverrides.custom_air_accel_pilot = $userinputarray[$uitransfercounter].airacceleration
+        $NorthstarServer.SetplaylistVarOverrides.roundscorelimit = $userinputarray[$uitransfercounter].roundscorelimit
+        $NorthstarServer.SetplaylistVarOverrides.scorelimit = $userinputarray[$uitransfercounter].scorelimit
+        $NorthstarServer.SetplaylistVarOverrides.timelimit = $userinputarray[$uitransfercounter].timelimit
+        $NorthstarServer.SetplaylistVarOverrides.max_players = $userinputarray[$uitransfercounter].maxplayers
+        $NorthstarServer.SetplaylistVarOverrides.pilot_health_multiplier = $userinputarray[$uitransfercounter].playerhealthmulti
+        $NorthstarServer.SetplaylistVarOverrides.riff_player_bleedout = $userinputarray[$uitransfercounter].playerbleed
+        $NorthstarServer.SetplaylistVarOverrides.classic_mp = $userinputarray[$uitransfercounter].classicmp
+        $NorthstarServer.SetplaylistVarOverrides.aegis_upgrades = $userinputarray[$uitransfercounter].aegisupgrade
+        $NorthstarServer.SetplaylistVarOverrides.boosts_enabled = $userinputarray[$uitransfercounter].boosts
+        $NorthstarServer.SetplaylistVarOverrides.run_epilogue = $userinputarray[$uitransfercounter].epilogue
+        $NorthstarServer.SetplaylistVarOverrides.riff_floorislava = $userinputarray[$uitransfercounter].floorislava
+        #missing some more overridevars
+
+        #Starting Arguments to string 
+        $NorthstarServer.StartingArgs = "+setplaylist private_match -dedicated -multiple"
+        if($userinputarray[$uitransfercounter].softwared3d11){
+            $NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + " -softwared3d11"
+        }
+
+        $overridevars = ""
+        ForEach ($varname in ($NorthstarServer.SetplaylistVarOverrides|gm -MemberType Property).Name){
+            if($NorthstarServer.SetplaylistVarOverrides."$varname" -ne 0){
+                $NorthstarServer.PlaylistVarOverrides = $True
+                $overridevars = $overridevars + "$varname " + $Northstarserver.SetplaylistVarOverrides."$varname" + " "
+            }
+        }
+        $overridevars = $overridevars -replace ".$"
+        if($NorthstarServer.PlaylistVarOverrides = $True){
+            $playlistvaroverridestring = " +setplaylistvaroverrides "
+            $playlistvaroverridestring = $playlistvaroverridestring + $overridevars
+            if($NorthstarServer.SetplaylistVarOverrides.max_players -gt 0){
+                $playlistvaroverridestring = $playlistvaroverridestring + " -maxplayersplaylist"
+            }
+            $NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + " " + $playlistvaroverridestring
+        }
         $uitransfercounter++
     }
     $xamGUI2.ShowDialog()

@@ -19,7 +19,7 @@
         <Button Name="MONstart" Content="Start Server" HorizontalAlignment="Left" Margin="932,152,0,0" VerticalAlignment="Top"/>
         <GroupBox Header="Server Browser" Margin="0,513,0,0">
             <Grid>
-                <WebBrowser Source="file:///C:\Server\Origin Games\PSScripts\test.html"/>
+                <WebBrowser Source="about:blank" Name="browser"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Server Status" Margin="0,0,238,523">
@@ -47,12 +47,18 @@
         </GroupBox>
         <GroupBox Header="Server Settings" Margin="0,284,392,276">
             <Grid>
-                <TextBox Name="MONrestarthours" HorizontalAlignment="Left" Margin="147,84,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <TextBox Name="MONrestarthours" HorizontalAlignment="Left" Margin="147,84,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="6"/>
                 <Label Content="Auto Restart Hours" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top"/>
                 <TextBox Name="MONramlimit" HorizontalAlignment="Left" Margin="147,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="8"/>
                 <Label Content="RAM Limit GB" Margin="10,10,500,0" VerticalAlignment="Top"/>
                 <TextBox Name="MONvmemlimit" HorizontalAlignment="Left" Margin="147,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="25"/>
                 <Label Content="Virtual Mem Limit GB" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top"/>
+                <TextBox Name="MONcleanlogdays" HorizontalAlignment="Left" Margin="147,119,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="3"/>
+                <Label Content="Clean Logs Days" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top"/>
+                <TextBox Name="MONramlimitkill" HorizontalAlignment="Left" Margin="458,14,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="12"/>
+                <Label Content="Kill RAM Limit GB" Margin="310,10,200,0" VerticalAlignment="Top"/>
+                <TextBox Name="MONvmemlimitkill" HorizontalAlignment="Left" Margin="458,49,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Text="50"/>
+                <Label Content="Kill Virtual Mem Limit GB" HorizontalAlignment="Left" Margin="310,45,0,0" VerticalAlignment="Top"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Server Machine" Margin="656,284,10,276">

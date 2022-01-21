@@ -16,6 +16,7 @@
         <Label Content="Server count:" HorizontalAlignment="Left" Margin="895,18,0,0" VerticalAlignment="Top" Height="26" Width="79"/>
         <Label Name="servercount" Content="0" HorizontalAlignment="Left" Margin="967,18,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
         <Button Name="buildservers" Content="Build servers" HorizontalAlignment="Left" Margin="900,645,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
+		<Button Name="saveuserinput" Content="Save Settings" HorizontalAlignment="Left" Margin="900,555,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
         <GroupBox Header="Playlist Var Overrides" Margin="272,5,450,433">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -29,7 +30,7 @@
                 <CheckBox Name="epilogue" Content="Epilogue / Evac" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,237,0,0" Grid.ColumnSpan="2"/>
                 <CheckBox Name="boosts" Content="Boosts" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,217,0,0" />
                 <Label Content="Max Players" HorizontalAlignment="Left" Margin="0,100,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                <CheckBox Name="overridemaxplayers" Content="Override Playlists Max Players" HorizontalAlignment="Left" Margin="0,257,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                
                 <CheckBox Name="floorislava" Content="Floor is Lava" HorizontalAlignment="Left" Margin="0,277,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
                 <TextBox Name="airacceleration" HorizontalAlignment="Left" Margin="52,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Column="1"/>
                 <TextBox Name="roundscorelimit" HorizontalAlignment="Left" Margin="52,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Column="1"/>

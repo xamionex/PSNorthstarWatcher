@@ -71,5 +71,6 @@
                 <Label Name="MONtotvmem" Content="0/0 GB" HorizontalAlignment="Left" Margin="278,44,0,0" VerticalAlignment="Top" Width="58"/>
             </Grid>
         </GroupBox>
+		<Button Name="MONrefresh" Content="Refresh" HorizontalAlignment="Left" Margin="686,219,0,0" VerticalAlignment="Top" Width="52"/>
     </Grid>
 </Window>

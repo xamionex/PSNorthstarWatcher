@@ -156,7 +156,7 @@ function CvarsToForm{
 
 function TickOrServerselect{
 
-    Write-Host "refreshrate Tick. Next tick in $($refreshrate.interval/1000)"
+    Write-Host "Refreshing. Current refresh tickrate $($refreshrate.interval/1000)"
     $refreshrateforeachcount = 0
     ForEach($NorthstarServer in $server.NorthstarServers){
         try{
@@ -180,7 +180,7 @@ function TickOrServerselect{
                 $MonitorValues[$refreshrateforeachcount].MONuptime = [string]([Math]::Round(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).totalhours,0)) +":"+[string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).minutes) +":"+ [string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).seconds)
 
                 #check these only after 60s uptime, in case for slow machines!
-                if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 20){
+                if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 60){
                     #check TCP
                     try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.ns_player_auth_port -State Listen}
                         catch{throw "Could not get listen TCP port $($NorthstarServer.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
@@ -271,7 +271,6 @@ function TickOrServerselect{
             $NorthstarServer.Crashcount++
             $NorthstarServer.Start()
         }
-
     } #end foreaach northstarserver
     #set UI values 
 
@@ -286,8 +285,8 @@ function TickOrServerselect{
     $MONvmem.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONvmem
     $MONpid.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONpid
 
-    $MONvmembar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit)*([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),1))
-    $MONrambar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit)*([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),1))
+    $MONvmembar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).PagedMemorySize64/1024/1024/1024),1))
+    $MONrambar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).WorkingSet64/1024/1024/1024),1))
 
     $MONtotram.Content = [string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))+"/"+[string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0)) + "GB"
     $MONtotrambar.value = 100/([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0))*([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))
@@ -395,7 +394,7 @@ class NorthstarServer {
 
     [void]Start(){
         if(!($this.Manualstart)){
-            if($this.process.HasExited){
+            if(!$this.WasStarted){
                 $this.Process = Start-Process -WorkingDirectory $this.AbsolutePath -PassThru -FilePath "$($this.AbsolutePath)\NorthstarLauncher.exe" -ArgumentList $this.StartingArgs
                 $this.ProcessID = $this.Process.ID
                 $this.WasStarted = $True
@@ -820,6 +819,10 @@ $start.add_Click({
         TickOrServerselect
     })
 
+    $MONrefresh.add_Click({
+        TickOrServerselect
+    })
+
     $MONrefreshrate.add_ValueChanged({
         [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
         Write-Host "refreshrate is now "$refreshrate.interval
@@ -844,6 +847,30 @@ $start.add_Click({
 
     $MONstopwhenempty.add_Click({
         $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
+    })
+
+    $MONramlimit.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit = $MONramlimit.Text
+    })
+
+    $MONvmemlimit.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit = $MONvmemlimit.Text
+    })
+
+    $MONrestarthours.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONrestarthours = $MONrestarthours.Text
+    })
+
+    $MONcleanlogdays.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONcleanlogdays = $MONcleanlogdays.Text
+    })
+
+    $MONramlimitkill.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimitkill = $MONramlimitkill.Text
+    })
+
+    $MONvmemlimitkill.add_LostFocus({
+        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
     })
     
     $server.BasePath = $serverdirectory.text
@@ -1030,6 +1057,8 @@ $buildservers.add_Click({
 })
 
 #endregion window logic
+
+[System.Windows.Forms.MessageBox]::Show("Thanks for using PSNorthstar Watcher! This is a beta and still being developed. If you find issues, have questions or want to give feedback please create an issue on GitHub. Thank you!.","Message from faky",0)
 
 #get user data from config xml
 [System.Collections.ArrayList]$userinputarray = @()

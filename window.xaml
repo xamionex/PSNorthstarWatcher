@@ -16,7 +16,6 @@
         <Label Content="Server count:" HorizontalAlignment="Left" Margin="895,18,0,0" VerticalAlignment="Top" Height="26" Width="79"/>
         <Label Name="servercount" Content="0" HorizontalAlignment="Left" Margin="967,18,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
         <Button Name="buildservers" Content="Build servers" HorizontalAlignment="Left" Margin="900,645,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
-		<Button Name="saveuserinput" Content="Save Settings" HorizontalAlignment="Left" Margin="900,555,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
         <GroupBox Header="Playlist Var Overrides" Margin="272,5,450,433">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -30,7 +29,6 @@
                 <CheckBox Name="epilogue" Content="Epilogue / Evac" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,237,0,0" Grid.ColumnSpan="2"/>
                 <CheckBox Name="boosts" Content="Boosts" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,217,0,0" />
                 <Label Content="Max Players" HorizontalAlignment="Left" Margin="0,100,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
-                
                 <CheckBox Name="floorislava" Content="Floor is Lava" HorizontalAlignment="Left" Margin="0,277,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
                 <TextBox Name="airacceleration" HorizontalAlignment="Left" Margin="52,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Column="1"/>
                 <TextBox Name="roundscorelimit" HorizontalAlignment="Left" Margin="52,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" Grid.Column="1"/>
@@ -44,7 +42,7 @@
                 <CheckBox Name="playerbleed" Content="Player Bleed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,157,0,0"  Grid.ColumnSpan="2"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="General Server Settings" Margin="10,5,768,492">
+        <GroupBox Header="General Server Settings" Margin="10,5,768,463">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="8*"/>
@@ -101,5 +99,7 @@
         <CheckBox Name="climode" Content="CLI Mode" HorizontalAlignment="Left" Margin="903,737,0,0" VerticalAlignment="Top"/>
         <TextBox Name="serverdirectory" HorizontalAlignment="Left" Margin="695,240,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
         <Label Content="Server Directory" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,217,0,0" Height="26" Width="107"/>
+        <CheckBox Name="manualstart" Content="Start this server manually" HorizontalAlignment="Left" Margin="17,261,0,0" VerticalAlignment="Top"/>
+		<Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Left" Margin="900,613,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
     </Grid>
 </Window>

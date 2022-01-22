@@ -30,17 +30,17 @@
                 <Label Content="RAM" HorizontalAlignment="Left" Margin="10,115,0,0" VerticalAlignment="Top"/>
                 <Label Content="Virtual Mem" HorizontalAlignment="Left" Margin="248,115,0,0" VerticalAlignment="Top"/>
                 <Label Content="PID" HorizontalAlignment="Left" Margin="187,9,0,0" VerticalAlignment="Top"/>
-                <Label Name="MONpid" Content="00000&#x9;" HorizontalAlignment="Left" Margin="90,45,0,0" VerticalAlignment="Top" BorderThickness="1,1,1,1" BorderBrush="Black"/>
+                <Label Name="MONudpport" Content="00000&#x9;" HorizontalAlignment="Left" Margin="90,45,0,0" VerticalAlignment="Top" BorderThickness="1,1,1,1" BorderBrush="Black"/>
                 <Label Content="Uptime" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top"/>
                 <Label Name="MONuptime" Content="0:00" HorizontalAlignment="Left" Margin="90,79,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
-                <Label Content="0/0" HorizontalAlignment="Left" Margin="655,81,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1" Width="53"/>
+                <Label Name="MONplayers" Content="0/0" HorizontalAlignment="Left" Margin="655,81,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1" Width="53"/>
                 <Label Name="MONmap" Content="mp_map" HorizontalAlignment="Left" Margin="582,43,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1" Width="126"/>
                 <Label Content="Status:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
                 <Label Name="MONserverstatuslabel" Content="Stopped" HorizontalAlignment="Left" Margin="90,10,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
                 <Label Content="TCP Port" HorizontalAlignment="Left" Margin="187,46,0,0" VerticalAlignment="Top"/>
                 <Label Content="UDP Port" HorizontalAlignment="Left" Margin="10,45,0,0" VerticalAlignment="Top"/>
-                <Label Name="MONuptime_Copy" Content="00000" HorizontalAlignment="Left" Margin="259,8,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
-                <Label Name="MONuptime_Copy1" Content="00000&#x9;" HorizontalAlignment="Left" Margin="259,45,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
+                <Label Name="MONpid" Content="00000" HorizontalAlignment="Left" Margin="259,8,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
+                <Label Name="MONtcpport" Content="00000&#x9;" HorizontalAlignment="Left" Margin="259,45,0,0" VerticalAlignment="Top" BorderBrush="Black" BorderThickness="1,1,1,1"/>
                 <Label Name="MONram" Content="0GB" HorizontalAlignment="Left" Margin="198,115,0,0" VerticalAlignment="Top" Width="58"/>
                 <Label Name="MONvmem" Content="0GB" HorizontalAlignment="Left" Margin="433,115,0,0" VerticalAlignment="Top" Width="58"/>
             </Grid>

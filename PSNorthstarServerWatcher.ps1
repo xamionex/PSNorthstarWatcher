@@ -1,8 +1,20 @@
-﻿#Todo: Mod support, add all Override Vars, Serverbrowser / MS Connectivity, actual monitor, restart button for server
+﻿#Todo: Mod support/integrate, add all Override Vars
 #show IPs in monitor (LAN, WAN, Router, ..?), show historical numbers on ram etc (max/min/avg/??)
-#=> IDea: add slider with time to "go back", 
 #browse button for paths
 #=> only restart server if it was empty the last 15 minutes
+#X implement autorestart after hours
+#fix bug when monitor window is closed so it starts servers again if you click start / watch => actually just close the first window on start
+#implement update button to update already built servers to newer northstar release
+#add description
+#make bigger input forms so you can see what you type
+#X fix bug when server crashes you cant start it because it thinks its still started (hasexited/wasstarted)
+#fix integrated server browser to show all servers
+#close main window if monitor is opened, open main window when monitor is closed
+#option to start servers minimized
+#fix disable dropship / classic_mp
+#add paths input verification and add trailing backslashes
+#remove folders if server was removed (cleanup)
+#on refresh only refresh currently selected server to make monitor more responsive
 
 #Add to use forms, probably obsolete by now, remove later!
 Add-Type -AssemblyName System.Windows.Forms
@@ -163,11 +175,12 @@ function TickOrServerselect{
             if(!$NorthstarServer.WasStarted){
                 $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Stopped"
             }
-            if($NorthstarServer.WasStarted){
-                #Write-Host "$($NorthstarServer.ns_server_name)"
-                $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.ns_server_name
-                $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Running"
-                $MonitorValues[$refreshrateforeachcount].MONpid = $NorthstarServer.ProcessID
+            if($NorthstarServer.WasStarted){ #only do checks(update stuff if started 
+                $windowtitle = (Get-Process -ID $NorthstarServer.ProcessID).MainWindowTitle                
+                $MonitorValues[$refreshrateforeachcount].MONplayers = $windowtitle.split(" ")[6]
+                $players = $MonitorValues[$refreshrateforeachcount].MONplayers.Split("/")[0]
+                Write-Host "player count: $players"
+
                 #Check if process is still running or responding
                 if($NorthstarServer.Process.HasExited){
                     Throw $NorthstarServer.ns_server_name + " is not running anymore. Process has exited."
@@ -176,82 +189,99 @@ function TickOrServerselect{
                     Throw $NorthstarServer.ns_server_name + " is not responding."
                 }
 
-                #check uptime
-                $MonitorValues[$refreshrateforeachcount].MONuptime = [string]([Math]::Round(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).totalhours,0)) +":"+[string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).minutes) +":"+ [string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).seconds)
-
-                #check these only after 60s uptime, in case for slow machines!
-                if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 60){
-                    #check TCP
-                    try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.ns_player_auth_port -State Listen}
-                        catch{throw "Could not get listen TCP port $($NorthstarServer.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
-                    $MonitorValues[$refreshrateforeachcount].MONtcpport = $NorthstarServer.ns_player_auth_port
-                    #check UDP
-                    try{Get-NetUDPEndpoint -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.udpport}
-                        catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
-                    $MonitorValues[$refreshrateforeachcount].MONudpport = $NorthstarServer.udpport
-                    #check for window with engineerorclose
-                    #TBD
-                    #
-                }
-
-                #check RAM
-                $MonitorValues[$refreshrateforeachcount].MONram = [string]([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) +"GB"
-                #check VRAM +
-                $MonitorValues[$refreshrateforeachcount].MONvmem = [string]([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) + "GB"
-
-                #check map #check players
-                $windowtitle = (Get-Process -ID $NorthstarServer.ProcessID).MainWindowTitle
-                $MonitorValues[$refreshrateforeachcount].MONplayers = $windowtitle.split(" ")[6]
-                $players = $MonitorValues[$refreshrateforeachcount].MONplayers.Split("/")[0]
-                Write-Host "player count: $players"
-                #$maxplayers = $windowtitle[6].split("/")[1]
-                $map = $windowtitle.split(" ")[5]
-                switch($map){
-                    "mp_black_water_canal"{$MonitorValues[$refreshrateforeachcount].MONmap="Black Water Canal"}
-                    "mp_grave"{$MonitorValues[$refreshrateforeachcount].MONmap="Boomtown"}
-                    "mp_colony02"{$MonitorValues[$refreshrateforeachcount].MONmap="Colony"}
-                    "mp_complex3"{$MonitorValues[$refreshrateforeachcount].MONmap="Complex"}
-                    "mp_crashsite3"{$MonitorValues[$refreshrateforeachcount].MONmap="Crashsite"}
-                    "mp_drydock"{$MonitorValues[$refreshrateforeachcount].MONmap="DryDock"}
-                    "mp_eden"{$MonitorValues[$refreshrateforeachcount].MONmap="Eden"}
-                    "mp_thaw"{$MonitorValues[$refreshrateforeachcount].MONmap="Exoplanet"}
-                    "mp_forwardbase_kodai"{$MonitorValues[$refreshrateforeachcount].MONmap="Forward Base Kodai"}
-                    "mp_glitch"{$MonitorValues[$refreshrateforeachcount].MONmap="Glitch"}
-                    "mp_homestead"{$MonitorValues[$refreshrateforeachcount].MONmap="Homestead"}
-                    "mp_relic02"{$MonitorValues[$refreshrateforeachcount].MONmap="Relic"}
-                    "mp_rise"{$MonitorValues[$refreshrateforeachcount].MONmap="Rise"}
-                    "mp_wargames"{$MonitorValues[$refreshrateforeachcount].MONmap="Wargames"}
-                    "mp_lobby"{$MonitorValues[$refreshrateforeachcount].MONmap="Lobby"}
-                    "mp_lf_deck"{$MonitorValues[$refreshrateforeachcount].MONmap="Deck"}
-                    "mp_lf_meadow"{$MonitorValues[$refreshrateforeachcount].MONmap="Meadow"}
-                    "mp_lf_stacks"{$MonitorValues[$refreshrateforeachcount].MONmap="Stacks"}
-                    "mp_lf_township"{$MonitorValues[$refreshrateforeachcount].MONmap="Township"}
-                    "mp_lf_traffic"{$MonitorValues[$refreshrateforeachcount].MONmap="Traffic"}
-                    "mp_lf_uma"{$MonitorValues[$refreshrateforeachcount].MONmap="UMA"}
-                    "mp_coliseum"{$MonitorValues[$refreshrateforeachcount].MONmap="The Coliseum"}
-                    "mp_coliseum_column"{$MonitorValues[$refreshrateforeachcount].MONmap="Pillars"}
-                    default{$MonitorValues[$refreshrateforeachcount].MONmap="$map"}
-                }
-
                 #check if server should be stopped
                 if($NorthstarServer.StopWhenPossible -and $players -lt 2){
-                    Throw "Stopping server that was marked for stop because it has less than 2 players now."
+                    Write-Host "Stopping server" $NorthstarServer.ns_server_name ". Was marked for stop because it has less than 2 players now."
+                    $NorthstarServer.Stop()
                 }
 
                 if($NorthstarServer.StopWhenPossible -and ([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) -gt $MONramlimit.Text){
-                    Throw "Stopping server because it exceeded Ramlimit and has less than 2 players."
+                    Write-Host "Stopping server because it exceeded Ramlimit and has less than 2 players."
+                    $NorthstarServer.Stop()
                 }
 
                 if(([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) -gt $MONramlimitkill.Text){
-                    Throw "Stopping server because it exceeded Ram Kill limit, even when it has players."
+                    Write-Host "Stopping server because it exceeded Ram Kill limit, even when it has players."
+                    $NorthstarServer.Stop()
                 }
 
                 if($NorthstarServer.StopWhenPossible -and ([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) -gt $MONvmemlimit.Text){
-                    Throw "Stopping server because it exceeded VMem Limit and has less than 2 players."
+                    Write-Host "Stopping server because it exceeded VMem Limit and has less than 2 players."
+                    $NorthstarServer.Stop()
                 }
 
                 if(([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) -gt $MONvmemlimitkill.Text){
-                    Throw "Stopping server because it exceeded VMem Kill Limit, even when it has players"
+                    Write-Host "Stopping server because it exceeded VMem Kill Limit, even when it has players"
+                    $NorthstarServer.Stop()
+                }
+                if(((get-date)-(Get-Process -ID $NorthstarServer.ProcessID).StartTime).Totalhours -gt $MONrestarthours.Text){
+                    if(!($NorthstarServer.StopWhenPossible)){
+                        Write-Host $NorthstarServer.ns_server_name "Server reached uptimelimit. Will restart when players have left."
+                        $NorthstarServer.StopWhenPossible = $True
+                    }
+                }
+
+                if($refreshrateforeachcount -eq $MONserverdrop.SelectedIndex){ #only to currently selected server
+                    #Write-Host "$($NorthstarServer.ns_server_name)"
+                    $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.ns_server_name
+                    $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Running"
+                    $MonitorValues[$refreshrateforeachcount].MONpid = $NorthstarServer.ProcessID
+                    
+
+                    #check uptime
+                    $MonitorValues[$refreshrateforeachcount].MONuptime = [string]([Math]::Round(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).totalhours,0)) +":"+[string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).minutes) +":"+ [string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).seconds)
+
+                    #check these only after 60s uptime, in case for slow machines!
+                    if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 60){
+                        #check TCP
+                        try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.ns_player_auth_port -State Listen}
+                            catch{throw "Could not get listen TCP port $($NorthstarServer.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
+                        $MonitorValues[$refreshrateforeachcount].MONtcpport = $NorthstarServer.ns_player_auth_port
+                        #check UDP
+                        try{Get-NetUDPEndpoint -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.udpport}
+                            catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
+                        $MonitorValues[$refreshrateforeachcount].MONudpport = $NorthstarServer.udpport
+                        #check for window with engineerorclose
+                        #TBD
+                        #
+                    }
+
+                    #check RAM
+                    $MonitorValues[$refreshrateforeachcount].MONram = [string]([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) +"GB"
+                    #check VRAM +
+                    $MonitorValues[$refreshrateforeachcount].MONvmem = [string]([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) + "GB"
+
+                    
+                    
+                    
+                    #$maxplayers = $windowtitle[6].split("/")[1]
+                    $map = $windowtitle.split(" ")[5]
+                    switch($map){
+                        "mp_black_water_canal"{$MonitorValues[$refreshrateforeachcount].MONmap="Black Water Canal"}
+                        "mp_grave"{$MonitorValues[$refreshrateforeachcount].MONmap="Boomtown"}
+                        "mp_colony02"{$MonitorValues[$refreshrateforeachcount].MONmap="Colony"}
+                        "mp_complex3"{$MonitorValues[$refreshrateforeachcount].MONmap="Complex"}
+                        "mp_crashsite3"{$MonitorValues[$refreshrateforeachcount].MONmap="Crashsite"}
+                        "mp_drydock"{$MonitorValues[$refreshrateforeachcount].MONmap="DryDock"}
+                        "mp_eden"{$MonitorValues[$refreshrateforeachcount].MONmap="Eden"}
+                        "mp_thaw"{$MonitorValues[$refreshrateforeachcount].MONmap="Exoplanet"}
+                        "mp_forwardbase_kodai"{$MonitorValues[$refreshrateforeachcount].MONmap="Forward Base Kodai"}
+                        "mp_glitch"{$MonitorValues[$refreshrateforeachcount].MONmap="Glitch"}
+                        "mp_homestead"{$MonitorValues[$refreshrateforeachcount].MONmap="Homestead"}
+                        "mp_relic02"{$MonitorValues[$refreshrateforeachcount].MONmap="Relic"}
+                        "mp_rise"{$MonitorValues[$refreshrateforeachcount].MONmap="Rise"}
+                        "mp_wargames"{$MonitorValues[$refreshrateforeachcount].MONmap="Wargames"}
+                        "mp_lobby"{$MonitorValues[$refreshrateforeachcount].MONmap="Lobby"}
+                        "mp_lf_deck"{$MonitorValues[$refreshrateforeachcount].MONmap="Deck"}
+                        "mp_lf_meadow"{$MonitorValues[$refreshrateforeachcount].MONmap="Meadow"}
+                        "mp_lf_stacks"{$MonitorValues[$refreshrateforeachcount].MONmap="Stacks"}
+                        "mp_lf_township"{$MonitorValues[$refreshrateforeachcount].MONmap="Township"}
+                        "mp_lf_traffic"{$MonitorValues[$refreshrateforeachcount].MONmap="Traffic"}
+                        "mp_lf_uma"{$MonitorValues[$refreshrateforeachcount].MONmap="UMA"}
+                        "mp_coliseum"{$MonitorValues[$refreshrateforeachcount].MONmap="The Coliseum"}
+                        "mp_coliseum_column"{$MonitorValues[$refreshrateforeachcount].MONmap="Pillars"}
+                        default{$MonitorValues[$refreshrateforeachcount].MONmap="$map"}
+                    }
                 }
             }
             $refreshrateforeachcount++
@@ -268,6 +298,7 @@ function TickOrServerselect{
             }
             Write-Host "Server problem detected. Server was terminated. Starting server again."
             Write-Host ($Error | Out-Host)
+            $NorthstarServer.WasStarted = $false
             $NorthstarServer.Crashcount++
             $NorthstarServer.Start()
         }
@@ -285,8 +316,10 @@ function TickOrServerselect{
     $MONvmem.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONvmem
     $MONpid.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONpid
 
-    $MONvmembar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).PagedMemorySize64/1024/1024/1024),1))
-    $MONrambar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).WorkingSet64/1024/1024/1024),1))
+    if($server.NorthstarServers[$MONserverdrop.SelectedIndex].WasStarted){
+        $MONvmembar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).PagedMemorySize64/1024/1024/1024),1))
+        $MONrambar.value = 100/($monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit)*([Math]::Round(((Get-Process -ID $server.NorthstarServers[$MONserverdrop.SelectedIndex].ProcessID).WorkingSet64/1024/1024/1024),1))
+    }
 
     $MONtotram.Content = [string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))+"/"+[string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0)) + "GB"
     $MONtotrambar.value = 100/([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0))*([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))
@@ -400,7 +433,7 @@ class NorthstarServer {
                 $this.WasStarted = $True
                 $this.StopWhenPossible = $false
             }else{
-                Write-Host "Warning! Tried to start a server that has not exited before."
+                Write-Host "Warning! Tried to start a server that had flag WasStarted = True"
             }
         }else{
             Write-Host "Not starting because server is on manual start mode."
@@ -416,7 +449,7 @@ class NorthstarServer {
             $this.StopWhenPossible = $false
             $this.Manualstart = $false
         }else{
-            Write-Host "Warning! Tried to start a server that has not exited before."
+            Write-Host "Warning! Tried to start a server that had flag WasStarted = True"
         }
     }
 
@@ -847,6 +880,7 @@ $start.add_Click({
 
     $MONstopwhenempty.add_Click({
         $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
+        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
     })
 
     $MONramlimit.add_LostFocus({
@@ -1030,6 +1064,7 @@ $buildservers.add_Click({
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | gm -MemberType Property) | Where-Object -Property Name -match "sv_").Name
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | gm -MemberType Property) | Where-Object -Property Name -match "host_").Name
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | gm -MemberType Property) | Where-Object -Property Name -match "everything_unlocked").Name
+                $nscvararray = $nscvararray + (($server.NorthstarServers[0] | gm -MemberType Property) | Where-Object -Property Name -match "net_").Name
                 $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
                 #$nscvararray = $nscvararray.remove("autoexec_ns_server")
 
@@ -1037,10 +1072,23 @@ $buildservers.add_Click({
                     if($NorthstarServer."$nscvar".gettype().Name -eq "String"){
                         Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer."$nscvar" + '"') -Append $True -Filepath $configfilepath
                     }
-                    if($NorthstarServer."$nscvar".gettype().Name -eq "Int32"){
+                    if($NorthstarServer."$nscvar".gettype().Name -eq "Int32" -or $NorthstarServer."$nscvar".gettype().Name -eq "Double"){
                         Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer."$nscvar") -Append $True -Filepath $configfilepath
                     }
                 }
+
+                [array]$nstrcvararray = (($server.NorthstarServers[0].TickRate | gm -MemberType Property) | Where-Object -Property Name -match "base_").Name
+                $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].TickRate | gm -MemberType Property) | Where-Object -Property Name -match "sv_").Name
+
+                ForEach($nscvar in $nstrcvararray){
+                    if($NorthstarServer.Tickrate."$nscvar".gettype().Name -eq "String"){
+                        Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.Tickrate."$nscvar" + '"') -Append $True -Filepath $configfilepath
+                    }
+                    if(($NorthstarServer.Tickrate."$nscvar".gettype().Name -eq "Int32") -or ($NorthstarServer.Tickrate."$nscvar".gettype().Name -eq "Double")){
+                        Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.Tickrate."$nscvar") -Append $True -Filepath $configfilepath
+                    }
+                }
+
             }
         }else{
             Write-Host "Keeping old autoexec_ns_server.cfg"

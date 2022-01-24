@@ -1,20 +1,13 @@
 ﻿#Todo: Mod support/integrate, add all Override Vars
 #show IPs in monitor (LAN, WAN, Router, ..?), show historical numbers on ram etc (max/min/avg/??)
 #browse button for paths
-#=> only restart server if it was empty the last 15 minutes
-#X implement autorestart after hours
-#fix bug when monitor window is closed so it starts servers again if you click start / watch => actually just close the first window on start
+#only restart server if it was empty the last 15 minutes
 #implement update button to update already built servers to newer northstar release
-#add description
-#make bigger input forms so you can see what you type
-#X fix bug when server crashes you cant start it because it thinks its still started (hasexited/wasstarted)
-#fix integrated server browser to show all servers
-#close main window if monitor is opened, open main window when monitor is closed
-#option to start servers minimized
-#fix disable dropship / classic_mp
 #add paths input verification and add trailing backslashes
 #remove folders if server was removed (cleanup)
-#on refresh only refresh currently selected server to make monitor more responsive
+#implement delay between server starts/server start queue
+#invert ram bar (shows free memory now)$
+#add build progress bar
 
 #Add to use forms, probably obsolete by now, remove later!
 Add-Type -AssemblyName System.Windows.Forms
@@ -31,13 +24,27 @@ if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript"){
 #region global vars
 #get Northstar root folders/files WITHOUT bin folder
 $global:northstarrootitems = @("R2Northstar","legal.txt","MinHook.x64.dll","Northstar.dll","NorthstarLauncher.exe","ns_startup_args.txt","ns_startup_args_dedi.txt","r2ds.bat")
-
+$global:needsrebuild = $true
+Write-Host "Protocol 1: Link to erver. Protocol 2: Uphold the Network Connection. Protocol 3: Protect the Server."
 
 #endregion global vars
 
 #region functions
 
 #
+function Set-Build{
+    param([bool]$Needed)
+    if($Needed){
+        $needsrebuild = $true
+        $pendingchanges.Foreground = "Red"
+        $pendingchanges.Content = "Build needed please rebuild"
+    }else{
+        $needsrebuild = $false
+        $pendingchanges.Foreground = "Green"
+        $pendingchanges.Content = "Build is up to date!" 
+    }
+}
+
 function Check-Adminrights{
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
     if($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
@@ -79,6 +86,7 @@ function UItoNS{
         $NorthstarServer.Manualstart = $userinputarray[$ServerID].manualstart
 
 		$NorthstarServer.ns_server_name = $userinputarray[$ServerID].servername
+        $NorthstarServer.ns_server_desc = $userinputarray[$ServerID].description
 		$NorthstarServer.UDPPort = $userinputarray[$ServerID].udpport
 		$NorthstarServer.ns_player_auth_port = $userinputarray[$ServerID].tcpport
 		$NorthstarServer.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
@@ -103,10 +111,10 @@ function UItoNS{
 		$NorthstarServer.SetplaylistVarOverrides.max_players = $userinputarray[$ServerID].maxplayers
 		$NorthstarServer.SetplaylistVarOverrides.pilot_health_multiplier = $userinputarray[$ServerID].playerhealthmulti
 		$NorthstarServer.SetplaylistVarOverrides.riff_player_bleedout = $userinputarray[$ServerID].playerbleed
-		$NorthstarServer.SetplaylistVarOverrides.classic_mp = $userinputarray[$ServerID].classicmp
+		$NorthstarServer.override_disable_classic_mp = $userinputarray[$ServerID].classicmp
 		$NorthstarServer.SetplaylistVarOverrides.aegis_upgrades = $userinputarray[$ServerID].aegisupgrade
 		$NorthstarServer.SetplaylistVarOverrides.boosts_enabled = $userinputarray[$ServerID].boosts
-		$NorthstarServer.SetplaylistVarOverrides.run_epilogue = $userinputarray[$ServerID].epilogue
+	    $NorthstarServer.override_disable_run_epilogue = $userinputarray[$ServerID].epilogue
 		$NorthstarServer.SetplaylistVarOverrides.riff_floorislava = $userinputarray[$ServerID].floorislava
 		#missing some more overridevars
 
@@ -123,6 +131,17 @@ function UItoNS{
 				$overridevars = $overridevars + "$varname " + $Northstarserver.SetplaylistVarOverrides."$varname" + " "
 			}
 		}
+
+        #special ifs because default is classic_mp 1 but is not overriden, to override it its actually 0 !
+        if($NorthstarServer.override_disable_classic_mp){
+            $overridevars = $overridevars + "classic_mp 0 "
+            $NorthstarServer.PlaylistVarOverrides = $True
+        }
+        if($NorthstarServer.override_disable_run_epilogue){
+            $overridevars = $overridevars + "run_epilogue 0 "
+            $NorthstarServer.PlaylistVarOverrides = $True
+        }
+
 		$overridevars = $overridevars -replace ".$"
 		if($NorthstarServer.PlaylistVarOverrides -eq $True){
 			$playlistvaroverridestring = " +setplaylistvaroverrides`" "
@@ -339,17 +358,18 @@ function TickOrServerselect{
 
     #get json and render index.html server browser
     #try{
-        $serverlist = Invoke-RestMethod "http://northstar.tf/client/servers" -ErrorAction SilentlyContinue
-        if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
-        Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;}</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
-        ForEach($filter in $server.NorthstarServers.ns_server_name){
-            $serverlist = $serverlist | where -property name -match $filter
-            ForEach($serverentry in $serverlist){
-                Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<tr><td>$($serverentry.name)</td><td>$($serverentry.playlist)</td><td>$($serverentry.map)</td><td>$($serverentry.playerCount)</td><td>$($serverentry.maxPlayers)</td><td>$($serverentry.description)</td></tr>"
-            }
-        Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "</table></html>"
-        $browser.Source = "$ScriptPath\index.html"
+    $serverlist = Invoke-RestMethod "http://northstar.tf/client/servers" -ErrorAction SilentlyContinue
+    if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
+    Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;}</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
+    ForEach($filter in $server.NorthstarServers.ns_server_name){
+        $filteredserverlist = $serverlist | where -property name -match $filter
+        ForEach($serverentry in $filteredserverlist){
+            Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<tr><td>$($serverentry.name)</td><td>$($serverentry.playlist)</td><td>$($serverentry.map)</td><td>$($serverentry.playerCount)</td><td>$($serverentry.maxPlayers)</td><td>$($serverentry.description)</td></tr>"
         }
+    }
+    Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "</table></html>"
+    $browser.Source = "$ScriptPath\index.html"
+
     #}
     #catch{
         #Write-Host "Error generating HTML file."
@@ -368,6 +388,10 @@ class NorthstarServer {
     [bool]$StopWhenPossible = $false
     [bool]$Manualstart = $false
     [bool]$WasStarted = $false
+
+    #need special overrides since default / non overriden is actually 1
+    [bool]$override_disable_classic_mp = $false
+    [bool]$override_disable_run_epilogue = $false
 
     [string]$ns_server_name = "Northstar Server generated by PSNorthstarWatcher."
     [string]$ns_server_desc = "This is the default description generated by PSNorthstarWatcher."
@@ -428,7 +452,7 @@ class NorthstarServer {
     [void]Start(){
         if(!($this.Manualstart)){
             if(!$this.WasStarted){
-                $this.Process = Start-Process -WorkingDirectory $this.AbsolutePath -PassThru -FilePath "$($this.AbsolutePath)\NorthstarLauncher.exe" -ArgumentList $this.StartingArgs
+                $this.Process = Start-Process -WindowStyle Minimized -WorkingDirectory $this.AbsolutePath -PassThru -FilePath "$($this.AbsolutePath)\NorthstarLauncher.exe" -ArgumentList $this.StartingArgs
                 $this.ProcessID = $this.Process.ID
                 $this.WasStarted = $True
                 $this.StopWhenPossible = $false
@@ -476,7 +500,7 @@ class SetplaylistVarOverrides {
     [int]$max_players
     [int]$custom_air_accel_pilot
     [double]$pilot_health_multiplier
-    [int]$run_epilogue
+    #[int]$run_epilogue
     [int]$respawn_delay
 
     [int]$boosts_enabled
@@ -495,7 +519,7 @@ class SetplaylistVarOverrides {
     [int]$roundtimelimit
 
     [int]$classic_rodeo
-    [int]$classic_mp
+    #[int]$classic_mp
     [int]$fp_embark_enabled
     [int]$promode_enable
 
@@ -530,6 +554,7 @@ class TickRate {
 
 Class UserInputConfig{
     [string]$servername = "new Server"
+    [string]$description
     [string]$gamemode = "tdm"
     [string]$udpport = "37015"
     [bool]$epilogue = $false
@@ -609,6 +634,7 @@ $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer\"
 $northstarpath.add_LostFocus({
     if($northstarpath.text -ne "Northstar\"){
         [System.Windows.Forms.MessageBox]::Show("Northstar source path changed. This is not recommended!","Northstar Source Path",0)
+        Set-Build -Needed $True
     }
 })
 
@@ -619,6 +645,7 @@ $addserver.add_Click({
     $serverdropdown.Items.add([System.Windows.Controls.ListBoxItem]::new())
     $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server"
     [string]$servercount.Content = [int]$servercount.content +1
+    Set-Build -Needed $True
 })
 
 $removeserver.add_Click({
@@ -626,6 +653,7 @@ $removeserver.add_Click({
         $userinputarray.RemoveAt(($serverdropdown.SelectedIndex))
         $serverdropdown.Items.RemoveAt(($serverdropdown.SelectedIndex))
         [string]$servercount.Content = [int]$servercount.content -1
+        Set-Build -Needed $True
     }
 })
 
@@ -634,6 +662,7 @@ $removeserver.add_Click({
 $servername.add_LostFocus({
     $serverdropdown.Items[$serverdropdown.SelectedIndex].Content = $servername.text
     #$serverdropdown.UpdateLayout()
+    Set-Build -Needed $True
 })
 
 #update config after servername change
@@ -641,9 +670,15 @@ $servername.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].servername = $servername.Text
 })
 
+$Description.Add_LostFocus({
+    $userinputarray[$serverdropdown.SelectedIndex].description = $Description.Text
+    Set-Build -Needed $True
+})
+
 
 $Gamemode.add_DropDownClosed({
     $userinputarray[$serverdropdown.SelectedIndex].gamemode = $Gamemode.Text
+    Set-Build -Needed $True
 })
 
 #server selection was changed using combobox/dropdown. update all values
@@ -656,7 +691,7 @@ $serverdropdown.add_DropDownClosed({
 })
 
 $epilogue.add_Click({
-    $userinputarray[$serverdropdown.SelectedIndex].epilogue = $epilogue.IsChecked
+    $userinputarray[$serverdropdown.SelectedIndex].epilogue = $epilogue.IsChecked #disableepilogue
 })
 
 $boosts.add_Click({
@@ -676,7 +711,7 @@ $aegisupgrade.add_Click({
 })
 
 $classicmp.add_Click({
-    $userinputarray[$serverdropdown.SelectedIndex].classicmp = $classicmp.IsChecked
+    $userinputarray[$serverdropdown.SelectedIndex].classicmp = $classicmp.IsChecked #disableclassicmp
 })
 
 $playerbleed.add_Click({
@@ -685,6 +720,7 @@ $playerbleed.add_Click({
 
 $reporttomasterserver.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].reporttomasterserver = $reporttomasterserver.IsChecked
+    Set-Build -Needed $True
 })
 
 $softwared3d11.add_Click({
@@ -693,14 +729,17 @@ $softwared3d11.add_Click({
 
 $allowinsecure.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].allowinsecure = $allowinsecure.IsChecked
+    Set-Build -Needed $True
 })
 
 $returntolobby.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].returntolobby = $returntolobby.IsChecked
+    Set-Build -Needed $True
 })
 
 $playercanchangemap.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $playercanchangemap.IsChecked
+    Set-Build -Needed $True
 })
 
 $playercanchangemap.add_Unchecked({
@@ -718,6 +757,7 @@ $playercanchangemode.add_Checked({
 
 $playercanchangemode.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $playercanchangemode.IsChecked
+    Set-Build -Needed $True
 })
 
 $manualstart.add_Click({
@@ -750,15 +790,18 @@ $playerhealthmulti.add_LostFocus({
 
 $tcpport.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].tcpport = $tcpport.Text
+    Set-Build -Needed $True
 })
 
 $udpport.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].udpport = $udpport.Text
+    Set-Build -Needed $True
 })
 
 $tickrate.add_ValueChanged({
     $userinputarray[$serverdropdown.SelectedIndex].tickrate = $tickrate.value
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
+    Set-Build -Needed $True
 })
 
 $saveuserinput.add_Click({
@@ -921,7 +964,21 @@ $start.add_Click({
     ForEach($NorthstarServer in $server.NorthstarServers){
         $NorthstarServer.Start()
     }
+    $xamGUI.Close()
+
+    $xamGUI2.add_Closing({
+        param($sender,$e)
+        $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+        if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
+        {
+            $e.Cancel= $true
+        }
+    })
+
     $xamGUI2.ShowDialog()
+    ForEach($NorthstarServer in $server.NorthstarServers){
+        $NorthstarServer.Stop()
+    }
     
 
     #after window was closed stop refreshrate timer
@@ -1095,6 +1152,8 @@ $buildservers.add_Click({
         }
     Write-Host "Build successful!"
     [System.Windows.Forms.MessageBox]::Show("Server build was successful!","Build Complete",0)
+    Set-Build -Needed $false
+    
     }catch{
         Write-Host "Error bulding servers!"
         Write-Host ($Error | Out-Host)
@@ -1137,3 +1196,5 @@ if($userinputarray.count -eq 0){
 
 #show main window
 $xamGUI.ShowDialog()
+Write-Host "Trust me..."
+pause

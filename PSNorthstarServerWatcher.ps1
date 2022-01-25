@@ -962,7 +962,12 @@ $start.add_Click({
     UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
     
     #show monitor window / start servers
+    $ServerCount = 0
     ForEach($NorthstarServer in $server.NorthstarServers){
+        if(++$ServerCount % 1 -eq 0) 
+        {
+            Start-Sleep -Seconds 5
+        }
         $NorthstarServer.Start()
     }
     $xamGUI.Close()

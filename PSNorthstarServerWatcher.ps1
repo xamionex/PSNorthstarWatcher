@@ -45,16 +45,17 @@ function Set-Build{
     }
 }
 
-function Check-Adminrights{
-    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-    if($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){
-        Write-Host "Running with administrator privileges."
-        return $true
-    }else{
-        Write-Host "Not running with administrator privileges."
+function Test-Adminrights{
+    if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+    [Security.Principal.WindowsBuiltInRole] "Administrator"))
+    {
+        Write-Warning "You do not have Administrator rights to run this script!"
         #Start-Process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\PSNorthstarSetup.ps1`"" -Verb runas 
         #throw "notadmin"
         return $false
+    }else{
+        Write-Host "Running with administrator privileges."
+        return $true
     }
 }
 
@@ -1099,7 +1100,7 @@ $buildservers.add_Click({
                 }else{
                     try{
                         Write-Host ("Create symbolic link from " + "$($NorthstarServer.AbsolutePath)\$($file.name)" + " to $($file.fullname)")
-                        if(!(Check-Adminrights)){
+                        if(!(Test-Adminrights)){
                             [System.Windows.Forms.MessageBox]::Show("The script needs to create symbolic links. Creating symbolic link needs administrator privileges. Please restart again as administrator.","Admin Rights not Detected",0)
                             throw "Can not create symbolic links without admin permission! "
                         }

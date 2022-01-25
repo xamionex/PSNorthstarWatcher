@@ -83,7 +83,7 @@ function UItoNS{
         throw "NorthstarServers array given to UItoNS has no entries/objects! Please initialize server.NorthstarServers[0], [1] etc first"
     }
 	ForEach($NorthstarServer in $NorthstarServers){
-		$NorthstarServer.AbsolutePath = $serverdirectory.Text + $NorthstarServer.Directory
+		$NorthstarServer.AbsolutePath = $serverdirectory.Text.TrimEnd("\") + "\" + $NorthstarServer.Directory
         $NorthstarServer.Manualstart = $userinputarray[$ServerID].manualstart
 
 		$NorthstarServer.ns_server_name = $userinputarray[$ServerID].servername
@@ -625,15 +625,15 @@ $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 
 #region window logic
 $titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
-$northstarpath.text = "Northstar\"
-$serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer\"
+$northstarpath.text = "Northstar"
+$serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
 #[System.Collections.ArrayList]$userinputarray = @()
 [System.Collections.ArrayList]$monitorvararray = @()
 #[System.Collections.ArrayList]$userinputconfignames = @("servername","gamemode","epilogue","boosts","overridemaxplayers","floorislava","airacceleration","roundscorelimit","scorelimit","timelimit","maxplayers","playerhealthmulti","aegisupgrade","classicmp","playerbleed","tcpport","udpport","reporttomasterserver","softwared3d11","allowinsecure","returntolobby","playercanchangemap","playercanchangemode","tickrate")
 
 
 $northstarpath.add_LostFocus({
-    if($northstarpath.text -ne "Northstar\"){
+    if($northstarpath.text -ne "Northstar"){
         [System.Windows.Forms.MessageBox]::Show("Northstar source path changed. This is not recommended!","Northstar Source Path",0)
         Set-Build -Needed $True
     }
@@ -951,7 +951,7 @@ $start.add_Click({
         $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
     })
     
-    $server.BasePath = $serverdirectory.text
+    $server.BasePath = $serverdirectory.text.TrimEnd("\")
 
     #remove before filling otherwise we get duplicates
     #ForEach($server in $server.NorthstarServers){
@@ -990,7 +990,7 @@ $start.add_Click({
 
 $buildservers.add_Click({
     try{
-        $server.BasePath = $serverdirectory.text
+        $server.BasePath = $serverdirectory.text.TrimEnd("\")
         #put text from form to var because it can cause weird issues
         $tf2srcpath = $titanfall2path.text.TrimEnd("\")
 
@@ -1012,17 +1012,17 @@ $buildservers.add_Click({
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml" 
 
         #$global:server = [Server]::new() # global var => easier to debug
-        if(Test-Path $serverdirectory.text){
+        if(Test-Path $server.BasePath){
             Write-Host "Given server directory destination does exist."
         }else{
-            Write-Host "Creating NorthstarServer base folder in $serverdirectory.text"
-            try{New-Item -ItemType Directory -Path $serverdirectory.text}
+            Write-Host "Creating NorthstarServer base folder in $server.BasePath"
+            try{New-Item -ItemType Directory -Path $server.BasePath}
                 catch {
-                    throw "could not create base NorthstarServer at $serverdirectory.text"
+                    throw "could not create base NorthstarServer at $server.BasePath"
                     $Error
                 }
         }
-        $server.BasePath = $serverdirectory.text
+        $server.BasePath = $server.BasePath
 
         #check TF2 source existance
 
@@ -1060,7 +1060,7 @@ $buildservers.add_Click({
                     Write-Host "$($NorthstarServer.Absolutepath)\$item exists."
                 }else{
                     Write-Host "$($NorthstarServer.Absolutepath)\$item" "does not exist. copying"
-                    Copy-Item "$ScriptPath\$($northstarpath.text)$item" -Destination $NorthstarServer.AbsolutePath -Recurse
+                    Copy-Item "$ScriptPath\$($northstarpath.text)\$item" -Destination $NorthstarServer.AbsolutePath -Recurse
                 }
             }
 
@@ -1197,4 +1197,3 @@ if($userinputarray.count -eq 0){
 #show main window
 $xamGUI.ShowDialog()
 Write-Host "Trust me..."
-pause

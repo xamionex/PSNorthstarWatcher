@@ -1022,7 +1022,6 @@ $buildservers.add_Click({
                     $Error
                 }
         }
-        $server.BasePath = $server.BasePath
 
         #check TF2 source existance
 

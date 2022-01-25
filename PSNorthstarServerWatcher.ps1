@@ -992,8 +992,8 @@ $buildservers.add_Click({
     try{
         $server.BasePath = $serverdirectory.text
         #put text from form to var because it can cause weird issues
-        $tf2srcpath = "$($titanfall2path.text)"
-        
+        $tf2srcpath = $titanfall2path.text.TrimEnd("\")
+
         #remove before filling otherwise we get duplicates
         ForEach($nsserver in $server.NorthstarServers){
             $server.NorthstarServers = @()
@@ -1032,7 +1032,7 @@ $buildservers.add_Click({
         $tffiles = Get-Childitem $tf2srcpath
 
         $atleastoneconfig = $false
-        
+
         ForEach($NorthstarServer in $server.NorthstarServers){
             if(Test-Path "$($NorthstarServer.AbsolutePath)\R2Northstar\mods\Northstar.CustomServers\mod\cfg\autoexec_ns_server.cfg"){
                 Write-Host "$($NorthstarServer.AbsolutePath)\R2Northstar\mods\Northstar.CustomServers\mod\cfg\autoexec_ns_server.cfg exists."
@@ -1044,7 +1044,6 @@ $buildservers.add_Click({
             Write-Host "Server configs ns_autoexec_server.cfg were detected previously for at least one server."
             $overwriteconfig = [System.Windows.Forms.MessageBox]::Show("autoexec_ns_server.cfg was detected. Do you want to overwrite config files for ALL servers? You will lose all previous configuration done manually!","Server Configuration File Detected", "YesNo" , "Information" , "Button1")
         }
-        
 
         ForEach($NorthstarServer in $server.NorthstarServers){
             #check if server folder exists or create it
@@ -1067,18 +1066,18 @@ $buildservers.add_Click({
 
             #check if it contains NS files and exclude them
             ForEach($item in $northstarrootitems){
-                if(Test-Path "$($titanfall2path.Text)\$item"){ #this NS item exists!
+                if(Test-Path "$($tf2srcpath)\$item"){ #this NS item exists!
                     Write-Host "Warning! Titanfall2 sources $item (file or folder of NorthStar)! Will try to exclude NS files and folders for symlinks."
                     $tffiles = $tffiles | Where-Object -Property "Name" -ne $item
                 }
-            }  
+            }
 
-            #bin\x64_retail\wsock32.dll
-            if(Test-Path "$($titanfall2path.Text)bin\x64_retail\wsock32.dll"){
+            #\bin\x64_retail\wsock32.dll
+            if(Test-Path "$($tf2srcpath)\bin\x64_retail\wsock32.dll"){
                 Write-Host "wsock32.dll already in TF2 original files!"
             }else{
                 Write-Host "Copying wsock32.dll to original TF2 folder to make things a bit easier"
-                try {Copy-Item ($($northstarpath.text) + "bin\x64_retail\wsock32.dll") -Destination "$($titanfall2path.Text)bin\x64_retail\"}
+                try {Copy-Item ($($northstarpath.text) + "\bin\x64_retail\wsock32.dll") -Destination "$($tf2srcpath)\bin\x64_retail\"}
                     catch {throw "Could not copy wsock32.dll"}
             }
 

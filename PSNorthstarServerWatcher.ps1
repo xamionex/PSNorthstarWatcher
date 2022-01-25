@@ -25,7 +25,7 @@ if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript"){
 #get Northstar root folders/files WITHOUT bin folder
 $global:northstarrootitems = @("R2Northstar","legal.txt","MinHook.x64.dll","Northstar.dll","NorthstarLauncher.exe","ns_startup_args.txt","ns_startup_args_dedi.txt","r2ds.bat")
 $global:needsrebuild = $true
-Write-Host "Protocol 1: Link to erver. Protocol 2: Uphold the Network Connection. Protocol 3: Protect the Server."
+Write-Host "Protocol 1: Link to server. Protocol 2: Uphold the Network Connection. Protocol 3: Protect the Server."
 
 #endregion global vars
 

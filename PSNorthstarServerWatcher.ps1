@@ -1176,7 +1176,7 @@ $buildservers.add_Click({
 if(Test-Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"){
     #TBD Add import for Titanfall2 Path, Northstar source pathh, Northstar server destination path
     [System.Collections.ArrayList]$userinputarray = Import-Clixml -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
-    $userinputcount = 0
+    #$userinputcount = 0
         ForEach($userinput in $userinputarray){
         $serverdropdown.Items.add([System.Windows.Controls.ListBoxItem]::new())
         $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = $userinput.servername

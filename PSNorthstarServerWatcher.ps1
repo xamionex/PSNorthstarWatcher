@@ -90,6 +90,8 @@ function UItoNS{
         $NorthstarServer.ns_server_desc = $userinputarray[$ServerID].description
 		$NorthstarServer.UDPPort = $userinputarray[$ServerID].udpport
 		$NorthstarServer.ns_player_auth_port = $userinputarray[$ServerID].tcpport
+		$NorthstarServer.TickRate.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
+		$NorthstarServer.TickRate.rate = $userinputarray[$ServerID].rate
 		$NorthstarServer.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
 		$NorthstarServer.ns_report_server_to_masterserver = $userinputarray[$ServerID].reporttomasterserver
 		#Password missing
@@ -409,7 +411,7 @@ class NorthstarServer {
     [string]$ns_server_password = '' #cfg
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() #
-    [Tickrate]$TickRate = [Tickrate]::new()#cf
+    [TickRate]$TickRate = [TickRate]::new()#cf
 
     [ValidateSet(
         "mp_angel_city","mp_black_water_canal","mp_grave","mp_colony02","mp_complex3","mp_crashsite3","mp_drydock","mp_eden","mp_thaw","mp_forwardbase_kodai","mp_glitch","mp_homestead","mp_relic02","mp_rise","mp_wargames","mp_lobby","mp_lf_deck","mp_lf_meadow","mp_lf_stacks","mp_lf_township","mp_lf_traffic","mp_lf_uma","mp_coliseum","mp_coliseum_column"
@@ -547,7 +549,7 @@ class SetplaylistVarOverrides {
 
 class TickRate {
     [double]$base_tickinterval_mp = 0.016666667 # default for 60  tick server / 20 tick client
-    [int]$rate = 786432
+    [int]$rate = 128000
     [int]$sv_updaterate_mp = 20 # default for 60  tick server / 20 tick client
     [int]$sv_minupdaterate = 20 # default for 60  tick server / 20 tick client
     [int]$sv_max_snapshots_multiplayer = 300 # updaterate * 15
@@ -578,7 +580,8 @@ Class UserInputConfig{
     [bool]$returntolobby = $false
     [bool]$playercanchangemap = $false
     [bool]$playercanchangemode = $false
-    [double]$tickrate = 60
+    [int]$tickrate = 60
+    [int]$rate = 384000
     [bool]$manualstart = $false
 }
 
@@ -801,7 +804,9 @@ $udpport.add_LostFocus({
 
 $tickrate.add_ValueChanged({
     $userinputarray[$serverdropdown.SelectedIndex].tickrate = $tickrate.value
+    $userinputarray[$serverdropdown.SelectedIndex].rate = $tickrate.value * 6400
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
+    [string]$serverratelabel.Content = "Server Rate "+[string]$($tickrate.value * 6400)
     Set-Build -Needed $True
 })
 
@@ -1126,6 +1131,7 @@ $buildservers.add_Click({
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "host_").Name
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "everything_unlocked").Name
                 $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "net_").Name
+                $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "rate").Name
                 $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
                 #$nscvararray = $nscvararray.remove("autoexec_ns_server")
 

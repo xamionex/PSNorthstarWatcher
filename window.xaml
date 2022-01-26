@@ -5,51 +5,18 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GUITest"
         xmlns:Collections="clr-namespace:System.Collections;assembly=System.Runtime.Extensions"
-        
         Title="PSNorthstarWatcher v1.0 - Server Setup" Height="800 " Width="1024" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ComboBox Name="serverdropdown" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="818,44,0,0" VerticalAlignment="Top" Width="166" IsDropDownOpen="True" SelectedIndex="0" Height="22"/>
-        <Button Name="start" Content="Start Servers and Watcher" HorizontalAlignment="Left" Margin="818,701,0,0" VerticalAlignment="Top" BorderThickness="1,1,1,1" FontWeight="Bold" Height="31" Width="157"/>
-        <Label Content="Server Start Delay (seconds)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,260,0,0" Height="26" Width="160"/>
-        <Slider Name="serverdelay" HorizontalAlignment="Left" Margin="692,285,0,0" VerticalAlignment="Top" SmallChange="1" IsSnapToTickEnabled="True" Maximum="60" Minimum="0" Value="5" TickPlacement="TopLeft" AutoToolTipPrecision="1" AutoToolTipPlacement="TopLeft" Height="24" Width="289"/>
-        <Label Content="Server count:" HorizontalAlignment="Left" Margin="895,18,0,0" VerticalAlignment="Top" Height="26" Width="79"/>
-        <Label Name="servercount" Content="0" HorizontalAlignment="Left" Margin="967,18,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
-        <Label Content="Titanfall2 Path" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,120,0,0" Height="26" Width="88"/>
-        <TextBox Name="titanfall2path" HorizontalAlignment="Left" Margin="695,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
-        <Label Content="Northstar Path" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,170,0,0" Height="26" Width="88"/>
-        <TextBox Name="northstarpath" HorizontalAlignment="Left" Margin="695,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
-        <Label Content="Server Directory" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,210,0,0" Height="26" Width="107"/>
-        <TextBox Name="serverdirectory" HorizontalAlignment="Left" Margin="695,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
-        <GroupBox Header="Playlist Var Overrides" Margin="371,5,351,269">
-            <Grid>
-                <Label Content="Air Acceleration" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
-                <Label Content="Round Score Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,25,0,0" Grid.ColumnSpan="3"/>
-                <Label Content="Score Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,50,0,0" Grid.ColumnSpan="3"/>
-                <Label Content="Time Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,75,0,0" Grid.ColumnSpan="2"/>
-                <CheckBox Name="epilogue" Content="Disable Epilogue / Evac" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,236,0,0"/>
-                <CheckBox Name="boosts" Content="Boosts" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,217,0,0" />
-                <Label Content="Max Players" HorizontalAlignment="Left" Margin="0,100,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
-                <CheckBox Name="floorislava" Content="Floor is Lava" HorizontalAlignment="Left" Margin="8,308,0,0" VerticalAlignment="Top"/>
-                <TextBox Name="airacceleration" HorizontalAlignment="Left" Margin="136,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <TextBox Name="roundscorelimit" HorizontalAlignment="Left" Margin="136,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <TextBox Name="scorelimit" HorizontalAlignment="Left" Margin="136,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <TextBox Name="timelimit" HorizontalAlignment="Left" Margin="136,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <TextBox Name="maxplayers" HorizontalAlignment="Left" Margin="136,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <Label Content="Pilot Health Multi." HorizontalAlignment="Left" Margin="0,125,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
-                <TextBox Name="playerhealthmulti" HorizontalAlignment="Left" Margin="136,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-                <CheckBox Name="aegisupgrade" Content="Aegis Upgrades" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="7,197,0,0"/>
-                <CheckBox Name="classicmp" Content="Disable Classic MP" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,177,0,0"/>
-                <CheckBox Name="playerbleed" Content="Player Bleed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,157,0,0"/>
-            </Grid>
-        </GroupBox>
         <GroupBox Header="General Server Settings" Margin="17,5,658,255">
             <Grid>
-                
                 <TextBox Name="Servername" HorizontalAlignment="Left" Margin="100,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Height="60"/>
                 <Label Content="Server Name:" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                <TextBox Name="Description" HorizontalAlignment="Left" Margin="100,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Height="79"/>
+                <Label Content="Description:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,65,0,0"/>
+                <Label Content="Game Mode:" HorizontalAlignment="Left" Margin="0,151,0,0" VerticalAlignment="Top"/>
                 <ComboBox Name="Gamemode" HorizontalAlignment="Left" Margin="100,153,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0">
                     <ComboBoxItem Content="tdm"/>
                     <ComboBoxItem Content="cp"/>
@@ -70,31 +37,61 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     <ComboBoxItem Content="ctf_comp"/>
                     <ComboBoxItem Content="attdm"/>
                 </ComboBox>
-                <Label Content="Game Mode:" HorizontalAlignment="Left" Margin="0,151,0,0" VerticalAlignment="Top"/>
+                <Label Content="TCP Port" HorizontalAlignment="Left" Margin="0,176,0,0" VerticalAlignment="Top"/>
                 <TextBox Name="tcpport" HorizontalAlignment="Left" Margin="100,180,0,0" Text="8081" TextWrapping="Wrap" VerticalAlignment="Top" Width="49"/>
+                <Label Content="UDP Port" HorizontalAlignment="Left" Margin="0,201,0,0" VerticalAlignment="Top"/>
                 <TextBox Name="udpport" HorizontalAlignment="Left" Margin="100,205,0,0" Text="37015" TextWrapping="Wrap" VerticalAlignment="Top" Width="49"/>
                 <CheckBox Name="reporttomasterserver" Content="Report to master server" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,243,0,0"/>
                 <CheckBox Name="softwared3d11" Content="softwared3d11" HorizontalAlignment="Left" Margin="10,263,0,0" VerticalAlignment="Top" Width="114"/>
                 <CheckBox Name="allowinsecure" Content="Allow insecure" HorizontalAlignment="Left" Margin="10,283,0,0" VerticalAlignment="Top" Width="149"/>
-                <CheckBox Name="returntolobby" Content="Return to lobby after match" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,323,0,0"/>
                 <CheckBox Name="playercanchangemap" Content="Players can change map in lobby" VerticalAlignment="Top" HorizontalAlignment="Left" Width="194" Margin="10,303,0,0"/>
+                <CheckBox Name="returntolobby" Content="Return to lobby after match" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,323,0,0"/>
                 <CheckBox Name="playercanchangemode" Content="Players can change mode in lobby" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,343,0,0"/>
-                
-                <Label Content="TCP Port" HorizontalAlignment="Left" Margin="0,176,0,0" VerticalAlignment="Top"/>
-                <Label Content="UDP Port" HorizontalAlignment="Left" Margin="0,201,0,0" VerticalAlignment="Top"/>
                 <Label HorizontalAlignment="Left" Margin="10,186,0,0" VerticalAlignment="Top" Grid.Column="1"/>
                 <CheckBox Name="manualstart" Content="Start this server manually" HorizontalAlignment="Left" Margin="10,417,0,0" VerticalAlignment="Top"/>
-                <TextBox Name="Description" HorizontalAlignment="Left" Margin="100,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Height="79"/>
-                <Label Content="Description:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,65,0,0"/>
             </Grid>
         </GroupBox>
+        <GroupBox Header="Playlist Var Overrides" Margin="371,5,351,269">
+            <Grid>
+                <Label Content="Air Acceleration" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+                <TextBox Name="airacceleration" HorizontalAlignment="Left" Margin="136,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Round Score Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,25,0,0" Grid.ColumnSpan="3"/>
+                <TextBox Name="roundscorelimit" HorizontalAlignment="Left" Margin="136,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Score Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,50,0,0" Grid.ColumnSpan="3"/>
+                <TextBox Name="scorelimit" HorizontalAlignment="Left" Margin="136,54,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Time Limit" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,75,0,0" Grid.ColumnSpan="2"/>
+                <TextBox Name="timelimit" HorizontalAlignment="Left" Margin="136,79,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Max Players" HorizontalAlignment="Left" Margin="0,100,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+                <TextBox Name="maxplayers" HorizontalAlignment="Left" Margin="136,104,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <Label Content="Pilot Health Multi." HorizontalAlignment="Left" Margin="0,125,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+                <TextBox Name="playerhealthmulti" HorizontalAlignment="Left" Margin="136,129,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+                <CheckBox Name="playerbleed" Content="Player Bleed" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,157,0,0"/>
+                <CheckBox Name="classicmp" Content="Disable Classic MP" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,177,0,0"/>
+                <CheckBox Name="aegisupgrade" Content="Aegis Upgrades" HorizontalAlignment="Left" VerticalAlignment="Top"  Margin="7,197,0,0"/>
+                <CheckBox Name="boosts" Content="Boosts" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,217,0,0" />
+                <CheckBox Name="epilogue" Content="Disable Epilogue / Evac" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,236,0,0"/>
+                <CheckBox Name="floorislava" Content="Floor is Lava" HorizontalAlignment="Left" Margin="8,308,0,0" VerticalAlignment="Top"/>
+            </Grid>
+        </GroupBox>
+        <Label Content="Server count:" HorizontalAlignment="Left" Margin="895,18,0,0" VerticalAlignment="Top" Height="26" Width="79"/>
+        <Label Name="servercount" Content="0" HorizontalAlignment="Left" Margin="967,18,0,0" VerticalAlignment="Top" Height="26" Width="16"/>
+        <ComboBox Name="serverdropdown" IsSynchronizedWithCurrentItem="True" HorizontalAlignment="Left" Margin="818,44,0,0" VerticalAlignment="Top" Width="166" IsDropDownOpen="True" SelectedIndex="0" Height="22"/>
         <Button Name="addserver" Content="Add Server" HorizontalAlignment="Left" Margin="916,72,0,0" VerticalAlignment="Top" Height="20" Width="68"/>
         <Button Name="removeserver" Content="Remove Server" HorizontalAlignment="Left" Margin="895,99,0,0" VerticalAlignment="Top" Height="20" Width="89"/>
-        <Slider Name="tickrate" HorizontalAlignment="Left" Margin="17,566,0,0" VerticalAlignment="Top" Width="753" SmallChange="1" IsSnapToTickEnabled="True" Maximum="128" Minimum="15" Value="60" TickPlacement="TopLeft" AutoToolTipPrecision="5" AutoToolTipPlacement="TopLeft" Height="24"/>
+        <Label Content="Titanfall2 Path" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,120,0,0" Height="26" Width="88"/>
+        <TextBox Name="titanfall2path" HorizontalAlignment="Left" Margin="695,140,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
+        <Label Content="Northstar Path" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,170,0,0" Height="26" Width="88"/>
+        <TextBox Name="northstarpath" HorizontalAlignment="Left" Margin="695,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
+        <Label Content="Server Directory" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,210,0,0" Height="26" Width="107"/>
+        <TextBox Name="serverdirectory" HorizontalAlignment="Left" Margin="695,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
+        <Label Content="Server Start Delay (seconds)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,260,0,0" Height="26" Width="160"/>
+        <Slider Name="serverdelay" HorizontalAlignment="Left" Margin="692,285,0,0" VerticalAlignment="Top" SmallChange="1" IsSnapToTickEnabled="True" Maximum="60" Minimum="0" Value="5" TickPlacement="TopLeft" AutoToolTipPrecision="1" AutoToolTipPlacement="TopLeft" Height="24" Width="289"/>
         <Label Name="servertickratelabel" Content="Server Tickrate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,534,0,0" Height="26" Width="116"/>
+        <Slider Name="tickrate" HorizontalAlignment="Left" Margin="17,566,0,0" VerticalAlignment="Top" Width="753" SmallChange="1" IsSnapToTickEnabled="True" Maximum="128" Minimum="15" Value="60" TickPlacement="TopLeft" AutoToolTipPrecision="5" AutoToolTipPlacement="TopLeft" Height="24"/>
         <Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Left" Margin="900,620,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
         <Button Name="buildservers" Content="Build servers" HorizontalAlignment="Left" Margin="900,645,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
         <Label Name="pendingchanges" Content="Changes pending please rebuild" HorizontalAlignment="Right" Margin="0,670,50,0" VerticalAlignment="Top" Foreground="Red" Height="26"/>
+        <Button Name="start" Content="Start Servers and Watcher" HorizontalAlignment="Left" Margin="818,701,0,0" VerticalAlignment="Top" BorderThickness="1,1,1,1" FontWeight="Bold" Height="31" Width="157"/>
         <CheckBox Name="climode" Content="CLI Mode" HorizontalAlignment="Left" Margin="903,737,0,0" VerticalAlignment="Top"/>
     </Grid>
 </Window>

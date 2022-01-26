@@ -1182,7 +1182,7 @@ if(Test-Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"){
         $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = $userinput.servername
         [string]$servercount.Content = [int]$servercount.content +1
     }
-    Remove-Variable -Name userinputcount
+    #Remove-Variable -Name userinputcount
 }
 
 #add first server automatically if none exists or import user config from xml

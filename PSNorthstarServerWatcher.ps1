@@ -17,7 +17,7 @@ Add-Type -AssemblyName System.Drawing
 if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript"){
     $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
 }
- else { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
+ else { $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0])
      if (!$ScriptPath){ $ScriptPath = "." }
 }
 
@@ -35,13 +35,13 @@ Write-Host "Protocol 1: Link to server. Protocol 2: Uphold the Network Connectio
 function Set-Build{
     param([bool]$Needed)
     if($Needed){
-        $needsrebuild = $true
+        #$needsrebuild = $true
         $pendingchanges.Foreground = "Red"
         $pendingchanges.Content = "Build needed please rebuild"
     }else{
-        $needsrebuild = $false
+        #$needsrebuild = $false
         $pendingchanges.Foreground = "Green"
-        $pendingchanges.Content = "Build is up to date!" 
+        $pendingchanges.Content = "Build is up to date!"
     }
 }
 
@@ -50,7 +50,7 @@ function Test-Adminrights{
     [Security.Principal.WindowsBuiltInRole] "Administrator"))
     {
         Write-Warning "You do not have Administrator rights to run this script!"
-        #Start-Process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\PSNorthstarSetup.ps1`"" -Verb runas 
+        #Start-Process powershell.exe -WorkingDirectory $PSScriptRoot -ArgumentList "-File `"$($PSScriptRoot)\PSNorthstarSetup.ps1`"" -Verb runas
         #throw "notadmin"
         return $false
     }else{
@@ -119,7 +119,7 @@ function UItoNS{
 		$NorthstarServer.SetplaylistVarOverrides.riff_floorislava = $userinputarray[$ServerID].floorislava
 		#missing some more overridevars
 
-		#Starting Arguments to string 
+		#Starting Arguments to string
 		$NorthstarServer.StartingArgs = "+setplaylist private_match -dedicated -multiple"
 		if($userinputarray[$ServerID].softwared3d11){
 			$NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + " -softwared3d11"
@@ -167,7 +167,7 @@ function CvarsToForm{
     if($cvararray){
         $userinputcvars = (($cvararray | Get-Member) | where-object -Property MemberType -eq Property).name #| foreach-object{$($_.Definition).split(" ")[1]}
     }
-    
+
     ForEach($cvar in $userinputcvars){
         if(((Get-Variable "$cvar").Value).gettype().Name -eq "Checkbox"){
             (Get-Variable "$cvar").Value.isChecked = $cvararray[$dropdown.SelectedIndex]."$cvar"
@@ -178,7 +178,7 @@ function CvarsToForm{
                if(((Get-Variable "$cvar").Value).gettype().Name -eq "Label"){
                     ((Get-Variable "$cvar").value).content = [string]$cvararray[$dropdown.SelectedIndex]."$cvar"
                }else{
-                    (Get-Variable "$cvar").value.text = [string]$cvararray[$dropdown.SelectedIndex]."$cvar" 
+                    (Get-Variable "$cvar").value.text = [string]$cvararray[$dropdown.SelectedIndex]."$cvar"
                }
             }
         }
@@ -195,8 +195,8 @@ function TickOrServerselect{
             if(!$NorthstarServer.WasStarted){
                 $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Stopped"
             }
-            if($NorthstarServer.WasStarted){ #only do checks(update stuff if started 
-                $windowtitle = (Get-Process -ID $NorthstarServer.ProcessID).MainWindowTitle                
+            if($NorthstarServer.WasStarted){ #only do checks(update stuff if started
+                $windowtitle = (Get-Process -ID $NorthstarServer.ProcessID).MainWindowTitle
                 $MonitorValues[$refreshrateforeachcount].MONplayers = $windowtitle.split(" ")[6]
                 $players = $MonitorValues[$refreshrateforeachcount].MONplayers.Split("/")[0]
                 Write-Host "player count: $players"
@@ -246,7 +246,7 @@ function TickOrServerselect{
                     $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.ns_server_name
                     $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Running"
                     $MonitorValues[$refreshrateforeachcount].MONpid = $NorthstarServer.ProcessID
-                    
+
 
                     #check uptime
                     $MonitorValues[$refreshrateforeachcount].MONuptime = [string]([Math]::Round(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).totalhours,0)) +":"+[string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).minutes) +":"+ [string](((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).seconds)
@@ -271,9 +271,9 @@ function TickOrServerselect{
                     #check VRAM +
                     $MonitorValues[$refreshrateforeachcount].MONvmem = [string]([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) + "GB"
 
-                    
-                    
-                    
+
+
+
                     #$maxplayers = $windowtitle[6].split("/")[1]
                     $map = $windowtitle.split(" ")[5]
                     switch($map){
@@ -323,7 +323,7 @@ function TickOrServerselect{
             $NorthstarServer.Start()
         }
     } #end foreaach northstarserver
-    #set UI values 
+    #set UI values
 
     $MONserverstatuslabel.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONserverstatuslabel
     $MONservernamelabel.Content = $MonitorValues[$MONserverdrop.SelectedIndex].MONservernamelabel
@@ -354,7 +354,7 @@ function TickOrServerselect{
     }
     $MONtotvmem.Content = [string]([Math]::round($allpagefilesize/1024,0)) + "/" + [string]([Math]::Round($allocatedpagefilesize/1024,0)) + "GB"
     $MONtotvmembar.Value = 100/([Math]::Round($allocatedpagefilesize/1024,0))*([Math]::round($allpagefilesize/1024,0))
-    
+
 
 
     #get json and render index.html server browser
@@ -401,11 +401,11 @@ class NorthstarServer {
     [string]$Directory = "1"
     [string]$AbsolutePath = ""
     [string]$BinaryFileName = "NorthstarLauncher.exe"
-    [string]$ns_masterserver_hostname = 'https://northstar.tf' 
+    [string]$ns_masterserver_hostname = 'https://northstar.tf'
     [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple -softwared3d11"
-    [ValidateSet(0,1)][int]$ns_report_server_to_masterserver = 1 
-    [ValidateSet(0,1)][int]$ns_auth_allow_insecure = 0 
-    
+    [ValidateSet(0,1)][int]$ns_report_server_to_masterserver = 1
+    [ValidateSet(0,1)][int]$ns_auth_allow_insecure = 0
+
     [string]$ns_server_password = '' #cfg
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() #
@@ -419,8 +419,8 @@ class NorthstarServer {
         "tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm"
     )][string]$ns_private_match_last_mode = "tdm"
 
-    [ValidateSet(0,1)][int]$ns_should_return_to_lobby = 0 
-    [ValidateSet(0,1,2)][int]$ns_private_match_only_host_can_change_settings = 2 
+    [ValidateSet(0,1)][int]$ns_should_return_to_lobby = 0
+    [ValidateSet(0,1,2)][int]$ns_private_match_only_host_can_change_settings = 2
 
     [int]$net_chan_limit_mode = 2
     [int]$net_chan_limit_msec_per_sec = 100
@@ -505,13 +505,13 @@ class SetplaylistVarOverrides {
     [int]$respawn_delay
 
     [int]$boosts_enabled
-    [int]$earn_meter_pilot_overdrive 
+    [int]$earn_meter_pilot_overdrive
     [double]$earn_meter_pilot_multiplier
 
     [double]$earn_meter_titan_multiplier
-    [int]$aegis_upgrades  
+    [int]$aegis_upgrades
     [int]$infinite_doomed_state
-    [int]$titan_shield_regen  
+    [int]$titan_shield_regen
 
     [int]$scorelimit
     [int]$roundscorelimit
@@ -605,7 +605,7 @@ try{
 }
 
 #Create the XAML reader using a new XML node reader
-$global:reader = New-Object System.Xml.XmlNodeReader $xmlWPF 
+$global:reader = New-Object System.Xml.XmlNodeReader $xmlWPF
 $global:xamGUI = [Windows.Markup.XamlReader]::Load( $reader )
 #$Global:xamGUI = [Windows.Markup.XamlReader]::Load((new-object System.Xml.XmlNodeReader $xmlWPF))
 
@@ -613,14 +613,14 @@ $global:xamGUI = [Windows.Markup.XamlReader]::Load( $reader )
 
 $xmlWPF.SelectNodes("//*[@Name]") | ForEach-Object{
 	Set-Variable -Name ($_.Name) -Value $xamGUI.FindName($_.Name) -Scope Global
-} 
+}
 
 [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
-$global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2 
+$global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
 $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
 $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 	Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
-} 
+}
 #endregion XAML
 
 #region window logic
@@ -807,9 +807,9 @@ $tickrate.add_ValueChanged({
 
 $saveuserinput.add_Click({
     if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory 
+        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
     }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml" 
+    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
 })
 
 $start.add_Click({
@@ -835,9 +835,9 @@ $start.add_Click({
 
     #save data before starting
     if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory 
+        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
     }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml" 
+    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
 
     $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 	   Remove-Variable -Name ($_.Name) -Scope Global
@@ -845,9 +845,9 @@ $start.add_Click({
     Remove-Variable "xmlWPF2" -Scope Global
     Remove-Variable "reader2" -Scope Global
     Remove-Variable "xamGUI2" -Scope Global
-    
+
     [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
-    $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2 
+    $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
     $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
     $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 	    Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
@@ -870,7 +870,7 @@ $start.add_Click({
         $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
     }
 
-    
+
     #put user input variables from current server to UI
     CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
 
@@ -880,7 +880,7 @@ $start.add_Click({
         $MonitorValues.add([MonitorValues]::new())
     }
 
-    
+
 
     $refreshrate = New-Object System.Windows.Forms.Timer
     $refreshrate.Interval = 10000
@@ -888,7 +888,7 @@ $start.add_Click({
 
     #on each tick update values on UI
     $refreshrate.add_Tick({
-        TickOrServerselect        
+        TickOrServerselect
     })
 
     $MONserverdrop.add_DropDownClosed({
@@ -950,7 +950,7 @@ $start.add_Click({
     $MONvmemlimitkill.add_LostFocus({
         $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
     })
-    
+
     $server.BasePath = $serverdirectory.text.TrimEnd("\")
 
     #remove before filling otherwise we get duplicates
@@ -960,11 +960,11 @@ $start.add_Click({
 
     #put all info from UI into userinputarray=>[NorthstarServer] Objects
     UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
-    
+
     #show monitor window / start servers
     $ServerCount = 0
     ForEach($NorthstarServer in $server.NorthstarServers){
-        if(++$ServerCount % 1 -eq 0) 
+        if(++$ServerCount % 1 -eq 0)
         {
             Start-Sleep -Seconds 5
         }
@@ -985,7 +985,7 @@ $start.add_Click({
     ForEach($NorthstarServer in $server.NorthstarServers){
         $NorthstarServer.Stop()
     }
-    
+
 
     #after window was closed stop refreshrate timer
     $refreshrate.stop()
@@ -1012,9 +1012,9 @@ $buildservers.add_Click({
 
         #save data before building
         if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory 
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
-        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml" 
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
 
         #$global:server = [Server]::new() # global var => easier to debug
         if(Test-Path $server.BasePath){
@@ -1087,7 +1087,7 @@ $buildservers.add_Click({
 
             #cycle through  original TF2 folder and file (non recursive!) and create symbolic links in NS server folder
             ForEach($file in $tffiles){
-                if(Test-Path "$($NorthstarServer.AbsolutePath)\$($file.name)"){ 
+                if(Test-Path "$($NorthstarServer.AbsolutePath)\$($file.name)"){
                     $target = get-item "$($NorthstarServer.AbsolutePath)\$($file.name)" #put target file/folder in an item object
                     Write-Host "Cannot create symbolic link at $target because it already exists."
                     if($target.LinkType -eq "SymbolicLink"){
@@ -1157,7 +1157,7 @@ $buildservers.add_Click({
     Write-Host "Build successful!"
     [System.Windows.Forms.MessageBox]::Show("Server build was successful!","Build Complete",0)
     Set-Build -Needed $false
-    
+
     }catch{
         Write-Host "Error bulding servers!"
         Write-Host ($Error | Out-Host)
@@ -1169,7 +1169,7 @@ $buildservers.add_Click({
 
 #endregion window logic
 
-[System.Windows.Forms.MessageBox]::Show("Thanks for using PSNorthstar Watcher! This is a beta and still being developed. If you find issues, have questions or want to give feedback please create an issue on GitHub. Thank you!.","Message from faky",0)
+#[System.Windows.Forms.MessageBox]::Show("Thanks for using PSNorthstar Watcher! This is a beta and still being developed. If you find issues, have questions or want to give feedback please create an issue on GitHub. Thank you!.","Message from faky",0)
 
 #get user data from config xml
 [System.Collections.ArrayList]$userinputarray = @()

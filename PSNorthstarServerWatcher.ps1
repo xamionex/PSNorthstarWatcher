@@ -973,7 +973,7 @@ $start.add_Click({
     $xamGUI.Close()
 
     $xamGUI2.add_Closing({
-        param($sender,$e)
+        param($e)
         $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
         if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
         {

@@ -86,7 +86,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         <TextBox Name="serverdirectory" HorizontalAlignment="Left" Margin="695,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
         <Label Content="Server Start Delay (seconds)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,260,0,0" Height="26" Width="160"/>
         <Slider Name="serverdelay" HorizontalAlignment="Left" Margin="692,285,0,0" VerticalAlignment="Top" SmallChange="1" IsSnapToTickEnabled="True" Maximum="60" Minimum="0" Value="5" TickPlacement="TopLeft" AutoToolTipPrecision="1" AutoToolTipPlacement="TopLeft" Height="24" Width="289"/>
-        <Label Name="serverratelabel" Content="Server Rate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,514,0,0" Height="26" Width="116"/>
+        <Label Name="rate" Content="Server Rate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,514,0,0" Height="26" Width="116"/>
         <Label Name="servertickratelabel" Content="Server Tickrate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,534,0,0" Height="26" Width="116"/>
         <Slider Name="tickrate" HorizontalAlignment="Left" Margin="17,566,0,0" VerticalAlignment="Top" Width="753" SmallChange="1" IsSnapToTickEnabled="True" Maximum="128" Minimum="15" Value="60" TickPlacement="TopLeft" AutoToolTipPrecision="5" AutoToolTipPlacement="TopLeft" Height="24"/>
         <Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Left" Margin="900,620,0,0" VerticalAlignment="Top" Height="20" Width="75"/>

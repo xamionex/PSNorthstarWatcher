@@ -639,7 +639,7 @@ $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
 $northstarpath.add_LostFocus({
     if($northstarpath.text -ne "Northstar"){
         [System.Windows.Forms.MessageBox]::Show("Northstar source path changed. This is not recommended!","Northstar Source Path",0)
-        Set-Build -Needed $True
+
     }
 })
 
@@ -650,7 +650,6 @@ $addserver.add_Click({
     $serverdropdown.Items.add([System.Windows.Controls.ListBoxItem]::new())
     $serverdropdown.Items[$serverdropdown.Items.Count-1].Content = "new Server"
     [string]$servercount.Content = [int]$servercount.content +1
-    Set-Build -Needed $True
 })
 
 $removeserver.add_Click({
@@ -658,7 +657,6 @@ $removeserver.add_Click({
         $userinputarray.RemoveAt(($serverdropdown.SelectedIndex))
         $serverdropdown.Items.RemoveAt(($serverdropdown.SelectedIndex))
         [string]$servercount.Content = [int]$servercount.content -1
-        Set-Build -Needed $True
     }
 })
 
@@ -667,24 +665,20 @@ $removeserver.add_Click({
 $servername.add_LostFocus({
     $serverdropdown.Items[$serverdropdown.SelectedIndex].Content = $servername.text
     #$serverdropdown.UpdateLayout()
-    Set-Build -Needed $True
 })
 
 #update config after servername change
 $servername.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].servername = $servername.Text
-    Set-Build -Needed $True
 })
 
 $Description.Add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].description = $Description.Text
-    Set-Build -Needed $True
 })
 
 
 $Gamemode.add_DropDownClosed({
     $userinputarray[$serverdropdown.SelectedIndex].gamemode = $Gamemode.Text
-    Set-Build -Needed $True
 })
 
 #server selection was changed using combobox/dropdown. update all values
@@ -698,62 +692,50 @@ $serverdropdown.add_DropDownClosed({
 
 $epilogue.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].epilogue = $epilogue.IsChecked #disableepilogue
-    Set-Build -Needed $True
 })
 
 $boosts.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].boosts = $boosts.IsChecked
-    Set-Build -Needed $True
 })
 
 <#$overridemaxplayers.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].overridemaxplayers = $overridemaxplayers.IsChecked
-    Set-Build -Needed $True
 })#>
 
 $floorislava.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].floorislava = $floorislava.IsChecked
-    Set-Build -Needed $True
 })
 
 $aegisupgrade.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].aegisupgrade = $aegisupgrade.IsChecked
-    Set-Build -Needed $True
 })
 
 $classicmp.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].classicmp = $classicmp.IsChecked #disableclassicmp
-    Set-Build -Needed $True
 })
 
 $playerbleed.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playerbleed = $playerbleed.IsChecked
-    Set-Build -Needed $True
 })
 
 $reporttomasterserver.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].reporttomasterserver = $reporttomasterserver.IsChecked
-    Set-Build -Needed $True
 })
 
 $softwared3d11.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].softwared3d11 = $softwared3d11.IsChecked
-    Set-Build -Needed $True
 })
 
 $allowinsecure.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].allowinsecure = $allowinsecure.IsChecked
-    Set-Build -Needed $True
 })
 
 $returntolobby.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].returntolobby = $returntolobby.IsChecked
-    Set-Build -Needed $True
 })
 
 $playercanchangemap.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $playercanchangemap.IsChecked
-    Set-Build -Needed $True
 })
 
 $playercanchangemap.add_Unchecked({
@@ -762,70 +744,58 @@ $playercanchangemap.add_Unchecked({
         $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $false
         $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $false
     }
-    Set-Build -Needed $True
 })
 
 $playercanchangemode.add_Checked({
     $playercanchangemap.IsChecked = $True
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemap = $True
-    Set-Build -Needed $True
 })
 
 $playercanchangemode.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $playercanchangemode.IsChecked
-    Set-Build -Needed $True
 })
 
 $manualstart.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].manualstart = $manualstart.IsChecked
-    Set-Build -Needed $True
 })
 
 $airacceleration.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].airacceleration = $airacceleration.Text
-    Set-Build -Needed $True
 })
 
 $roundscorelimit.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].roundscorelimit = $roundscorelimit.Text
-    Set-Build -Needed $True
 })
 
 $scorelimit.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].scorelimit = $scorelimit.Text
-    Set-Build -Needed $True
 })
 
 $timelimit.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].timelimit = $timelimit.Text
-    Set-Build -Needed $True
 })
 
 $maxplayers.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].maxplayers = $maxplayers.Text
-    Set-Build -Needed $True
 })
 
 $playerhealthmulti.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].playerhealthmulti = $playerhealthmulti.Text
-    Set-Build -Needed $True
 })
 
 $tcpport.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].tcpport = $tcpport.Text
-    Set-Build -Needed $True
 })
 
 $udpport.add_LostFocus({
     $userinputarray[$serverdropdown.SelectedIndex].udpport = $udpport.Text
-    Set-Build -Needed $True
 })
 
 $tickrate.add_ValueChanged({
     $userinputarray[$serverdropdown.SelectedIndex].tickrate = $tickrate.value
     $userinputarray[$serverdropdown.SelectedIndex].rate = $tickrate.value * 6400
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
-    [string]$serverratelabel.Content = "Server Rate "+[string]$($tickrate.value * 6400)
+    [string]$rate.Content = "Server Tickrate "+[string]$($tickrate.value * 6400)
 })
 
 $saveuserinput.add_Click({
@@ -833,6 +803,7 @@ $saveuserinput.add_Click({
         New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
     }
     Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+    Set-Build -Needed $True
 })
 
 $start.add_Click({
@@ -1149,7 +1120,6 @@ function Test-Servers {
             $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "host_").Name
             $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "everything_unlocked").Name
             $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "net_").Name
-            $nscvararray = $nscvararray + (($server.NorthstarServers[0] | Get-Member -MemberType Property) | Where-Object -Property Name -match "rate").Name
             $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
             #$nscvararray = $nscvararray.remove("autoexec_ns_server")
 
@@ -1164,6 +1134,7 @@ function Test-Servers {
 
             [array]$nstrcvararray = (($server.NorthstarServers[0].TickRate | Get-Member -MemberType Property) | Where-Object -Property Name -match "base_").Name
             $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].TickRate | Get-Member -MemberType Property) | Where-Object -Property Name -match "sv_").Name
+            $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].TickRate | Get-Member -MemberType Property) | Where-Object -Property Name -match "rate").Name
 
             ForEach($nscvar in $nstrcvararray){
                 if($NorthstarServer.Tickrate."$nscvar".gettype().Name -eq "String"){

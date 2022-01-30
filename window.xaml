@@ -5,12 +5,12 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GUITest"
         xmlns:Collections="clr-namespace:System.Collections;assembly=System.Runtime.Extensions"
-        Title="PSNorthstarWatcher v1.0 - Server Setup" Height="800 " Width="1024" ResizeMode="NoResize">
+        Title="PSNorthstarWatcher v1.0 - Server Setup" Height="650 " Width="1024" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <GroupBox Header="General Server Settings" Margin="17,5,658,255">
+        <GroupBox Header="General Server Settings" Margin="17,5,658,100">
             <Grid>
                 <TextBox Name="Servername" HorizontalAlignment="Left" Margin="100,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="207" Height="60"/>
                 <Label Content="Server Name:" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
@@ -51,7 +51,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                 <CheckBox Name="manualstart" Content="Start this server manually" HorizontalAlignment="Left" Margin="10,417,0,0" VerticalAlignment="Top"/>
             </Grid>
         </GroupBox>
-        <GroupBox Header="Playlist Var Overrides" Margin="371,5,351,269">
+        <GroupBox Header="Playlist Var Overrides" Margin="371,5,351,100">
             <Grid>
                 <Label Content="Air Acceleration" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
                 <TextBox Name="airacceleration" HorizontalAlignment="Left" Margin="136,4,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
@@ -86,8 +86,8 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         <TextBox Name="serverdirectory" HorizontalAlignment="Left" Margin="695,230,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="289"/>
         <Label Content="Server Start Delay (seconds)" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="692,260,0,0" Height="26" Width="160"/>
         <Slider Name="serverdelay" HorizontalAlignment="Left" Margin="692,285,0,0" VerticalAlignment="Top" SmallChange="1" IsSnapToTickEnabled="True" Maximum="60" Minimum="0" Value="5" TickPlacement="TopLeft" AutoToolTipPrecision="1" AutoToolTipPlacement="TopLeft" Height="24" Width="289"/>
-        <Label Name="rate" Content="Server Rate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,514,0,0" Height="26" Width="116"/>
-        <Label Name="servertickratelabel" Content="Server Tickrate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,534,0,0" Height="26" Width="116"/>
+        <Label Name="rate" Content="Server Rate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,514,0,0" Height="26"/>
+        <Label Name="servertickratelabel" Content="Server Tickrate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,534,0,0" Height="26"/>
         <Slider Name="tickrate" HorizontalAlignment="Left" Margin="17,566,0,0" VerticalAlignment="Top" Width="753" SmallChange="1" IsSnapToTickEnabled="True" Maximum="128" Minimum="15" Value="60" TickPlacement="TopLeft" AutoToolTipPrecision="5" AutoToolTipPlacement="TopLeft" Height="24"/>
         <Label Name="pendingchanges" Content="Pending Save" HorizontalAlignment="Right" Margin="0,0,8,90" VerticalAlignment="Bottom" Foreground="Red" Height="26"/>
         <Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Right" Margin="0,0,10,70" VerticalAlignment="Bottom" Height="20" Width="75"/>

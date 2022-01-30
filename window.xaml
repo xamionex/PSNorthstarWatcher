@@ -89,10 +89,9 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         <Label Name="rate" Content="Server Rate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,514,0,0" Height="26" Width="116"/>
         <Label Name="servertickratelabel" Content="Server Tickrate" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="17,534,0,0" Height="26" Width="116"/>
         <Slider Name="tickrate" HorizontalAlignment="Left" Margin="17,566,0,0" VerticalAlignment="Top" Width="753" SmallChange="1" IsSnapToTickEnabled="True" Maximum="128" Minimum="15" Value="60" TickPlacement="TopLeft" AutoToolTipPrecision="5" AutoToolTipPlacement="TopLeft" Height="24"/>
-        <Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Left" Margin="900,620,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
-        <Button Name="buildservers" Content="Build servers" HorizontalAlignment="Left" Margin="900,645,0,0" VerticalAlignment="Top" Height="20" Width="75"/>
-        <Label Name="pendingchanges" Content="Changes pending please rebuild" HorizontalAlignment="Right" Margin="0,670,50,0" VerticalAlignment="Top" Foreground="Red" Height="26"/>
-        <Button Name="start" Content="Start Servers and Watcher" HorizontalAlignment="Left" Margin="818,701,0,0" VerticalAlignment="Top" BorderThickness="1,1,1,1" FontWeight="Bold" Height="31" Width="157"/>
-        <CheckBox Name="climode" Content="CLI Mode" HorizontalAlignment="Left" Margin="903,737,0,0" VerticalAlignment="Top"/>
+        <Label Name="pendingchanges" Content="Pending Save" HorizontalAlignment="Right" Margin="0,0,8,90" VerticalAlignment="Bottom" Foreground="Red" Height="26"/>
+        <Button Name="saveuserinput" Content="Save config" HorizontalAlignment="Right" Margin="0,0,10,70" VerticalAlignment="Bottom" Height="20" Width="75"/>
+        <Button Name="start" Content="Start Servers and Watcher" HorizontalAlignment="Right" Margin="0,0,10,35" VerticalAlignment="Bottom" BorderThickness="1,1,1,1" FontWeight="Bold" Height="31" Width="157"/>
+        <CheckBox Name="climode" Content="CLI Mode" HorizontalAlignment="Right" Margin="0,0,10,10" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

@@ -240,8 +240,8 @@ function TickOrServerselect{
                     $NorthstarServer.Stop()
                 }
 
-                if($NorthstarServer.StopWhenPossible -and $players -lt 2){
-                    Write-Host "Stopping server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for stop because it has less than 2 players now."
+                if($NorthstarServer.RestartWhenPossible -and $players -lt 2){
+                    Write-Host "Restarting server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for restart because it has less than 2 players now."
                     $NorthstarServer.Stop()
                     $NorthstarServer.Start()
                 }

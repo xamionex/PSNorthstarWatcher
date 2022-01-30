@@ -142,19 +142,19 @@ function UItoNS{
 		}
         $DediArgs = ""
 		ForEach ($varname in ($NorthstarServer.NS|Get-Member -MemberType Property).Name){
-			if($NorthstarServer.NS."$varname" -ne 0){
+			#if($NorthstarServer.NS."$varname" -ne 0){
 				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NS."$varname" + " "
-			}
+			#}
 		}
 		ForEach ($varname in ($NorthstarServer.NetWork|Get-Member -MemberType Property).Name){
-			if($NorthstarServer.NetWork."$varname" -ne 0){
+			#if($NorthstarServer.NetWork."$varname" -ne 0){
 				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NetWork."$varname" + " "
-			}
+			#}
 		}
 		ForEach ($varname in ($NorthstarServer.NSStrings|Get-Member -MemberType Property).Name){
-			if($NorthstarServer.NSStrings."$varname" -ne 0){
+			#if($NorthstarServer.NSStrings."$varname" -ne 0){
 				$DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.NSStrings."$varname" + "`" "
-			}
+			#}
 		}
 
         #special ifs because default is classic_mp 1 but is not overriden, to override it its actually 0 !
@@ -509,7 +509,6 @@ class NS{
     [ValidateSet(0,1)][int]$ns_erase_auth_info = 1
     [ValidateSet(0,1)][int]$ns_report_sp_server_to_masterserver = 0
     [ValidateSet(0,1)][int]$everything_unlocked = 1
-    [ValidateSet(0,1)][int]$net_data_block_enabled = 0
 
 }
 

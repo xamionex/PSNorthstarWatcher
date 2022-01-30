@@ -844,7 +844,7 @@ $tickrate.add_ValueChanged({
     $userinputarray[$serverdropdown.SelectedIndex].tickrate = $tickrate.value
     $userinputarray[$serverdropdown.SelectedIndex].rate = $tickrate.value * 6400
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
-    [string]$rate.Content = "Server Tickrate "+[string]$($tickrate.value * 6400)
+    [string]$rate.Content = "Server Rate "+[string]$($tickrate.value * 6400)
     Set-Need
 })
 

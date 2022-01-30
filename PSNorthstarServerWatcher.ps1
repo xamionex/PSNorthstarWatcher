@@ -263,7 +263,7 @@ function TickOrServerselect{
 
                 if($refreshrateforeachcount -eq $MONserverdrop.SelectedIndex){ #only to currently selected server
                     #Write-Host "$($NorthstarServer.ns_server_name)"
-                    $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.ns_server_name
+                    $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.NS.ns_server_name
                     $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Running"
                     $MonitorValues[$refreshrateforeachcount].MONpid = $NorthstarServer.ProcessID
 
@@ -274,12 +274,12 @@ function TickOrServerselect{
                     #check these only after 60s uptime, in case for slow machines!
                     if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 60){
                         #check TCP
-                        try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.ns_player_auth_port -State Listen}
-                            catch{throw "Could not get listen TCP port $($NorthstarServer.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
-                        $MonitorValues[$refreshrateforeachcount].MONtcpport = $NorthstarServer.ns_player_auth_port
+                        try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.NS.ns_player_auth_port -State Listen}
+                            catch{throw "Could not get listen TCP port $($NorthstarServer.NS.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NS.ns_server_name)"}
+                        $MonitorValues[$refreshrateforeachcount].MONtcpport = $NorthstarServer.NS.ns_player_auth_port
                         #check UDP
                         try{Get-NetUDPEndpoint -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.udpport}
-                            catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.ns_server_name)"}
+                            catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NS.ns_server_name)"}
                         $MonitorValues[$refreshrateforeachcount].MONudpport = $NorthstarServer.udpport
                         #check for window with engineerorclose
                         #TBD

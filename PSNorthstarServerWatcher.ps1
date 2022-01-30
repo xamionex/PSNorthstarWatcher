@@ -508,6 +508,9 @@ class NS{
     [ValidateSet(0,1,2)][int]$ns_private_match_only_host_can_change_settings = 2
     [ValidateSet(0,1)][int]$ns_erase_auth_info = 1
     [ValidateSet(0,1)][int]$ns_report_sp_server_to_masterserver = 0
+    [ValidateSet(0,1)][int]$everything_unlocked = 1
+    [ValidateSet(0,1)][int]$net_data_block_enabled = 0
+
 }
 
 class NSStrings{

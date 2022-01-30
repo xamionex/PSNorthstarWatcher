@@ -240,29 +240,39 @@ function TickOrServerselect{
                     $NorthstarServer.Stop()
                 }
 
+                if($NorthstarServer.StopWhenPossible -and $players -lt 2){
+                    Write-Host "Stopping server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for stop because it has less than 2 players now."
+                    $NorthstarServer.Stop()
+                    $NorthstarServer.Start()
+                }
+
                 if($NorthstarServer.StopWhenPossible -and ([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) -gt $MONramlimit.Text){
                     Write-Host "Stopping server because it exceeded Ramlimit and has less than 2 players."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.Start()
                 }
 
                 if(([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) -gt $MONramlimitkill.Text){
-                    Write-Host "Stopping server because it exceeded Ram Kill limit, even when it has players."
+                    Write-Host "Restarting server because it exceeded Ram Kill limit, even when it has players."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.Start()
                 }
 
                 if($NorthstarServer.StopWhenPossible -and ([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) -gt $MONvmemlimit.Text){
-                    Write-Host "Stopping server because it exceeded VMem Limit and has less than 2 players."
+                    Write-Host "Restarting server because it exceeded VMem Limit and has less than 2 players."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.Start()
                 }
 
                 if(([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).PagedMemorySize64/1024/1024/1024),2)) -gt $MONvmemlimitkill.Text){
-                    Write-Host "Stopping server because it exceeded VMem Kill Limit, even when it has players"
+                    Write-Host "Restarting server because it exceeded VMem Kill Limit, even when it has players"
                     $NorthstarServer.Stop()
+                    $NorthstarServer.Start()
                 }
                 if(((get-date)-(Get-Process -ID $NorthstarServer.ProcessID).StartTime).Totalhours -gt $MONrestarthours.Text){
                     if(!($NorthstarServer.StopWhenPossible)){
                         Write-Host $NorthstarServer.NSStrings.ns_server_name "Server reached uptimelimit. Will restart when players have left."
-                        $NorthstarServer.StopWhenPossible = $True
+                        $NorthstarServer.RestartWhenPossible = $True
                     }
                 }
 
@@ -412,6 +422,7 @@ class NorthstarServer {
     [int64]$Memory = 0
     [int]$CrashCount = 0
     [bool]$StopWhenPossible = $false
+    [bool]$RestartWhenPossible = $false
     [bool]$Manualstart = $false
     [bool]$WasStarted = $false
 

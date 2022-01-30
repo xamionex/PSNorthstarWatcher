@@ -92,8 +92,8 @@ function UItoNS{
 		$NorthstarServer.AbsolutePath = $serverdirectory.Text.TrimEnd("\") + "\" + $NorthstarServer.Directory
         $NorthstarServer.Manualstart = $userinputarray[$ServerID].manualstart
 
-		$NorthstarServer.NS.ns_server_name = $userinputarray[$ServerID].servername
-        $NorthstarServer.NS.ns_server_desc = $userinputarray[$ServerID].description
+		$NorthstarServer.NSStrings.ns_server_name = $userinputarray[$ServerID].servername
+        $NorthstarServer.NSStrings.ns_server_desc = $userinputarray[$ServerID].description
 		$NorthstarServer.UDPPort = $userinputarray[$ServerID].udpport
 		$NorthstarServer.NS.ns_player_auth_port = $userinputarray[$ServerID].tcpport
 		$NorthstarServer.NetWork.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
@@ -149,6 +149,11 @@ function UItoNS{
 		ForEach ($varname in ($NorthstarServer.NetWork|Get-Member -MemberType Property).Name){
 			if($NorthstarServer.NetWork."$varname" -ne 0){
 				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NetWork."$varname" + " "
+			}
+		}
+		ForEach ($varname in ($NorthstarServer.NSStrings|Get-Member -MemberType Property).Name){
+			if($NorthstarServer.NSStrings."$varname" -ne 0){
+				$DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.NSStrings."$varname" + "`" "
 			}
 		}
 
@@ -223,15 +228,15 @@ function TickOrServerselect{
 
                 #Check if process is still running or responding
                 if($NorthstarServer.Process.HasExited){
-                    Throw $NorthstarServer.ns_server_name + " is not running anymore. Process has exited."
+                    Throw $NorthstarServer.NSStrings.ns_server_name + " is not running anymore. Process has exited."
                 }
                 if(!($NorthstarServer.Process.Responding)){
-                    Throw $NorthstarServer.ns_server_name + " is not responding."
+                    Throw $NorthstarServer.NSStrings.ns_server_name + " is not responding."
                 }
 
                 #check if server should be stopped
                 if($NorthstarServer.StopWhenPossible -and $players -lt 2){
-                    Write-Host "Stopping server" $NorthstarServer.ns_server_name ". Was marked for stop because it has less than 2 players now."
+                    Write-Host "Stopping server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for stop because it has less than 2 players now."
                     $NorthstarServer.Stop()
                 }
 
@@ -256,14 +261,14 @@ function TickOrServerselect{
                 }
                 if(((get-date)-(Get-Process -ID $NorthstarServer.ProcessID).StartTime).Totalhours -gt $MONrestarthours.Text){
                     if(!($NorthstarServer.StopWhenPossible)){
-                        Write-Host $NorthstarServer.ns_server_name "Server reached uptimelimit. Will restart when players have left."
+                        Write-Host $NorthstarServer.NSStrings.ns_server_name "Server reached uptimelimit. Will restart when players have left."
                         $NorthstarServer.StopWhenPossible = $True
                     }
                 }
 
                 if($refreshrateforeachcount -eq $MONserverdrop.SelectedIndex){ #only to currently selected server
                     #Write-Host "$($NorthstarServer.ns_server_name)"
-                    $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.NS.ns_server_name
+                    $MonitorValues[$refreshrateforeachcount].MONservernamelabel = $NorthstarServer.NSStrings.ns_server_name
                     $MonitorValues[$refreshrateforeachcount].MONserverstatuslabel = "Running"
                     $MonitorValues[$refreshrateforeachcount].MONpid = $NorthstarServer.ProcessID
 
@@ -275,11 +280,11 @@ function TickOrServerselect{
                     if(((get-date) - ((Get-Process -ID $NorthstarServer.ProcessID).StartTime)).TotalSeconds -gt 60){
                         #check TCP
                         try{Get-NetTCPConnection -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.NS.ns_player_auth_port -State Listen}
-                            catch{throw "Could not get listen TCP port $($NorthstarServer.NS.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NS.ns_server_name)"}
+                            catch{throw "Could not get listen TCP port $($NorthstarServer.NS.ns_player_auth_port) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NSStrings.ns_server_name)"}
                         $MonitorValues[$refreshrateforeachcount].MONtcpport = $NorthstarServer.NS.ns_player_auth_port
                         #check UDP
                         try{Get-NetUDPEndpoint -OwningProcess $NorthstarServer.ProcessID -LocalPort $NorthstarServer.udpport}
-                            catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NS.ns_server_name)"}
+                            catch{throw "Could not get listen UDP port $($NorthstarServer.udpport) for PID $($NorthstarServer.ProcessID) of server $($NorthstarServer.NSStrings.ns_server_name)"}
                         $MonitorValues[$refreshrateforeachcount].MONudpport = $NorthstarServer.udpport
                         #check for window with engineerorclose
                         #TBD
@@ -382,7 +387,7 @@ function TickOrServerselect{
     $serverlist = Invoke-RestMethod "http://northstar.tf/client/servers" -ErrorAction SilentlyContinue
     if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
     Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;}</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
-    ForEach($filter in $server.NorthstarServers.ns_server_name){
+    ForEach($filter in $server.NorthstarServers.NSStrings.ns_server_name){
         $filteredserverlist = $serverlist | Where-Object -property name -match $filter
         ForEach($serverentry in $filteredserverlist){
             Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<tr><td>$($serverentry.name)</td><td>$($serverentry.playlist)</td><td>$($serverentry.map)</td><td>$($serverentry.playerCount)</td><td>$($serverentry.maxPlayers)</td><td>$($serverentry.description)</td></tr>"
@@ -422,8 +427,9 @@ class NorthstarServer {
 
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() # Ella Setto Playlisto Varro Overrido!
-    [NS]$NS = [NS]::new() # El NS class
     [NetWork]$NetWork = [NetWork]::new() # La Ticko Ratero Classo
+    [NS]$NS = [NS]::new() # El NS class
+    [NSStrings]$NSStrings = [NSStrings]::new() # El NSStrings class (name,desc,pass)
 
     [ValidateSet(0,1)][int]$everything_unlocked = 1
 
@@ -489,9 +495,6 @@ class NorthstarServer {
 
 class NS{
     #[string]$ns_masterserver_hostname = 'https://northstar.tf'
-    [string]$ns_server_name = "Northstar Server generated by PSNorthstarWatcher."
-    [string]$ns_server_desc = "This is the default description generated by PSNorthstarWatcher."
-    [string]$ns_server_password = '' #cfg
     [int]$ns_player_auth_port = 8081 #default 8081
     [ValidateSet(0,1)][int]$ns_report_server_to_masterserver = 1
     [ValidateSet(0,1)][int]$ns_auth_allow_insecure = 0
@@ -505,6 +508,12 @@ class NS{
     [ValidateSet(0,1,2)][int]$ns_private_match_only_host_can_change_settings = 2
     [ValidateSet(0,1)][int]$ns_erase_auth_info = 1
     [ValidateSet(0,1)][int]$ns_report_sp_server_to_masterserver = 0
+}
+
+class NSStrings{
+    [string]$ns_server_name = "Northstar Server generated by PSNorthstarWatcher."
+    [string]$ns_server_desc = "This is the default description generated by PSNorthstarWatcher."
+    [string]$ns_server_password = '' #cfg
 }
 
 class Server{

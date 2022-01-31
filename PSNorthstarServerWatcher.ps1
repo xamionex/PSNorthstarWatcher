@@ -100,6 +100,7 @@ function UItoNS{
 		$NorthstarServer.NetWork.rate = $userinputarray[$ServerID].rate
 		$NorthstarServer.NS.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
 		$NorthstarServer.NS.ns_report_server_to_masterserver = $userinputarray[$ServerID].reporttomasterserver
+		$NorthstarServer.serverstartdelay = $userinputarray[$ServerID].serverstartdelay
 		#Password missing
 		#lastmap missing
 		$NorthstarServer.NS.ns_private_match_last_mode = $userinputarray[$ServerID].gamemode
@@ -424,6 +425,7 @@ class NorthstarServer {
     [string]$AbsolutePath = ""
     [string]$BinaryFileName = "NorthstarLauncher.exe"
     [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple -softwared3d11"
+    [int]$serverstartdelay = 5
 
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() # Ella Setto Playlisto Varro Overrido!
@@ -612,6 +614,7 @@ Class UserInputConfig{
     [bool]$playercanchangemode = $false
     [int]$tickrate = 60
     [int]$rate = 384000
+    [int]$serverstartdelay = 5
     [bool]$manualstart = $false
 }
 
@@ -859,6 +862,12 @@ $tickrate.add_ValueChanged({
     Set-Need
 })
 
+$serverstartdelay.add_ValueChanged({
+    $userinputarray[$serverdropdown.SelectedIndex].serverstartdelay = $serverstartdelay.value
+    [string]$serverstartdelaylabel.Content = "Server Start Delay (Seconds) "+[string]$($serverstartdelay.value)
+    Set-Need
+})
+
 $saveuserinput.add_Click({
     if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
         New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
@@ -1018,15 +1027,18 @@ $start.add_Click({
     UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
 
     #show monitor window / start servers
+    $xamGUI.Close()
+    if($NorthstarServer.serverstartdelay -ne 0){
+        [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
+    }
     $ServerCount = 0
     ForEach($NorthstarServer in $server.NorthstarServers){
         if(++$ServerCount % 1 -eq 0)
         {
-            Start-Sleep -Seconds 5
+            Start-Sleep -Seconds $NorthstarServer.serverstartdelay
         }
         $NorthstarServer.Start()
     }
-    $xamGUI.Close()
 
     $xamGUI2.add_Closing({
         param($e)

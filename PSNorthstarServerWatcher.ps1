@@ -238,17 +238,20 @@ function TickOrServerselect{
                 if($NorthstarServer.StopWhenPossible -and $players -lt 2){
                     Write-Host "Stopping server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for stop because it has less than 2 players now."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.StopWhenPossible = $False
                 }
 
                 if($NorthstarServer.RestartWhenPossible -and $players -lt 2){
                     Write-Host "Restarting server" $NorthstarServer.NSStrings.ns_server_name ". Was marked for restart because it has less than 2 players now."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.RestartWhenPossible = $False
                     $NorthstarServer.Start()
                 }
 
                 if($NorthstarServer.StopWhenPossible -and ([Math]::Round(((Get-Process -ID $NorthstarServer.ProcessID).WorkingSet64/1024/1024/1024),2)) -gt $MONramlimit.Text){
                     Write-Host "Stopping server because it exceeded Ramlimit and has less than 2 players."
                     $NorthstarServer.Stop()
+                    $NorthstarServer.StopWhenPossible = $False
                     $NorthstarServer.Start()
                 }
 

@@ -906,6 +906,10 @@ $saveuserinput.add_Click({
 })
 
 $start.add_Click({
+    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+    }
+    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
     Set-Build -Needed $True
     Class MonitorValues{
         [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"

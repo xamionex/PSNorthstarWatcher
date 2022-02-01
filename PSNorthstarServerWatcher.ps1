@@ -96,10 +96,13 @@ function UItoNS{
         $NorthstarServer.NSStrings.ns_server_desc = $userinputarray[$ServerID].description
 		$NorthstarServer.UDPPort = $userinputarray[$ServerID].udpport
 		$NorthstarServer.NS.ns_player_auth_port = $userinputarray[$ServerID].tcpport
-		$NorthstarServer.NetWork.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
-		$NorthstarServer.NetWork.rate = $userinputarray[$ServerID].rate
 		$NorthstarServer.NS.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
 		$NorthstarServer.NS.ns_report_server_to_masterserver = $userinputarray[$ServerID].reporttomasterserver
+		$NorthstarServer.NetWork.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
+		$NorthstarServer.NetWork.rate = $userinputarray[$ServerID].rate
+		$NorthstarServer.NetWork.net_chan_limit_mode = $userinputarray[$ServerID].net_chan_limit_mode
+		$NorthstarServer.NetWork.net_chan_limit_msec_per_sec = $userinputarray[$ServerID].net_chan_limit_msec_per_sec
+		$NorthstarServer.serverstartdelay = $userinputarray[$ServerID].serverstartdelay
 		#Password missing
 		#lastmap missing
 		$NorthstarServer.NS.ns_private_match_last_mode = $userinputarray[$ServerID].gamemode
@@ -399,7 +402,7 @@ function TickOrServerselect{
     #try{
     $serverlist = Invoke-RestMethod "http://northstar.tf/client/servers" -ErrorAction SilentlyContinue
     if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
-    Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;}</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
+    Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;} html{background:#1a1a1d;color:white};</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
     ForEach($filter in $server.NorthstarServers.NSStrings.ns_server_name){
         $filteredserverlist = $serverlist | Where-Object -property name -match $filter
         ForEach($serverentry in $filteredserverlist){
@@ -438,6 +441,7 @@ class NorthstarServer {
     [string]$AbsolutePath = ""
     [string]$BinaryFileName = "NorthstarLauncher.exe"
     [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple -softwared3d11"
+    [int]$serverstartdelay = 5
 
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() # Ella Setto Playlisto Varro Overrido!
@@ -626,6 +630,9 @@ Class UserInputConfig{
     [bool]$playercanchangemode = $false
     [int]$tickrate = 60
     [int]$rate = 384000
+    [int]$serverstartdelay = 5
+    [int]$net_chan_limit_mode = 2
+    [int]$net_chan_limit_msec_per_sec = 100
     [bool]$manualstart = $false
 }
 
@@ -815,6 +822,11 @@ $playercanchangemode.add_Checked({
     Set-Need
 })
 
+$net_chan_limit_mode.add_Click({
+    $userinputarray[$serverdropdown.SelectedIndex].net_chan_limit_mode = $net_chan_limit_mode.IsChecked
+    Set-Need
+})
+
 $playercanchangemode.add_Click({
     $userinputarray[$serverdropdown.SelectedIndex].playercanchangemode = $playercanchangemode.IsChecked
     Set-Need
@@ -870,6 +882,18 @@ $tickrate.add_ValueChanged({
     $userinputarray[$serverdropdown.SelectedIndex].rate = $tickrate.value * 6400
     [string]$servertickratelabel.Content = "Server Tickrate "+[string]$($tickrate.value)
     [string]$rate.Content = "Server Rate "+[string]$($tickrate.value * 6400)
+    Set-Need
+})
+
+$serverstartdelay.add_ValueChanged({
+    $userinputarray[$serverdropdown.SelectedIndex].serverstartdelay = $serverstartdelay.value
+    [string]$serverstartdelaylabel.Content = "Server Start Delay (Seconds) "+[string]$($serverstartdelay.value)
+    Set-Need
+})
+
+$net_chan_limit_msec_per_sec.add_ValueChanged({
+    $userinputarray[$serverdropdown.SelectedIndex].net_chan_limit_msec_per_sec = $net_chan_limit_msec_per_sec.value
+    [string]$net_chan_limit_mode_label.Content = "Net Chan Kick (MiliSeconds) "+[string]$($net_chan_limit_msec_per_sec.value)
     Set-Need
 })
 
@@ -1032,15 +1056,18 @@ $start.add_Click({
     UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
 
     #show monitor window / start servers
+    $xamGUI.Close()
+    if($NorthstarServer.serverstartdelay -ne 0){
+        [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
+    }
     $ServerCount = 0
     ForEach($NorthstarServer in $server.NorthstarServers){
         if(++$ServerCount % 1 -eq 0)
         {
-            Start-Sleep -Seconds 5
+            Start-Sleep -Seconds $NorthstarServer.serverstartdelay
         }
         $NorthstarServer.Start()
     }
-    $xamGUI.Close()
 
     $xamGUI2.add_Closing({
         param($e)

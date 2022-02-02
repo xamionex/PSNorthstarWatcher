@@ -169,6 +169,9 @@ function UItoNS{
             $overridevars = $overridevars + "run_epilogue 0 "
             $NorthstarServer.PlaylistVarOverrides = $True
         }
+        #special replacements for net_chan_mode because 2=enabled and 0=disabled. needs to be in this order
+        $DediArgs = $DediArgs -replace "net_chan_limit_mode 0","net_chan_limit_mode 2"
+        $DediArgs = $DediArgs -replace "net_chan_limit_mode 1","net_chan_limit_mode 0"
 
 		$overridevars = $overridevars -replace ".$"
 		if($NorthstarServer.PlaylistVarOverrides -eq $True){
@@ -906,6 +909,10 @@ $saveuserinput.add_Click({
 })
 
 $start.add_Click({
+    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+    }
+    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
     Set-Build -Needed $True
     Class MonitorValues{
         [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"

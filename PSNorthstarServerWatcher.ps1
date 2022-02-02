@@ -1,5 +1,4 @@
 ﻿#Todo: Mod support/integrate, add all Override Vars
-#Todo: trol faky
 #show IPs in monitor (LAN, WAN, Router, ..?), show historical numbers on ram etc (max/min/avg/??)
 #browse button for paths
 #only restart server if it was empty the last 15 minutes

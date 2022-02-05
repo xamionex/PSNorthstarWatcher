@@ -1126,7 +1126,9 @@ function New-Symlinks{ #creates all symlinks from global variable using admin pe
     #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
 	#Write-Host "listsrc" $symlinklistsrc
 	#Write-Host "listdst" $symlinklistdst
-    Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc $symlinklistsrc -symlinklistdst $symlinklistdst" -Verb RunAs
+    if($symlinklistsrc -and $symlinklistdst){
+        Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc $symlinklistsrc -symlinklistdst $symlinklistdst" -Verb RunAs
+    }
 }
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{

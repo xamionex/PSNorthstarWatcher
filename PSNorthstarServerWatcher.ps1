@@ -993,7 +993,7 @@ $start.add_Click({
     })
 
     $MONserverdrop.add_DropDownClosed({
-        CvarsToForm -cvararray $monitorvararray $MONserverdrop
+        CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
         TickOrServerselect
     })
 

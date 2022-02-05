@@ -1111,6 +1111,14 @@ $start.add_Click({
     }
 })
 
+function Add-Symlink{
+    param(
+        [string]$srcpath,
+        [string]$dstpath
+    )
+    #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+    Start-Process SymlinkHelper.exe -WorkingDirectory $ScriptPath -ArugmentList "-srcpath $($NorthstarServer.AbsolutePath)\$($file.name) " + "-dstpath $file.fullname" -Verb Runas
+}
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{
         $server.BasePath = $serverdirectory.text.TrimEnd("\")
@@ -1225,7 +1233,8 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                             [System.Windows.Forms.MessageBox]::Show("The script needs to create symbolic links. Creating symbolic link needs administrator privileges. Please restart again as administrator.","Admin Rights not Detected",0)
                             throw "Can not create symbolic links without admin permission! "
                         }
-                        New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+                        #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+                        Add-Symlink -srcpath "$($NorthstarServer.AbsolutePath)\$($file.name)" -dstpath $file.fullname
                     }catch{
                         throw "Could not create symbolic links!"
                     }

@@ -1228,11 +1228,11 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                         Throw "$target is not a link, please inspect that file and eventually remove it. Then run setup again."}
                 }else{
                     try{
-                        Write-Host ("Create symbolic link from " + "$($NorthstarServer.AbsolutePath)\$($file.name)" + " to $($file.fullname)")
+                        <#Write-Host ("Create symbolic link from " + "$($NorthstarServer.AbsolutePath)\$($file.name)" + " to $($file.fullname)")
                         if(!(Test-Adminrights)){
                             [System.Windows.Forms.MessageBox]::Show("The script needs to create symbolic links. Creating symbolic link needs administrator privileges. Please restart again as administrator.","Admin Rights not Detected",0)
                             throw "Can not create symbolic links without admin permission! "
-                        }
+                        }#>
                         #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
                         Add-Symlink -srcpath "$($NorthstarServer.AbsolutePath)\$($file.name)" -dstpath $file.fullname
                     }catch{

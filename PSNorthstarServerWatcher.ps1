@@ -909,194 +909,206 @@ $saveuserinput.add_Click({
 })
 
 $start.add_Click({
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
-    }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
-    Set-Build -Needed $True
-    Class MonitorValues{
-        [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"
-        [string]$MONservernamelabel # "this is a server name"
-        [string]$MONudpport # "37015"
-        [string]$MONtcpport # "8081"
-        [string]$MONuptime # HH:MM
-        [string]$MONmap # MAPNAME
-        [string]$MONplayers #16/20
-        [string]$MONram # "14.2GB"
-        [string]$MONvmem # "64.3GB"
-        [string]$MONtotram #"31.9GB"
-        [string]$MONtotvmem # "128.3GB"
-        [string]$MONpid # "1234"
+    try{
+        #Check if user did add servers, otherwise do nothing!
+        if($serverdropdown.Items.Count -eq 0){
+            Throw "Did not add servers! Add servers then try again!"
+        }
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Set-Build -Needed $True
+        Class MonitorValues{
+            [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"
+            [string]$MONservernamelabel # "this is a server name"
+            [string]$MONudpport # "37015"
+            [string]$MONtcpport # "8081"
+            [string]$MONuptime # HH:MM
+            [string]$MONmap # MAPNAME
+            [string]$MONplayers #16/20
+            [string]$MONram # "14.2GB"
+            [string]$MONvmem # "64.3GB"
+            [string]$MONtotram #"31.9GB"
+            [string]$MONtotvmem # "128.3GB"
+            [string]$MONpid # "1234"
 
-        [double]$MONvmembar = 0
-        [double]$MONtotrambar = 0
-        [double]$MONrambar = 0
-        [double]$MONtotvmembar = 0
-    }
+            [double]$MONvmembar = 0
+            [double]$MONtotrambar = 0
+            [double]$MONrambar = 0
+            [double]$MONtotvmembar = 0
+        }
 
-    #save data before starting
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
-    }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        #save data before starting
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
 
-    $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
-	   Remove-Variable -Name ($_.Name) -Scope Global
-    }
-    Remove-Variable "xmlWPF2" -Scope Global
-    Remove-Variable "reader2" -Scope Global
-    Remove-Variable "xamGUI2" -Scope Global
+        $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
+        Remove-Variable -Name ($_.Name) -Scope Global
+        }
+        Remove-Variable "xmlWPF2" -Scope Global
+        Remove-Variable "reader2" -Scope Global
+        Remove-Variable "xamGUI2" -Scope Global
 
-    [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
-    $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
-    $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
-    $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
-	    Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
-    }
-
-
-
-    #Initialize array for user Input vars on UI
-    ForEach($item in $serverdropdown.Items){
-        $monitorvararray.add([MonitorVars]::new())
-        $MONserverdrop.Items.add([System.Windows.Controls.ListBoxItem]::new())
-        $MONserverdrop.Items[$MONserverdrop.Items.Count-1].Content = $item.content
-        [string]$MONservercount.Content = [int]$MONservercount.content +1
-        #$monitorvalues[$MONserverdrop.Items.Count-1].MONservernamelabel = $item.content
-    }
-
-    #create server object
-    ForEach($item in $MONserverdrop.Items){
-        $server.NorthstarServers.Add([NorthstarServer]::new())
-        $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
-    }
-
-
-    #put user input variables from current server to UI
-    CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
-
-    #initalize array for values on UI
-    [System.Collections.ArrayList]$global:MonitorValues = @()
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        $MonitorValues.add([MonitorValues]::new())
-    }
+        [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
+        $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
+        $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
+        $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
+            Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
+        }
 
 
 
-    $refreshrate = New-Object System.Windows.Forms.Timer
-    $refreshrate.Interval = 10000
-    $refreshrate.start()
+        #Initialize array for user Input vars on UI
+        ForEach($item in $serverdropdown.Items){
+            $monitorvararray.add([MonitorVars]::new())
+            $MONserverdrop.Items.add([System.Windows.Controls.ListBoxItem]::new())
+            $MONserverdrop.Items[$MONserverdrop.Items.Count-1].Content = $item.content
+            [string]$MONservercount.Content = [int]$MONservercount.content +1
+            #$monitorvalues[$MONserverdrop.Items.Count-1].MONservernamelabel = $item.content
+        }
 
-    #on each tick update values on UI
-    $refreshrate.add_Tick({
-        TickOrServerselect
-    })
+        #create server object
+        ForEach($item in $MONserverdrop.Items){
+            $server.NorthstarServers.Add([NorthstarServer]::new())
+            $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
+        }
 
-    $MONserverdrop.add_DropDownClosed({
+
+        #put user input variables from current server to UI
         CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
-        TickOrServerselect
-    })
 
-    $MONrefresh.add_Click({
-        TickOrServerselect
-    })
-
-    $MONrefreshrate.add_ValueChanged({
-        [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
-        ForEach($monitorvar in $monitorvararray){
-            $monitorvar.MONrefreshrate = ($MONrefreshrate.Value)
+        #initalize array for values on UI
+        [System.Collections.ArrayList]$global:MonitorValues = @()
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            $MonitorValues.add([MonitorValues]::new())
         }
-        Write-Host "refreshrate is now "$refreshrate.interval
-        $refreshrate.Stop()
+
+
+
+        $refreshrate = New-Object System.Windows.Forms.Timer
+        $refreshrate.Interval = 10000
         $refreshrate.start()
-    })
 
-    $MONstart.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Startmanual()
-    })
+        #on each tick update values on UI
+        $refreshrate.add_Tick({
+            TickOrServerselect
+        })
 
-    $MONstop.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Stop()
-        #since server was stopped manually, setting manual start flag
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONserverdrop.add_DropDownClosed({
+            CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
+            TickOrServerselect
+        })
 
-    $MONforcestop.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Kill()
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONrefresh.add_Click({
+            TickOrServerselect
+        })
 
-    $MONstopwhenempty.add_Click({
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONrefreshrate.add_ValueChanged({
+            [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
+            ForEach($monitorvar in $monitorvararray){
+                $monitorvar.MONrefreshrate = ($MONrefreshrate.Value)
+            }
+            Write-Host "refreshrate is now "$refreshrate.interval
+            $refreshrate.Stop()
+            $refreshrate.start()
+        })
 
-    $MONramlimit.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit = $MONramlimit.Text
-    })
+        $MONstart.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Startmanual()
+        })
 
-    $MONvmemlimit.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit = $MONvmemlimit.Text
-    })
+        $MONstop.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Stop()
+            #since server was stopped manually, setting manual start flag
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONrestarthours.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONrestarthours = $MONrestarthours.Text
-    })
+        $MONforcestop.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Kill()
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONcleanlogdays.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONcleanlogdays = $MONcleanlogdays.Text
-    })
+        $MONstopwhenempty.add_Click({
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONramlimitkill.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimitkill = $MONramlimitkill.Text
-    })
+        $MONramlimit.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit = $MONramlimit.Text
+        })
 
-    $MONvmemlimitkill.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
-    })
+        $MONvmemlimit.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit = $MONvmemlimit.Text
+        })
 
-    $server.BasePath = $serverdirectory.text.TrimEnd("\")
+        $MONrestarthours.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONrestarthours = $MONrestarthours.Text
+        })
 
-    #remove before filling otherwise we get duplicates
-    #ForEach($server in $server.NorthstarServers){
-    #    $server.NorthstarServers.remove($server)
-    #}
+        $MONcleanlogdays.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONcleanlogdays = $MONcleanlogdays.Text
+        })
 
-    #put all info from UI into userinputarray=>[NorthstarServer] Objects
-    UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
+        $MONramlimitkill.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimitkill = $MONramlimitkill.Text
+        })
 
-    #show monitor window / start servers
-    $xamGUI.Close()
-    if($NorthstarServer.serverstartdelay -ne 0){
-        [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
-    }
-    $ServerCount = 0
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        if(++$ServerCount % 1 -eq 0)
-        {
-            Start-Sleep -Seconds $NorthstarServer.serverstartdelay
+        $MONvmemlimitkill.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
+        })
+
+        $server.BasePath = $serverdirectory.text.TrimEnd("\")
+
+        #remove before filling otherwise we get duplicates
+        #ForEach($server in $server.NorthstarServers){
+        #    $server.NorthstarServers.remove($server)
+        #}
+
+        #put all info from UI into userinputarray=>[NorthstarServer] Objects
+        UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
+
+        #show monitor window / start servers
+        $xamGUI.Close()
+        if($NorthstarServer.serverstartdelay -ne 0){
+            [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
         }
-        $NorthstarServer.Start()
-    }
-
-    $xamGUI2.add_Closing({
-        param($e)
-        $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
-        if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
-        {
-            $e.Cancel= $true
+        $ServerCount = 0
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            if(++$ServerCount % 1 -eq 0)
+            {
+                Start-Sleep -Seconds $NorthstarServer.serverstartdelay
+            }
+            $NorthstarServer.Start()
         }
-    })
 
-    $xamGUI2.ShowDialog()
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        $NorthstarServer.Stop()
+        $xamGUI2.add_Closing({
+            param($e)
+            $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+            if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
+            {
+                $e.Cancel= $true
+            }
+        })
+
+        $xamGUI2.ShowDialog()
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            $NorthstarServer.Stop()
+        }
+
+
+        #after window was closed stop refreshrate timer
+        $refreshrate.stop()
+        $server.NorthstarServers = @()
+    }catch{
+        Write-Host "Starting servers/monitor failed!"
+        Write-host ($Error | Out-Host)
+        [System.Windows.Forms.MessageBox]::Show("Could not start servers and monitor, please check debug log.","Starting Servers/Monitor failed",0)
+    }finally{
+        #do we need to clean up something?
     }
-
-
-    #after window was closed stop refreshrate timer
-    $refreshrate.stop()
-    $server.NorthstarServers = @()
 })
 
 function Test-Servers {

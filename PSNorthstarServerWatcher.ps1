@@ -1003,6 +1003,9 @@ $start.add_Click({
 
     $MONrefreshrate.add_ValueChanged({
         [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
+        ForEach($monitorvar in $monitorvararray){
+            $monitorvar.MONrefreshrate = ($MONrefreshrate.Value)
+        }
         Write-Host "refreshrate is now "$refreshrate.interval
         $refreshrate.Stop()
         $refreshrate.start()

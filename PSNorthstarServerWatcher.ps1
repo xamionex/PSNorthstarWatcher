@@ -407,7 +407,7 @@ function TickOrServerselect{
     if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
     Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;} html{background:#1a1a1d;color:white};</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
     ForEach($filter in $server.NorthstarServers.NSStrings.ns_server_name){
-        $filteredserverlist = $serverlist | Where-Object -property name -match $filter
+        $filteredserverlist = $serverlist | Where-Object -property name -Contains $filter
         ForEach($serverentry in $filteredserverlist){
             Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<tr><td>$($serverentry.name)</td><td>$($serverentry.playlist)</td><td>$($serverentry.map)</td><td>$($serverentry.playerCount)</td><td>$($serverentry.maxPlayers)</td><td>$($serverentry.description)</td></tr>"
         }

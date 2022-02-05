@@ -38,7 +38,7 @@ function Set-Build{
         #$needsrebuild = $true
         $pendingchanges.Foreground = "Red"
         $pendingchanges.Content = "Pending Save"
-        Test-Servers
+        Add-Servers
     }else{
         #$needsrebuild = $false
         $pendingchanges.Foreground = "Green"
@@ -1111,7 +1111,7 @@ $start.add_Click({
     }
 })
 
-function Test-Servers {
+function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{
         $server.BasePath = $serverdirectory.text.TrimEnd("\")
         #put text from form to var because it can cause weird issues

@@ -1117,7 +1117,7 @@ function Add-Symlink{
         [string]$dstpath
     )
     #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
-    Start-Process SymlinkHelper.exe -WorkingDirectory $ScriptPath -ArugmentList "-srcpath $($NorthstarServer.AbsolutePath)\$($file.name) " + "-dstpath $file.fullname" -Verb Runas
+    Start-Process SymlinkHelper.exe -WorkingDirectory $ScriptPath -ArgumentList "-srcpath $($file.fullname) -dstpath $($NorthstarServer.AbsolutePath)\$($file.name)" -Verb Runas
 }
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{
@@ -1234,7 +1234,7 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                             throw "Can not create symbolic links without admin permission! "
                         }#>
                         #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
-                        Add-Symlink -srcpath "$($NorthstarServer.AbsolutePath)\$($file.name)" -dstpath $file.fullname
+                        Add-Symlink -srcpath $file.fullname -dstpath  "$($NorthstarServer.AbsolutePath)\$($file.name)"
                     }catch{
                         throw "Could not create symbolic links!"
                     }

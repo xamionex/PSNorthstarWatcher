@@ -4,4 +4,7 @@ param(
     [string]$dstpath
 )
 #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
-New-Item -ItemType SymbolicLink -Path $srcpath -Value $dstpath
+New-Item -ItemType SymbolicLink -Path $dstpath -Value $srcpath
+Write-Host "srcpath" $srcpath
+Write-Host "dstpath" $dstpath
+Write-Host ($Error | Out-string)

@@ -1111,13 +1111,22 @@ $start.add_Click({
     }
 })
 
-function Add-Symlink{
+function Add-Symlink{ #adds symlink to global var to later create then with New-Symlink
     param(
         [string]$srcpath,
         [string]$dstpath
     )
+
+    $global:symlinklistsrc = $symlinklistsrc + ($srcpath + ";")
+	#Write-Host $symlinklistsrc
+    $global:symlinklistdst = $symlinklistdst + ($dstpath + ";")
+	#Write-Host $symlinklistdst
+}
+function New-Symlinks{ #creates all symlinks from global variable using admin permissions
     #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
-    Start-Process SymlinkHelper.exe -WorkingDirectory $ScriptPath -ArgumentList "-srcpath $($file.fullname) -dstpath $($NorthstarServer.AbsolutePath)\$($file.name)" -Verb Runas
+	#Write-Host "listsrc" $symlinklistsrc
+	#Write-Host "listdst" $symlinklistdst
+    Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc $symlinklistsrc -symlinklistdst $symlinklistdst" -Verb RunAs
 }
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{
@@ -1241,6 +1250,7 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                 }
             }
         }
+		New-Symlinks
 
         #if($overwriteconfig -eq "Yes"){
         ForEach($NorthstarServer in $server.NorthstarServers){
@@ -1250,7 +1260,7 @@ function Add-Servers { #add servers / if they exist script will check if everyth
             Write-FileUtf8 -Append $False -InputVar "//Config file overwritten by PSNorthstarWatcher on $(get-date)" -Filepath $configfilepath
             Write-FileUtf8 -Append $False -InputVar "ns_masterserver_hostname `"https://northstar.tf`"" -Filepath $configfilepathr2n
             Write-Host "Overwriting $configfilepath"
-            #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath#>
+            #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath
             $nscvararray = (($server.NorthstarServers[0].NS | Get-Member -MemberType Property)).Name
             $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
             #$nscvararray = $nscvararray.remove("autoexec_ns_server")

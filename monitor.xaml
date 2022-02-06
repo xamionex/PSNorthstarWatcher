@@ -571,7 +571,7 @@
         <GroupBox Header="Server Machine" Margin="6,6,10,4" Foreground="White" BorderBrush="Black" Style="{DynamicResource GroupBoxStyleDarkGray}" Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1">
             <Grid>
                 <ProgressBar Name="MONtotrambar" HorizontalAlignment="Left" Height="10" Margin="119,22,0,0" VerticalAlignment="Top" Width="100"/>
-                <Label Style="{DynamicResource DarkGraytext}" Content="Total RAM" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
+                <Label Style="{DynamicResource DarkGraytext}" Content="Free RAM" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
                 <ProgressBar Name="MONtotvmembar" HorizontalAlignment="Left" Height="10" Margin="119,43,0,0" VerticalAlignment="Top" Width="100"/>
                 <Label Style="{DynamicResource DarkGraytext}" Content="Total Virtual Mem" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
                 <Label Style="{DynamicResource DarkGraytext}" Name="MONtotram" Content="0/0 GB" HorizontalAlignment="Left" Margin="224,14,0,0" VerticalAlignment="Top" Width="58"/>

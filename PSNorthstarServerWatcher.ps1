@@ -784,6 +784,13 @@ $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
 $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 	Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
 }
+
+[xml]$xmlWPF3 = Get-Content -Path "$ScriptPath\modconfig.xaml"
+$reader3 = New-Object System.Xml.XmlNodeReader $xmlWPF3
+$global:xamGUI3 = [Windows.Markup.XamlReader]::Load( $reader3 )
+$xmlWPF3.SelectNodes("//*[@Name]") | ForEach-Object{
+    Set-Variable -Name ($_.Name) -Value $xamGUI3.FindName($_.Name) -Scope Global
+}
 #endregion XAML
 
 #region window logic

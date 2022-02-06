@@ -649,6 +649,38 @@ Class Paths{
     [string]$nssource
 }
 
+class EnablemodsJSON{
+    [string]${Northstar.Client} = "true" #{} allows var names with dots! :)
+    [string]${Northstar.CustomServers} = "true"
+    [string]${Northstar.Custom} = "true"
+    [string]${Karma.Abuse} = "true"
+    [string]${xamionex.UnholyTrinity} = "true"
+    [string]${Kala.TeamShuffle} = "true"
+    [string]${PeePee.ServerTools} = "true"
+    [string]${Takyon.PlayerVote} = "true"
+}
+
+class RCONConfig{
+    [string]$rcon_admin = "" #UIDs or Nicknames comma separated
+}
+
+class AdminAbuseConfig{
+    [string]$grant_admin = ""#UIDs or Nicknames comma separated
+    [string]$autoannounce = "Welcome to this server" #announcement on servers
+}
+
+class ServerToolsConfig{
+    [ValidateSet(0,1)][int]$SkipLobby = 0 #will skipp lobby and start match straight if 1
+    [int]$AutoKick = 120 #kick after seconds of inactivity
+    [ValidateSet(
+        "tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm"
+    )][string]$ReplacementMap ="tdm"
+    [ValidateSet(
+        "mp_angel_city","mp_black_water_canal","mp_grave","mp_colony02","mp_complex3","mp_crashsite3","mp_drydock","mp_eden","mp_thaw","mp_forwardbase_kodai","mp_glitch","mp_homestead","mp_relic02","mp_rise","mp_wargames","mp_lobby","mp_lf_deck","mp_lf_meadow","mp_lf_stacks","mp_lf_township","mp_lf_traffic","mp_lf_uma","mp_coliseum","mp_coliseum_column"
+    )][string]$ReplacementMode = "mp_forwardbase_kodai"
+}
+
+
 $global:server = [Server]::new() # global var => easier to debug
 
 #region XAML

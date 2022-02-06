@@ -388,18 +388,12 @@ function TickOrServerselect{
     $MONtotram.Content = [string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))+"/"+[string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0)) + "GB"
     $MONtotrambar.value = 100/([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0))*([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))
 
-    $allpagefilesize = 0
-    ForEach($pagefileusage in (Get-WmiObject -Class Win32_PageFileUsage).currentusage){
-        $allpagefilesize = $allpagefilesize + $pagefileusage
-    }
-    $allocatedpagefilesize = 0
-    ForEach($pagefile in (Get-WmiObject -Class Win32_PageFileUsage).AllocatedBaseSize){
-        $allocatedpagefilesize = $allocatedpagefilesize + $pagefile
-    }
-    $MONtotvmem.Content = [string]([Math]::round($allpagefilesize/1024,0)) + "/" + [string]([Math]::Round($allocatedpagefilesize/1024,0)) + "GB"
-    $MONtotvmembar.Value = 100/([Math]::Round($allocatedpagefilesize/1024,0))*([Math]::round($allpagefilesize/1024,0))
-
-
+    <#$MONtotvmem.Content = [string]([Math]::round($allpagefilesize/1024,0)) + "/" + [string]([Math]::Round($allocatedpagefilesize/1024,0)) + "GB"
+    $MONtotvmembar.Value = 100/([Math]::Round($allocatedpagefilesize/1024,0))*([Math]::round($allpagefilesize/1024,0))#>
+    $freevmemgb = [Math]::round((Get-WmiObject -class win32_operatingsystem).FreeVirtualMemory/1024/1024,0)
+    $totvmemgb = [Math]::round((Get-WmiObject -class win32_operatingsystem).TotalVirtualMemorySize/1024/1024,0)
+    $MONtotvmem.Content = "$freevmemgb / $totvmemgb GB"
+    $MONtotvmembar.Value = 100/$totvmemgb*$freevmemgb
 
     #get json and render index.html server browser
     #try{

@@ -600,5 +600,6 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         <Button Style="{DynamicResource GrayBtn}" Name="saveuserinput" Content="Save config" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="128,14,5,25" Background="{x:Null}" Foreground="White"/>
         <Button Style="{DynamicResource GrayBtn}" Name="start" Content="Start Servers&#xD;&#xA;and Watcher" BorderThickness="1,1,1,1" FontWeight="Bold" Grid.Row="3" Grid.Column="3" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="5,14,155,5" Background="{x:Null}" Foreground="White"/>
         <CheckBox Name="climode" Content="CLI Mode" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="3" Grid.Column="2" Margin="202,45,5,4" Foreground="White"/>
+        <Button Style="{DynamicResource GrayBtn}" Name="editmodconfig" Content="Edit Mod Config" Grid.Column="2" Background="{x:Null}" Foreground="White" Width="120" Height="20" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="151,318,0,0"/>
     </Grid>
 </Window>

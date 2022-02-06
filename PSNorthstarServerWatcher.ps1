@@ -130,6 +130,24 @@ function UItoNS{
 		$NorthstarServer.SetplaylistVarOverrides.riff_floorislava = $userinputarray[$ServerID].floorislava
 		#missing some more overridevars
 
+        #region mod cvars
+        #RCON MOD
+        $NorthstarServer.ModConfig.EnableModsJSON.RCON = $userinputarray[$ServerID].MODenablercon
+        $NorthstarServer.ModConfig.RCONConfig.rcon_admin = $userinputarray[$ServerID].MODrconadmins
+
+        #Admin Abuse MOD
+        $NorthstarServer.ModConfig.EnableModsJSON.{Karma.Abuse} = $userinputarray[$ServerID].MODenableadminabuse
+        $NorthstarServer.ModConfig.AdminAbuseConfig.grant_admin = $userinputarray[$ServerID].MODabuseadmins
+        $NorthstarServer.ModConfig.AdminAbuseConfig.autoannounce = $userinputarray[$ServerID].MODabuseannouncement
+
+        #ServerTools MOD
+        $NorthstarServer.ModConfig.EnableModsJSON.{PeePee.ServerTools} = $userinputarray[$ServerID].MODenableservertools
+        $NorthstarServer.ModConfig.ServerToolsConfig.SkipLobby = $userinputarray[$ServerID].MODservertoolskiplobby
+        $NorthstarServer.ModConfig.ServerToolsConfig.AutoKick = $userinputarray[$ServerID].MODservertoolautokickseconds
+        $NorthstarServer.ModConfig.ServerToolsConfig.ReplacementMap = $userinputarray[$ServerID].MODservertoolautoloadmap
+        $NorthstarServer.ModConfig.ServerToolsConfig.ReplacementMode = $userinputarray[$ServerID].MODservertoolautoloadmode
+        #endregion mod vars
+
 		#Starting Arguments to string
 		$NorthstarServer.StartingArgs = "+setplaylist private_match -dedicated -multiple"
 		if($userinputarray[$ServerID].softwared3d11){
@@ -160,6 +178,21 @@ function UItoNS{
 			#}
 		}
 
+        #RCONConfig
+        ForEach ($varname in ($NorthstarServer.ModConfig.RCONConfig|Get-Member -MemberType Property).Name){
+				$DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.ModConfig.RCONConfig."$varname" + "`" "
+		}
+        #AdminAbuseConfig
+
+        ForEach ($varname in ($NorthstarServer.ModConfig.AdminAbuseConfig|Get-Member -MemberType Property).Name){
+            $DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.ModConfig.AdminAbuseConfig."$varname" + "`" "
+        }
+
+        #ServerToolsConfig
+        ForEach ($varname in ($NorthstarServer.ModConfig.ServerToolsConfig|Get-Member -MemberType Property).Name){
+            $DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.ModConfig.ServerToolsConfig."$varname" + "`" "
+        }
+
         #special ifs because default is classic_mp 1 but is not overriden, to override it its actually 0 !
         if($NorthstarServer.override_disable_classic_mp){
             $overridevars = $overridevars + "classic_mp 0 "
@@ -186,6 +219,8 @@ function UItoNS{
         $NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + "-port " + $NorthstarServer.UDPPort
 		$ServerID++
 		Write-Host ($NorthstarServer |Format-List|out-string)
+        Write-Host ($NorthstarServer.ModConfig |Format-List|out-string)
+        Write-Host ($NorthstarServer.ModConfig.EnableModsJSON |Format-List|out-string)
 	}
 }
 #load all variables into forms in window
@@ -445,6 +480,7 @@ class NorthstarServer {
     [NetWork]$NetWork = [NetWork]::new() # La Ticko Ratero Classo
     [NS]$NS = [NS]::new() # El NS class
     [NSStrings]$NSStrings = [NSStrings]::new() # El NSStrings class (name,desc,pass)
+    [ModConfig]$ModConfig = [ModConfig]::new()
 
     [ValidateSet(0,1)][int]$everything_unlocked = 1
 
@@ -631,6 +667,17 @@ Class UserInputConfig{
     [int]$net_chan_limit_mode = 2
     [int]$net_chan_limit_msec_per_sec = 100
     [bool]$manualstart = $false
+    [string]$MODenablercon = "false"
+    [string]$MODenableadminabuse = "false"
+    [string]$MODenableservertools = "false"
+    [string]$MODrconadmins = ""
+    [string]$MODabuseadmins = ""
+    [string]$MODabuseannouncement = ""
+    [int]$MODservertoolskiplobby = 0
+    [int]$MODservertoolautokickseconds = 120
+    [string]$MODservertoolautoloadmap = "mp_forwardbase_kodai"
+    [string]$MODservertoolautoloadmode = "tdm"
+
 }
 
 class MonitorVars{
@@ -653,11 +700,11 @@ class EnablemodsJSON{
     [string]${Northstar.Client} = "true" #{} allows var names with dots! :)
     [string]${Northstar.CustomServers} = "true"
     [string]${Northstar.Custom} = "true"
-    [string]${Karma.Abuse} = "true"
-    [string]${xamionex.UnholyTrinity} = "true"
-    [string]${Kala.TeamShuffle} = "true"
-    [string]${PeePee.ServerTools} = "true"
-    [string]${Takyon.PlayerVote} = "true"
+    [string]$RCON = "false"
+    [string]${Karma.Abuse} = "false"
+    [string]${xamionex.UnholyTrinity} = "false"
+    [string]${Kala.TeamShuffle} = "false"
+    [string]${PeePee.ServerTools} = "false"
 }
 
 class RCONConfig{
@@ -674,12 +721,39 @@ class ServerToolsConfig{
     [int]$AutoKick = 120 #kick after seconds of inactivity
     [ValidateSet(
         "tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm"
-    )][string]$ReplacementMap ="tdm"
+    )][string]$ReplacementMode ="tdm"
     [ValidateSet(
         "mp_angel_city","mp_black_water_canal","mp_grave","mp_colony02","mp_complex3","mp_crashsite3","mp_drydock","mp_eden","mp_thaw","mp_forwardbase_kodai","mp_glitch","mp_homestead","mp_relic02","mp_rise","mp_wargames","mp_lobby","mp_lf_deck","mp_lf_meadow","mp_lf_stacks","mp_lf_township","mp_lf_traffic","mp_lf_uma","mp_coliseum","mp_coliseum_column"
-    )][string]$ReplacementMode = "mp_forwardbase_kodai"
+    )][string]$ReplacementMap = "mp_forwardbase_kodai"
 }
 
+class ModConfig{
+    [EnableModsJSON]$EnableModsJSON = [EnableModsJSON]::new()
+    [RCONConfig]$RCONConfig = [RCONConfig]::new()
+    [AdminAbuseConfig]$AdminAbuseConfig = [AdminAbuseConfig]::new()
+    [ServerToolsConfig]$ServerToolsConfig = [ServerToolsConfig]::new()
+
+    [void]SaveModUserconfigXML(){
+        [System.Collections.ArrayList]$vars = @()
+        ForEach($configclass in ($this | Get-Member)){
+            $vars.Add($configclass)
+        }
+        Export-Clixml -InputObject $vars -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserModSettings.xml"
+    }
+
+    [void]LoadModUserconfigXML(){
+        $vars = Import-Clixml -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserModSettings.xml"
+        ForEach($configclass in $vars){
+            Switch($configclass.gettype().Name){
+                "EnableModsJSON"{$this.EnableModsJSON=$configclass}
+                "RCONConfig"{$this.RCONConfig=$configclass}
+                "AdminAbuseConfig"{$this.AdminAbuseConfig=$configclass}
+                "ServerToolsConfig"{$this.ServerToolsConfig=$configclass}
+                default{Throw "Error in LoadModUserconfigXML, found class in config that does not match classes."}
+            }
+        }
+    }
+}
 
 $global:server = [Server]::new() # global var => easier to debug
 
@@ -977,6 +1051,83 @@ $saveuserinput.add_Click({
         Throw "Could not save correctly!"
         Write-Host ($Error | Out-Host)
     }
+})
+
+$editmodconfig.add_Click({
+    #[System.Windows.Forms.MessageBox]::Show("Mod config only works with already set up servers, saving and building now!", "Info for Mods", [System.Windows.Forms.MessageBoxButtons]::Ok)
+    Set-Build -Needed $true
+    [xml]$xmlWPF3 = Get-Content -Path "$ScriptPath\modconfig.xaml"
+    $reader3 = New-Object System.Xml.XmlNodeReader $xmlWPF3
+    $global:xamGUI3 = [Windows.Markup.XamlReader]::Load( $reader3 )
+    $xmlWPF3.SelectNodes("//*[@Name]") | ForEach-Object{
+        Set-Variable -Name ($_.Name) -Value $xamGUI3.FindName($_.Name) -Scope Global
+    }
+    $MODenablercon.IsChecked = [System.Convert]::ToBoolean($userinputarray[$serverdropdown.SelectedIndex].MODenablercon)
+    $MODenableadminabuse.IsChecked = [System.Convert]::ToBoolean($userinputarray[$serverdropdown.SelectedIndex].MODenableadminabuse)
+    $MODenableservertools.IsChecked = [System.Convert]::ToBoolean($userinputarray[$serverdropdown.SelectedIndex].MODenableservertools)
+    $MODrconadmins.text = $userinputarray[$serverdropdown.SelectedIndex].MODrconadmins
+    $MODabuseadmins.text = $userinputarray[$serverdropdown.SelectedIndex].MODabuseadmins
+    $MODabuseannouncement.text = $userinputarray[$serverdropdown.SelectedIndex].MODabuseannouncement
+    $MODservertoolskiplobby.isChecked = [System.Convert]::ToBoolean($userinputarray[$serverdropdown.SelectedIndex].MODservertoolskiplobby)
+    $MODservertoolautokickseconds.text = $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautokickseconds
+    $MODservertoolautoloadmap.text = $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautoloadmap
+    $MODservertoolautoloadmode.text = $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautoloadmode
+
+    $MODenablercon.add_Checked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenablercon = "true"
+    })
+    $MODenablercon.add_UnChecked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenablercon = "false"
+    })
+
+    $MODenableadminabuse.add_Checked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenableadminabuse = "true"
+    })
+    $MODenableadminabuse.add_UnChecked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenableadminabuse = "false"
+    })
+
+    $MODenableservertools.add_Checked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenableservertools = "true"
+    })
+    $MODenableservertools.add_UnChecked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODenableservertools = "false"
+    })
+
+    $MODrconadmins.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODrconadmins = $MODrconadmins.Text
+    })
+    $MODabuseadmins.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODabuseadmins = $MODabuseadmins.Text
+    })
+    $MODabuseannouncement.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODabuseannouncement = $MODabuseannouncement.Text
+    })
+
+    $MODservertoolskiplobby.add_Checked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODservertoolskiplobby = 1
+    })
+    $MODservertoolskiplobby.add_UnChecked({
+        $userinputarray[$serverdropdown.SelectedIndex].MODservertoolskiplobby = 0
+    })
+
+    $MODservertoolautokickseconds.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautokickseconds = $MODservertoolautokickseconds.Text
+    })
+
+    $MODservertoolautoloadmap.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautoloadmap = $MODservertoolautoloadmap.Text
+    })
+
+    $MODservertoolautoloadmode.add_LostFocus({
+        $userinputarray[$serverdropdown.SelectedIndex].MODservertoolautoloadmode = $MODservertoolautoloadmode.Text
+    })
+
+    $xamGUI3.add_Closing({
+        Write-Host ($userinputarray[$serverdropdown.SelectedIndex].MODenablercon|Out-Host)
+        Write-Host "Closing MOD config window."
+    })
+    $xamGUI3.ShowDialog()
 })
 
 $start.add_Click({
@@ -1339,6 +1490,9 @@ function Add-Servers { #add servers / if they exist script will check if everyth
 
         #if($overwriteconfig -eq "Yes"){
         ForEach($NorthstarServer in $server.NorthstarServers){
+            #enablemods.json write to enable and disable mods
+            Write-FileUtf8 -Filepath "$($NorthstarServer.AbsolutePath)\R2Northstar\enabledmods.json" -Append $false -InputVar (ConvertTo-JSON -InputObject $NorthstarServer.ModConfig.EnablemodsJSON)
+
             $autoexecserver = "server-" + $server.NorthstarServers.count + "-autoexec.cfg"
             $configfilepath = "$($NorthstarServer.AbsolutePath)\r2\cfg\" + $autoexecserver
             $configfilepathr2n = "$($NorthstarServer.AbsolutePath)\R2Northstar\mods\Northstar.CustomServers\mod\cfg\autoexec_ns_server.cfg"
@@ -1368,7 +1522,6 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                     Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.NetWork."$nscvar") -Append $True -Filepath $configfilepath
                 }
             }
-
         }
         #}else{
         #    Write-Host "Keeping old autoexec_ns_server.cfg"
@@ -1383,7 +1536,7 @@ function Add-Servers { #add servers / if they exist script will check if everyth
         [System.Windows.Forms.MessageBox]::Show("There was an error building your servers. Check debug console.","PSNorthstarWatcher Error Building Servers",0)
     }
     #Remove-Variable server -Scope global
-    $server.NorthstarServers = @()
+    $server.NorthstarServers = @() # $server= $server = :) D: :@ :>
 }
 
 #endregion window logic

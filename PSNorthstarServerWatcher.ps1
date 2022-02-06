@@ -98,10 +98,10 @@ function UItoNS{
 		$NorthstarServer.NS.ns_player_auth_port = $userinputarray[$ServerID].tcpport
 		$NorthstarServer.NS.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
 		$NorthstarServer.NS.ns_report_server_to_masterserver = $userinputarray[$ServerID].reporttomasterserver
-		$NorthstarServer.NetWork.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
-		$NorthstarServer.NetWork.rate = $userinputarray[$ServerID].rate
-		$NorthstarServer.NetWork.net_chan_limit_mode = $userinputarray[$ServerID].net_chan_limit_mode
-		$NorthstarServer.NetWork.net_chan_limit_msec_per_sec = $userinputarray[$ServerID].net_chan_limit_msec_per_sec
+		$NorthstarServer.Network.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
+		$NorthstarServer.Network.rate = $userinputarray[$ServerID].rate
+		$NorthstarServer.Network.net_chan_limit_mode = $userinputarray[$ServerID].net_chan_limit_mode
+		$NorthstarServer.Network.net_chan_limit_msec_per_sec = $userinputarray[$ServerID].net_chan_limit_msec_per_sec
 		$NorthstarServer.serverstartdelay = $userinputarray[$ServerID].serverstartdelay
 		#Password missing
 		#lastmap missing
@@ -149,9 +149,9 @@ function UItoNS{
 				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NS."$varname" + " "
 			#}
 		}
-		ForEach ($varname in ($NorthstarServer.NetWork|Get-Member -MemberType Property).Name){
-			#if($NorthstarServer.NetWork."$varname" -ne 0){
-				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NetWork."$varname" + " "
+		ForEach ($varname in ($NorthstarServer.Network|Get-Member -MemberType Property).Name){
+			#if($NorthstarServer.Network."$varname" -ne 0){
+				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.Network."$varname" + " "
 			#}
 		}
 		ForEach ($varname in ($NorthstarServer.NSStrings|Get-Member -MemberType Property).Name){
@@ -442,7 +442,7 @@ class NorthstarServer {
 
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() # Ella Setto Playlisto Varro Overrido!
-    [NetWork]$NetWork = [NetWork]::new() # La Ticko Ratero Classo
+    [Network]$Network = [Network]::new() # La Ticko Ratero Classo
     [NS]$NS = [NS]::new() # El NS class
     [NSStrings]$NSStrings = [NSStrings]::new() # El NSStrings class (name,desc,pass)
 
@@ -459,7 +459,7 @@ class NorthstarServer {
                 $this.autoexec_ns_server.Add($Cvar +" "+ $this."$Cvar")
             }
         }
-        $CVarArrayTickrate = (($this.NetWork | Get-Member) | where-object -Property MemberType -eq Property) | foreach-object{$($_.Definition).split(" ")[1]}
+        $CVarArrayTickrate = (($this.Network | Get-Member) | where-object -Property MemberType -eq Property) | foreach-object{$($_.Definition).split(" ")[1]}
         ForEach($CVar in $CVarArrayTickrate){
             $this.autoexec_ns_server.Add($Cvar +" "+ $this.Tickrate."$Cvar")
         }
@@ -587,7 +587,7 @@ class SetplaylistVarOverrides{
     [int]$player_bleedout_aiBleedingPlayerMissChance
 }
 
-class NetWork{
+class Network{
     [double]$base_tickinterval_mp = 0.016666667 # default for 60  tick server / 20 tick client
     [int]$rate = 128000
     [int]$sv_updaterate_mp = 20 # default for 60  tick server / 20 tick client
@@ -1358,14 +1358,14 @@ function Add-Servers { #add servers / if they exist script will check if everyth
                     Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.NS."$nscvar") -Append $True -Filepath $configfilepath
                 }
             }
-            $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].NetWork | Get-Member -MemberType Property)).Name
-            #$nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].NetWork | Get-Member -MemberType Property) | Where-Object -Property Name -notmatch "sv_").Name
+            $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].Network | Get-Member -MemberType Property)).Name
+            #$nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].Network | Get-Member -MemberType Property) | Where-Object -Property Name -notmatch "sv_").Name
             ForEach($nscvar in $nstrcvararray){
-                if($NorthstarServer.NetWork."$nscvar".gettype().Name -eq "String"){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.NetWork."$nscvar" + '"') -Append $True -Filepath $configfilepath
+                if($NorthstarServer.Network."$nscvar".gettype().Name -eq "String"){
+                    Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.Network."$nscvar" + '"') -Append $True -Filepath $configfilepath
                 }
-                if(($NorthstarServer.NetWork."$nscvar".gettype().Name -eq "Int32") -or ($NorthstarServer.NetWork."$nscvar".gettype().Name -eq "Double")){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.NetWork."$nscvar") -Append $True -Filepath $configfilepath
+                if(($NorthstarServer.Network."$nscvar".gettype().Name -eq "Int32") -or ($NorthstarServer.Network."$nscvar".gettype().Name -eq "Double")){
+                    Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.Network."$nscvar") -Append $True -Filepath $configfilepath
                 }
             }
 

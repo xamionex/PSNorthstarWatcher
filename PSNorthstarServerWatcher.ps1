@@ -901,11 +901,16 @@ $net_chan_limit_msec_per_sec.add_ValueChanged({
 })
 
 $saveuserinput.add_Click({
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+    try{
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Set-Build -Needed $True
+    }catch{
+        Throw "Could not save correctly!"
+        Write-Host ($Error | Out-Host)
     }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
-    Set-Build -Needed $True
 })
 
 $start.add_Click({
@@ -959,8 +964,6 @@ $start.add_Click({
             Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
         }
 
-
-
         #Initialize array for user Input vars on UI
         ForEach($item in $serverdropdown.Items){
             $monitorvararray.add([MonitorVars]::new())
@@ -976,7 +979,6 @@ $start.add_Click({
             $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
         }
 
-
         #put user input variables from current server to UI
         CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
 
@@ -985,8 +987,6 @@ $start.add_Click({
         ForEach($NorthstarServer in $server.NorthstarServers){
             $MonitorValues.add([MonitorValues]::new())
         }
-
-
 
         $refreshrate = New-Object System.Windows.Forms.Timer
         $refreshrate.Interval = 10000
@@ -1146,6 +1146,20 @@ function Add-Servers { #add servers / if they exist script will check if everyth
             $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
         }
         UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
+
+        #Check for duplicate TCP/UDP ports
+        [System.Collections.ArrayList]$portlist = @()
+        ForEach($nsserver in $server.NorthstarServers){
+            $portlist.Add($nsserver.UDPPort)
+            $portlist.Add($nsserver.NS.ns_player_auth_port)
+        }
+        $groupedportlist = $portlist | Group-Object
+        ForEach($port in $groupedportlist){
+            if($port.Count -gt 1){
+                [System.Windows.Forms.MessageBox]::Show("Error! Duplicate ports found, make sure you do not use TCP+UDP Ports twice!","Duplicate Ports Found",0)
+                Throw "Error! Duplicate ports found, make sure you do not use TCP+UDP Ports twice!"
+            }
+        }
 
         #save data before building
         if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){

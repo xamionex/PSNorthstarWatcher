@@ -643,6 +643,12 @@ class MonitorVars{
     #[string]$MONservernamelabel = "servernamelabel"
 }
 
+Class Paths{
+    [string]$tf2source
+    [string]$nsdestination
+    [string]$nssource
+}
+
 $global:server = [Server]::new() # global var => easier to debug
 
 #region XAML
@@ -675,9 +681,32 @@ $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 #endregion XAML
 
 #region window logic
-$titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
-$northstarpath.text = "Northstar"
-$serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
+
+if(Test-Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"){
+	Write-Host "Importing patsh xml"
+    $paths = Import-Clixml -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
+    $serverdirectory.text = $paths.nsdestination
+    $titanfall2path.text = $paths.tf2source
+    $northstarpath.text = $paths.nssource
+	Write-Host $paths
+}else{
+	Write-Host "creating new paths var"
+	$paths = [Paths]::new()
+}
+
+if(-not $titanfall2path.text){
+    $titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
+    $paths.tf2source = $titanfall2path.text
+}
+if(-not $northstarpath.text){
+    $northstarpath.text = "Northstar"
+    $paths.nssource = "Northstar"
+}
+if(-not $serverdirectory.text){
+    $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
+    $paths.nsdestination = $serverdirectory.text
+}
+
 #[System.Collections.ArrayList]$userinputarray = @()
 [System.Collections.ArrayList]$monitorvararray = @()
 #[System.Collections.ArrayList]$userinputconfignames = @("servername","gamemode","epilogue","boosts","overridemaxplayers","floorislava","airacceleration","roundscorelimit","scorelimit","timelimit","maxplayers","playerhealthmulti","aegisupgrade","classicmp","playerbleed","tcpport","udpport","reporttomasterserver","softwared3d11","allowinsecure","returntolobby","playercanchangemap","playercanchangemode","tickrate")
@@ -686,10 +715,20 @@ $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
 $northstarpath.add_LostFocus({
     if($northstarpath.text -ne "Northstar"){
         [System.Windows.Forms.MessageBox]::Show("Northstar source path changed. This is not recommended!","Northstar Source Path",0)
+        $paths.nssource = $northstarpath.text
         Set-Need
     }
 })
 
+$serverdirectory.add_LostFocus({
+    $paths.nsdestination = $serverdirectory.text
+    Set-Need
+})
+
+$titanfall2path.add_LostFocus({
+    $paths.tf2source = $titanfall2path.text
+    Set-Need
+})
 
 #Click on Add Server
 $addserver.add_Click({
@@ -900,6 +939,7 @@ $saveuserinput.add_Click({
             New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
         Set-Build -Needed $True
     }catch{
         Throw "Could not save correctly!"
@@ -917,6 +957,7 @@ $start.add_Click({
             New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
         Set-Build -Needed $True
         Class MonitorValues{
             [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"
@@ -943,6 +984,7 @@ $start.add_Click({
             New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
 
         $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
         Remove-Variable -Name ($_.Name) -Scope Global
@@ -1160,6 +1202,7 @@ function Add-Servers { #add servers / if they exist script will check if everyth
             New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
 
         #$global:server = [Server]::new() # global var => easier to debug
         if(Test-Path $server.BasePath){

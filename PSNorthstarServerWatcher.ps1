@@ -38,7 +38,7 @@ function Set-Build{
         #$needsrebuild = $true
         $pendingchanges.Foreground = "Red"
         $pendingchanges.Content = "Pending Save"
-        Test-Servers
+        Add-Servers
     }else{
         #$needsrebuild = $false
         $pendingchanges.Foreground = "Green"
@@ -393,18 +393,12 @@ function TickOrServerselect{
     $MONtotram.Content = [string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))+"/"+[string]([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0)) + "GB"
     $MONtotrambar.value = 100/([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).totalvisiblememorysize/1024/1024),0))*([Math]::Round(((Get-WmiObject -Class WIN32_OperatingSystem).freephysicalmemory/1024/1024),0))
 
-    $allpagefilesize = 0
-    ForEach($pagefileusage in (Get-WmiObject -Class Win32_PageFileUsage).currentusage){
-        $allpagefilesize = $allpagefilesize + $pagefileusage
-    }
-    $allocatedpagefilesize = 0
-    ForEach($pagefile in (Get-WmiObject -Class Win32_PageFileUsage).AllocatedBaseSize){
-        $allocatedpagefilesize = $allocatedpagefilesize + $pagefile
-    }
-    $MONtotvmem.Content = [string]([Math]::round($allpagefilesize/1024,0)) + "/" + [string]([Math]::Round($allocatedpagefilesize/1024,0)) + "GB"
-    $MONtotvmembar.Value = 100/([Math]::Round($allocatedpagefilesize/1024,0))*([Math]::round($allpagefilesize/1024,0))
-
-
+    <#$MONtotvmem.Content = [string]([Math]::round($allpagefilesize/1024,0)) + "/" + [string]([Math]::Round($allocatedpagefilesize/1024,0)) + "GB"
+    $MONtotvmembar.Value = 100/([Math]::Round($allocatedpagefilesize/1024,0))*([Math]::round($allpagefilesize/1024,0))#>
+    $freevmemgb = [Math]::round((Get-WmiObject -class win32_operatingsystem).FreeVirtualMemory/1024/1024,0)
+    $totvmemgb = [Math]::round((Get-WmiObject -class win32_operatingsystem).TotalVirtualMemorySize/1024/1024,0)
+    $MONtotvmem.Content = "$freevmemgb / $totvmemgb GB"
+    $MONtotvmembar.Value = 100/$totvmemgb*$freevmemgb
 
     #get json and render index.html server browser
     #try{
@@ -412,7 +406,7 @@ function TickOrServerselect{
     if(Test-Path "$ScriptPath\index.html"){Remove-Item "$ScriptPath\index.html"}
     Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<!DOCTYPE html><head><style>table {border-collapse:collapse;}td {border: 1px solid;}th {text-align:left;} html{background:#1a1a1d;color:white};</style></head><table><tr><th>Servername</th><th>Gamemode</th><th>Map</th><th>Players</th><th>Maxplayers</th><th>Description</th></tr>"
     ForEach($filter in $server.NorthstarServers.NSStrings.ns_server_name){
-        $filteredserverlist = $serverlist | Where-Object -property name -match $filter
+        $filteredserverlist = $serverlist | Where-Object -property name -Contains $filter
         ForEach($serverentry in $filteredserverlist){
             Write-FileUtf8 -Append $True -Filepath "$ScriptPath\index.html" -InputVar "<tr><td>$($serverentry.name)</td><td>$($serverentry.playlist)</td><td>$($serverentry.map)</td><td>$($serverentry.playerCount)</td><td>$($serverentry.maxPlayers)</td><td>$($serverentry.description)</td></tr>"
         }
@@ -658,6 +652,44 @@ class MonitorVars{
     #[string]$MONservernamelabel = "servernamelabel"
 }
 
+Class Paths{
+    [string]$tf2source
+    [string]$nsdestination
+    [string]$nssource
+}
+
+class EnablemodsJSON{
+    [string]${Northstar.Client} = "true" #{} allows var names with dots! :)
+    [string]${Northstar.CustomServers} = "true"
+    [string]${Northstar.Custom} = "true"
+    [string]${Karma.Abuse} = "true"
+    [string]${xamionex.UnholyTrinity} = "true"
+    [string]${Kala.TeamShuffle} = "true"
+    [string]${PeePee.ServerTools} = "true"
+    [string]${Takyon.PlayerVote} = "true"
+}
+
+class RCONConfig{
+    [string]$rcon_admin = "" #UIDs or Nicknames comma separated
+}
+
+class AdminAbuseConfig{
+    [string]$grant_admin = ""#UIDs or Nicknames comma separated
+    [string]$autoannounce = "Welcome to this server" #announcement on servers
+}
+
+class ServerToolsConfig{
+    [ValidateSet(0,1)][int]$SkipLobby = 0 #will skipp lobby and start match straight if 1
+    [int]$AutoKick = 120 #kick after seconds of inactivity
+    [ValidateSet(
+        "tdm", "cp","ctf","lts","ps","ffa","speedball","mfd","ttdm","fra","gg","inf","tt","kr","fastball","arena","ctf_comp","attdm"
+    )][string]$ReplacementMap ="tdm"
+    [ValidateSet(
+        "mp_angel_city","mp_black_water_canal","mp_grave","mp_colony02","mp_complex3","mp_crashsite3","mp_drydock","mp_eden","mp_thaw","mp_forwardbase_kodai","mp_glitch","mp_homestead","mp_relic02","mp_rise","mp_wargames","mp_lobby","mp_lf_deck","mp_lf_meadow","mp_lf_stacks","mp_lf_township","mp_lf_traffic","mp_lf_uma","mp_coliseum","mp_coliseum_column"
+    )][string]$ReplacementMode = "mp_forwardbase_kodai"
+}
+
+
 $global:server = [Server]::new() # global var => easier to debug
 
 #region XAML
@@ -690,9 +722,32 @@ $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
 #endregion XAML
 
 #region window logic
-$titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
-$northstarpath.text = "Northstar"
-$serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
+
+if(Test-Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"){
+	Write-Host "Importing patsh xml"
+    $paths = Import-Clixml -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
+    $serverdirectory.text = $paths.nsdestination
+    $titanfall2path.text = $paths.tf2source
+    $northstarpath.text = $paths.nssource
+	Write-Host $paths
+}else{
+	Write-Host "creating new paths var"
+	$paths = [Paths]::new()
+}
+
+if(-not $titanfall2path.text){
+    $titanfall2path.text = (Get-ItemProperty -Path "hklm:\SOFTWARE\Respawn\Titanfall2" -ErrorAction SilentlyContinue).'Install Dir'
+    $paths.tf2source = $titanfall2path.text
+}
+if(-not $northstarpath.text){
+    $northstarpath.text = "Northstar"
+    $paths.nssource = "Northstar"
+}
+if(-not $serverdirectory.text){
+    $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
+    $paths.nsdestination = $serverdirectory.text
+}
+
 #[System.Collections.ArrayList]$userinputarray = @()
 [System.Collections.ArrayList]$monitorvararray = @()
 #[System.Collections.ArrayList]$userinputconfignames = @("servername","gamemode","epilogue","boosts","overridemaxplayers","floorislava","airacceleration","roundscorelimit","scorelimit","timelimit","maxplayers","playerhealthmulti","aegisupgrade","classicmp","playerbleed","tcpport","udpport","reporttomasterserver","softwared3d11","allowinsecure","returntolobby","playercanchangemap","playercanchangemode","tickrate")
@@ -701,10 +756,20 @@ $serverdirectory.text = "$($env:LOCALAPPDATA)\NorthstarServer"
 $northstarpath.add_LostFocus({
     if($northstarpath.text -ne "Northstar"){
         [System.Windows.Forms.MessageBox]::Show("Northstar source path changed. This is not recommended!","Northstar Source Path",0)
+        $paths.nssource = $northstarpath.text
         Set-Need
     }
 })
 
+$serverdirectory.add_LostFocus({
+    $paths.nsdestination = $serverdirectory.text
+    Set-Need
+})
+
+$titanfall2path.add_LostFocus({
+    $paths.tf2source = $titanfall2path.text
+    Set-Need
+})
 
 #Click on Add Server
 $addserver.add_Click({
@@ -910,202 +975,239 @@ $net_chan_limit_msec_per_sec.add_ValueChanged({
 })
 
 $saveuserinput.add_Click({
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+    try{
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
+        Set-Build -Needed $True
+    }catch{
+        Throw "Could not save correctly!"
+        Write-Host ($Error | Out-Host)
     }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
-    Set-Build -Needed $True
 })
 
 $start.add_Click({
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
-    }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
-    Set-Build -Needed $True
-    Class MonitorValues{
-        [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"
-        [string]$MONservernamelabel # "this is a server name"
-        [string]$MONudpport # "37015"
-        [string]$MONtcpport # "8081"
-        [string]$MONuptime # HH:MM
-        [string]$MONmap # MAPNAME
-        [string]$MONplayers #16/20
-        [string]$MONram # "14.2GB"
-        [string]$MONvmem # "64.3GB"
-        [string]$MONtotram #"31.9GB"
-        [string]$MONtotvmem # "128.3GB"
-        [string]$MONpid # "1234"
+    try{
+        #Check if user did add servers, otherwise do nothing!
+        if($serverdropdown.Items.Count -eq 0){
+            Throw "Did not add servers! Add servers then try again!"
+        }
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
+        Set-Build -Needed $True
+        Class MonitorValues{
+            [string]$MONserverstatuslabel # "Running" "Stopped" or "Pending"
+            [string]$MONservernamelabel # "this is a server name"
+            [string]$MONudpport # "37015"
+            [string]$MONtcpport # "8081"
+            [string]$MONuptime # HH:MM
+            [string]$MONmap # MAPNAME
+            [string]$MONplayers #16/20
+            [string]$MONram # "14.2GB"
+            [string]$MONvmem # "64.3GB"
+            [string]$MONtotram #"31.9GB"
+            [string]$MONtotvmem # "128.3GB"
+            [string]$MONpid # "1234"
 
-        [double]$MONvmembar = 0
-        [double]$MONtotrambar = 0
-        [double]$MONrambar = 0
-        [double]$MONtotvmembar = 0
-    }
+            [double]$MONvmembar = 0
+            [double]$MONtotrambar = 0
+            [double]$MONrambar = 0
+            [double]$MONtotvmembar = 0
+        }
 
-    #save data before starting
-    if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
-        New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
-    }
-    Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        #save data before starting
+        if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
+            New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
+        }
+        Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
 
-    $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
-	   Remove-Variable -Name ($_.Name) -Scope Global
-    }
-    Remove-Variable "xmlWPF2" -Scope Global
-    Remove-Variable "reader2" -Scope Global
-    Remove-Variable "xamGUI2" -Scope Global
+        $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
+        Remove-Variable -Name ($_.Name) -Scope Global
+        }
+        Remove-Variable "xmlWPF2" -Scope Global
+        Remove-Variable "reader2" -Scope Global
+        Remove-Variable "xamGUI2" -Scope Global
 
-    [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
-    $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
-    $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
-    $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
-	    Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
-    }
+        [xml]$global:xmlWPF2 = Get-Content -Path "$ScriptPath\monitor.xaml"
+        $global:reader2 = New-Object System.Xml.XmlNodeReader $xmlWPF2
+        $global:xamGUI2 = [Windows.Markup.XamlReader]::Load( $reader2 )
+        $xmlWPF2.SelectNodes("//*[@Name]") | ForEach-Object{
+            Set-Variable -Name ($_.Name) -Value $xamGUI2.FindName($_.Name) -Scope Global
+        }
 
+        #Initialize array for user Input vars on UI
+        ForEach($item in $serverdropdown.Items){
+            $monitorvararray.add([MonitorVars]::new())
+            $MONserverdrop.Items.add([System.Windows.Controls.ListBoxItem]::new())
+            $MONserverdrop.Items[$MONserverdrop.Items.Count-1].Content = $item.content
+            [string]$MONservercount.Content = [int]$MONservercount.content +1
+            #$monitorvalues[$MONserverdrop.Items.Count-1].MONservernamelabel = $item.content
+        }
 
+        #create server object
+        ForEach($item in $MONserverdrop.Items){
+            $server.NorthstarServers.Add([NorthstarServer]::new())
+            $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
+        }
 
-    #Initialize array for user Input vars on UI
-    ForEach($item in $serverdropdown.Items){
-        $monitorvararray.add([MonitorVars]::new())
-        $MONserverdrop.Items.add([System.Windows.Controls.ListBoxItem]::new())
-        $MONserverdrop.Items[$MONserverdrop.Items.Count-1].Content = $item.content
-        [string]$MONservercount.Content = [int]$MONservercount.content +1
-        #$monitorvalues[$MONserverdrop.Items.Count-1].MONservernamelabel = $item.content
-    }
+        #put user input variables from current server to UI
+        CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
 
-    #create server object
-    ForEach($item in $MONserverdrop.Items){
-        $server.NorthstarServers.Add([NorthstarServer]::new())
-        $server.NorthstarServers[$server.NorthstarServers.count-1].Directory = $server.NorthstarServers.count
-    }
+        #initalize array for values on UI
+        [System.Collections.ArrayList]$global:MonitorValues = @()
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            $MonitorValues.add([MonitorValues]::new())
+        }
 
-
-    #put user input variables from current server to UI
-    CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
-
-    #initalize array for values on UI
-    [System.Collections.ArrayList]$global:MonitorValues = @()
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        $MonitorValues.add([MonitorValues]::new())
-    }
-
-
-
-    $refreshrate = New-Object System.Windows.Forms.Timer
-    $refreshrate.Interval = 10000
-    $refreshrate.start()
-
-    #on each tick update values on UI
-    $refreshrate.add_Tick({
-        TickOrServerselect
-    })
-
-    $MONserverdrop.add_DropDownClosed({
-        CvarsToForm -cvararray $monitorvararray $MONserverdrop
-        TickOrServerselect
-    })
-
-    $MONrefresh.add_Click({
-        TickOrServerselect
-    })
-
-    $MONrefreshrate.add_ValueChanged({
-        [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
-        Write-Host "refreshrate is now "$refreshrate.interval
-        $refreshrate.Stop()
+        $refreshrate = New-Object System.Windows.Forms.Timer
+        $refreshrate.Interval = 10000
         $refreshrate.start()
-    })
 
-    $MONstart.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Startmanual()
-    })
+        #on each tick update values on UI
+        $refreshrate.add_Tick({
+            TickOrServerselect
+        })
 
-    $MONstop.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Stop()
-        #since server was stopped manually, setting manual start flag
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONserverdrop.add_DropDownClosed({
+            CvarsToForm -cvararray $monitorvararray -dropdown $MONserverdrop
+            TickOrServerselect
+        })
 
-    $MONforcestop.add_Click({
-        $server.Northstarservers[$MONserverdrop.SelectedIndex].Kill()
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONrefresh.add_Click({
+            TickOrServerselect
+        })
 
-    $MONstopwhenempty.add_Click({
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
-        $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
-    })
+        $MONrefreshrate.add_ValueChanged({
+            [int]$refreshrate.Interval = ($MONrefreshrate.Value)*1000
+            ForEach($monitorvar in $monitorvararray){
+                $monitorvar.MONrefreshrate = ($MONrefreshrate.Value)
+            }
+            Write-Host "refreshrate is now "$refreshrate.interval
+            $refreshrate.Stop()
+            $refreshrate.start()
+        })
 
-    $MONramlimit.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit = $MONramlimit.Text
-    })
+        $MONstart.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Startmanual()
+        })
 
-    $MONvmemlimit.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit = $MONvmemlimit.Text
-    })
+        $MONstop.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Stop()
+            #since server was stopped manually, setting manual start flag
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONrestarthours.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONrestarthours = $MONrestarthours.Text
-    })
+        $MONforcestop.add_Click({
+            $server.Northstarservers[$MONserverdrop.SelectedIndex].Kill()
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONcleanlogdays.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONcleanlogdays = $MONcleanlogdays.Text
-    })
+        $MONstopwhenempty.add_Click({
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].StopWhenPossible = $True
+            $server.NorthstarServers[$MONserverdrop.SelectedIndex].Manualstart = $True
+        })
 
-    $MONramlimitkill.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimitkill = $MONramlimitkill.Text
-    })
+        $MONramlimit.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimit = $MONramlimit.Text
+        })
 
-    $MONvmemlimitkill.add_LostFocus({
-        $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
-    })
+        $MONvmemlimit.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimit = $MONvmemlimit.Text
+        })
 
-    $server.BasePath = $serverdirectory.text.TrimEnd("\")
+        $MONrestarthours.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONrestarthours = $MONrestarthours.Text
+        })
 
-    #remove before filling otherwise we get duplicates
-    #ForEach($server in $server.NorthstarServers){
-    #    $server.NorthstarServers.remove($server)
-    #}
+        $MONcleanlogdays.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONcleanlogdays = $MONcleanlogdays.Text
+        })
 
-    #put all info from UI into userinputarray=>[NorthstarServer] Objects
-    UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
+        $MONramlimitkill.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONramlimitkill = $MONramlimitkill.Text
+        })
 
-    #show monitor window / start servers
-    $xamGUI.Close()
-    if($NorthstarServer.serverstartdelay -ne 0){
-        [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
-    }
-    $ServerCount = 0
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        if(++$ServerCount % 1 -eq 0)
-        {
-            Start-Sleep -Seconds $NorthstarServer.serverstartdelay
+        $MONvmemlimitkill.add_LostFocus({
+            $monitorvararray[$MONserverdrop.SelectedIndex].MONvmemlimitkill = $MONvmemlimitkill.Text
+        })
+
+        $server.BasePath = $serverdirectory.text.TrimEnd("\")
+
+        #remove before filling otherwise we get duplicates
+        #ForEach($server in $server.NorthstarServers){
+        #    $server.NorthstarServers.remove($server)
+        #}
+
+        #put all info from UI into userinputarray=>[NorthstarServer] Objects
+        UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
+
+        #show monitor window / start servers
+        $xamGUI.Close()
+        if($NorthstarServer.serverstartdelay -ne 0){
+            [System.Windows.Forms.MessageBox]::Show("Start delay is set to $($NorthstarServer.serverstartdelay), Monitor will show up after this period", "Timer", [System.Windows.Forms.MessageBoxButtons]::Ok)
         }
-        $NorthstarServer.Start()
-    }
-
-    $xamGUI2.add_Closing({
-        param($e)
-        $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
-        if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
-        {
-            $e.Cancel= $true
+        $ServerCount = 0
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            if(++$ServerCount % 1 -eq 0)
+            {
+                Start-Sleep -Seconds $NorthstarServer.serverstartdelay
+            }
+            $NorthstarServer.Start()
         }
-    })
 
-    $xamGUI2.ShowDialog()
-    ForEach($NorthstarServer in $server.NorthstarServers){
-        $NorthstarServer.Stop()
+        $xamGUI2.add_Closing({
+            param($e)
+            $result = [System.Windows.Forms.MessageBox]::Show("This will close ALL Northstar servers. Are you sure?", "Exit PSNorthstarWatcher", [System.Windows.Forms.MessageBoxButtons]::YesNo)
+            if ($result -ne [System.Windows.Forms.DialogResult]::Yes)
+            {
+                $e.Cancel= $true
+            }
+        })
+
+        $xamGUI2.ShowDialog()
+        ForEach($NorthstarServer in $server.NorthstarServers){
+            $NorthstarServer.Stop()
+        }
+
+
+        #after window was closed stop refreshrate timer
+        $refreshrate.stop()
+        $server.NorthstarServers = @()
+    }catch{
+        Write-Host "Starting servers/monitor failed!"
+        Write-host ($Error | Out-Host)
+        [System.Windows.Forms.MessageBox]::Show("Could not start servers and monitor, please check debug log.","Starting Servers/Monitor failed",0)
+    }finally{
+        #do we need to clean up something?
     }
-
-
-    #after window was closed stop refreshrate timer
-    $refreshrate.stop()
-    $server.NorthstarServers = @()
 })
 
-function Test-Servers {
+function Add-Symlink{ #adds symlink to global var to later create then with New-Symlink
+    param(
+        [string]$srcpath,
+        [string]$dstpath
+    )
+
+    $global:symlinklistsrc = $symlinklistsrc + ($srcpath + ";")
+	#Write-Host $symlinklistsrc
+    $global:symlinklistdst = $symlinklistdst + ($dstpath + ";")
+	#Write-Host $symlinklistdst
+}
+function New-Symlinks{ #creates all symlinks from global variable using admin permissions
+    #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+	#Write-Host "listsrc" $symlinklistsrc
+	#Write-Host "listdst" $symlinklistdst
+    if($symlinklistsrc -and $symlinklistdst){
+        Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc $symlinklistsrc -symlinklistdst $symlinklistdst" -Verb RunAs
+    }
+}
+function Add-Servers { #add servers / if they exist script will check if everythings correct.
     try{
         $server.BasePath = $serverdirectory.text.TrimEnd("\")
         #put text from form to var because it can cause weird issues
@@ -1122,11 +1224,26 @@ function Test-Servers {
         }
         UItoNS -NorthstarServers $server.northstarservers -userinputarray $userinputarray
 
+        #Check for duplicate TCP/UDP ports
+        [System.Collections.ArrayList]$portlist = @()
+        ForEach($nsserver in $server.NorthstarServers){
+            $portlist.Add($nsserver.UDPPort)
+            $portlist.Add($nsserver.NS.ns_player_auth_port)
+        }
+        $groupedportlist = $portlist | Group-Object
+        ForEach($port in $groupedportlist){
+            if($port.Count -gt 1){
+                [System.Windows.Forms.MessageBox]::Show("Error! Duplicate ports found, make sure you do not use TCP+UDP Ports twice!","Duplicate Ports Found",0)
+                Throw "Error! Duplicate ports found, make sure you do not use TCP+UDP Ports twice!"
+            }
+        }
+
         #save data before building
         if(!(Test-Path "$env:LOCALAPPDATA\NorthstarServer\")){
             New-Item "$env:LOCALAPPDATA\NorthstarServer\" -ItemType Directory
         }
         Export-Clixml -InputObject $userinputarray -Path "$env:LOCALAPPDATA\NorthstarServer\psnswUserSettings.xml"
+        Export-Clixml -InputObject $paths -Path "$env:LOCALAPPDATA\NorthstarServer\psnswPaths.xml"
 
         #$global:server = [Server]::new() # global var => easier to debug
         if(Test-Path $server.BasePath){
@@ -1214,18 +1331,20 @@ function Test-Servers {
                         Throw "$target is not a link, please inspect that file and eventually remove it. Then run setup again."}
                 }else{
                     try{
-                        Write-Host ("Create symbolic link from " + "$($NorthstarServer.AbsolutePath)\$($file.name)" + " to $($file.fullname)")
+                        <#Write-Host ("Create symbolic link from " + "$($NorthstarServer.AbsolutePath)\$($file.name)" + " to $($file.fullname)")
                         if(!(Test-Adminrights)){
                             [System.Windows.Forms.MessageBox]::Show("The script needs to create symbolic links. Creating symbolic link needs administrator privileges. Please restart again as administrator.","Admin Rights not Detected",0)
                             throw "Can not create symbolic links without admin permission! "
-                        }
-                        New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+                        }#>
+                        #New-Item -ItemType SymbolicLink -Path "$($NorthstarServer.AbsolutePath)\$($file.name)" -Value $file.fullname
+                        Add-Symlink -srcpath $file.fullname -dstpath  "$($NorthstarServer.AbsolutePath)\$($file.name)"
                     }catch{
                         throw "Could not create symbolic links!"
                     }
                 }
             }
         }
+		New-Symlinks
 
         #if($overwriteconfig -eq "Yes"){
         ForEach($NorthstarServer in $server.NorthstarServers){
@@ -1235,7 +1354,7 @@ function Test-Servers {
             Write-FileUtf8 -Append $False -InputVar "//Config file overwritten by PSNorthstarWatcher on $(get-date)" -Filepath $configfilepath
             Write-FileUtf8 -Append $False -InputVar "ns_masterserver_hostname `"https://northstar.tf`"" -Filepath $configfilepathr2n
             Write-Host "Overwriting $configfilepath"
-            #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath#>
+            #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath
             $nscvararray = (($server.NorthstarServers[0].NS | Get-Member -MemberType Property)).Name
             $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
             #$nscvararray = $nscvararray.remove("autoexec_ns_server")

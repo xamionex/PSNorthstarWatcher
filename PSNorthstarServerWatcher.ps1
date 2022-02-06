@@ -972,7 +972,11 @@ $playercanchangemode.add_Checked({
 })
 
 $net_chan_limit_mode.add_Click({
-    $userinputarray[$serverdropdown.SelectedIndex].net_chan_limit_mode = $net_chan_limit_mode.IsChecked
+    if($net_chan_limit_mode.IsChecked){
+        $userinputarray[$serverdropdown.SelectedIndex].net_chan_limit_mode = 0
+    }else{
+        $userinputarray[$serverdropdown.SelectedIndex].net_chan_limit_mode = 2
+    }
     Set-Need
 })
 

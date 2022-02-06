@@ -218,9 +218,9 @@ function UItoNS{
         $NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + " " + $DediArgs
         $NorthstarServer.StartingArgs = $NorthstarServer.StartingArgs + "-port " + $NorthstarServer.UDPPort
 		$ServerID++
-		Write-Host ($NorthstarServer |Format-List|out-string)
-        Write-Host ($NorthstarServer.ModConfig |Format-List|out-string)
-        Write-Host ($NorthstarServer.ModConfig.EnableModsJSON |Format-List|out-string)
+		Write-Host ($NorthstarServer |out-string)
+        #Write-Host ($NorthstarServer.ModConfig |Format-List|out-string)
+        Write-Host ($NorthstarServer.ModConfig.EnableModsJSON |out-string)
 	}
 }
 #load all variables into forms in window
@@ -1128,6 +1128,7 @@ $editmodconfig.add_Click({
         Write-Host "Closing MOD config window."
     })
     $xamGUI3.ShowDialog()
+    Set-Build -Needed $true
 })
 
 $start.add_Click({

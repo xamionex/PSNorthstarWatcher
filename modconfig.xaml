@@ -517,9 +517,9 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         </Grid.RowDefinitions>
         <GroupBox Style="{DynamicResource GroupBoxStyleDarkGray}" Header="Enable/Disable Mods" HorizontalAlignment="Stretch" Visibility="Visible" Foreground="White" BorderBrush="#FF040405">
             <Grid>
-                <CheckBox x:Name="MODenablercon" Content="RCON" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
-                <CheckBox x:Name="MODenableadminabuse" Content="Admin Abuse" HorizontalAlignment="Left" Margin="5,25,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
-                <CheckBox x:Name="MODenableservertools" Content="ServerTools" HorizontalAlignment="Left" Margin="5,45,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
+                <CheckBox Name="MODenablercon" Content="RCON" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
+                <CheckBox Name="MODenableadminabuse" Content="Admin Abuse" HorizontalAlignment="Left" Margin="5,25,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
+                <CheckBox Name="MODenableservertools" Content="ServerTools" HorizontalAlignment="Left" Margin="5,45,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="RCON Mod Config" Style="{DynamicResource GroupBoxStyleDarkGray}" Foreground="White" BorderBrush="#FF040405" Grid.Row="1">
@@ -529,7 +529,7 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     <ColumnDefinition Width="75*"/>
                 </Grid.ColumnDefinitions>
                 <Label Content="Admins" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="Syntax: UID,UID or UID,NICKNAME,..."/>
-                <TextBox x:Name="MODrconadmins" HorizontalAlignment="Stretch" Margin="5,5,5,5" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="2" ToolTip="Syntax: UID,UID or UID,NICKNAME,..." Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODrconadmins" HorizontalAlignment="Stretch" Margin="5,5,5,5" TextWrapping="Wrap" VerticalAlignment="Stretch" Grid.Column="2" ToolTip="Syntax: UID,UID or UID,NICKNAME,..." Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="Admin Abuse Config" Style="{DynamicResource GroupBoxStyleDarkGray}" Foreground="White" BorderBrush="#FF040405" Grid.Row="2">
@@ -543,13 +543,13 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     <RowDefinition Height="50*"/>
                 </Grid.RowDefinitions>
                 <Label Content="Admins" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="Syntax: UID,UID or UID,NICKNAME,..." Margin="5,5,0,0" Grid.ColumnSpan="1"/>
-                <TextBox x:Name="MODabuseadmins" Margin="5,5,5,5" TextWrapping="Wrap" ToolTip="Syntax: UID,UID or UID,NICKNAME,..." Grid.Column="2" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODabuseadmins" Margin="5,5,5,5" TextWrapping="Wrap" ToolTip="Syntax: UID,UID or UID,NICKNAME,..." Grid.Column="2" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
                 <Label Content="Announcement" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="Text for server announcement" Margin="5,5,0,0" Grid.ColumnSpan="1" Grid.Row="2"/>
-                <TextBox x:Name="MODabuseannouncement" Margin="5,5,5,5" TextWrapping="Wrap" ToolTip="Text for server announcement" Grid.Column="2" Grid.Row="2" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODabuseannouncement" Margin="5,5,5,5" TextWrapping="Wrap" ToolTip="Text for server announcement" Grid.Column="2" Grid.Row="2" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
             </Grid>
         </GroupBox>
         <GroupBox Header="ServerTools Config" Style="{DynamicResource GroupBoxStyleDarkGray}" Foreground="White" BorderBrush="#FF040405" Grid.Row="1" Grid.Column="1" Grid.RowSpan="2">
-            <Grid x:Name="MODservertoolskiplobby" Margin="5,5,5,5">
+            <Grid Margin="5,5,5,5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="45*"/>
                     <ColumnDefinition Width="55*"/>
@@ -563,13 +563,13 @@ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     <RowDefinition Height="50*"/>
                     <RowDefinition Height="50*"/>
                 </Grid.RowDefinitions>
-                <CheckBox Content="SkipLobby" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
+                <CheckBox Name="MODservertoolskiplobby" Content="SkipLobby" HorizontalAlignment="Left" Margin="5,5,0,0" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405"/>
                 <Label Content="AutoKick Seconds" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="" Grid.ColumnSpan="1" Grid.Row="1"/>
-                <TextBox x:Name="MODservertoolautokickseconds" Grid.Row="1" Grid.Column="1" Margin="5,5,5,5" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODservertoolautokickseconds" Grid.Row="1" Grid.Column="1" Margin="5,5,5,5" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
                 <Label Content="Autoload Map" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="&quot;mp_angel_city&quot;,&quot;mp_black_water_canal&quot;,&quot;mp_grave&quot;,&quot;mp_colony02&quot;,&quot;mp_complex3&quot;,&quot;mp_crashsite3&quot;,&quot;mp_drydock&quot;,&quot;mp_eden&quot;,&quot;mp_thaw&quot;,&quot;mp_forwardbase_kodai&quot;,&quot;mp_glitch&quot;,&quot;mp_homestead&quot;,&quot;mp_relic02&quot;,&quot;mp_rise&quot;,&quot;mp_wargames&quot;,&quot;mp_lobby&quot;,&quot;mp_lf_deck&quot;,&quot;mp_lf_meadow&quot;,&quot;mp_lf_stacks&quot;,&quot;mp_lf_township&quot;,&quot;mp_lf_traffic&quot;,&quot;mp_lf_uma&quot;,&quot;mp_coliseum&quot;,&quot;mp_coliseum_column&quot;" Grid.ColumnSpan="1" Grid.Row="2"/>
-                <TextBox x:Name="MODservertoolautoloadmap" Grid.Row="2" Grid.Column="1" Margin="5,5,5,5" ToolTip="&quot;mp_angel_city&quot;,&quot;mp_black_water_canal&quot;,&quot;mp_grave&quot;,&quot;mp_colony02&quot;,&quot;mp_complex3&quot;,&quot;mp_crashsite3&quot;,&quot;mp_drydock&quot;,&quot;mp_eden&quot;,&quot;mp_thaw&quot;,&quot;mp_forwardbase_kodai&quot;,&quot;mp_glitch&quot;,&quot;mp_homestead&quot;,&quot;mp_relic02&quot;,&quot;mp_rise&quot;,&quot;mp_wargames&quot;,&quot;mp_lobby&quot;,&quot;mp_lf_deck&quot;,&quot;mp_lf_meadow&quot;,&quot;mp_lf_stacks&quot;,&quot;mp_lf_township&quot;,&quot;mp_lf_traffic&quot;,&quot;mp_lf_uma&quot;,&quot;mp_coliseum&quot;,&quot;mp_coliseum_column&quot;" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODservertoolautoloadmap" Grid.Row="2" Grid.Column="1" Margin="5,5,5,5" ToolTip="&quot;mp_angel_city&quot;,&quot;mp_black_water_canal&quot;,&quot;mp_grave&quot;,&quot;mp_colony02&quot;,&quot;mp_complex3&quot;,&quot;mp_crashsite3&quot;,&quot;mp_drydock&quot;,&quot;mp_eden&quot;,&quot;mp_thaw&quot;,&quot;mp_forwardbase_kodai&quot;,&quot;mp_glitch&quot;,&quot;mp_homestead&quot;,&quot;mp_relic02&quot;,&quot;mp_rise&quot;,&quot;mp_wargames&quot;,&quot;mp_lobby&quot;,&quot;mp_lf_deck&quot;,&quot;mp_lf_meadow&quot;,&quot;mp_lf_stacks&quot;,&quot;mp_lf_township&quot;,&quot;mp_lf_traffic&quot;,&quot;mp_lf_uma&quot;,&quot;mp_coliseum&quot;,&quot;mp_coliseum_column&quot;" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
                 <Label Content="Autoload Mode" HorizontalAlignment="Left" VerticalAlignment="Top" Foreground="White" BorderBrush="#FF040405" ToolTip="&quot;tdm&quot;, &quot;cp&quot;,&quot;ctf&quot;,&quot;lts&quot;,&quot;ps&quot;,&quot;ffa&quot;,&quot;speedball&quot;,&quot;mfd&quot;,&quot;ttdm&quot;,&quot;fra&quot;,&quot;gg&quot;,&quot;inf&quot;,&quot;tt&quot;,&quot;kr&quot;,&quot;fastball&quot;,&quot;arena&quot;,&quot;ctf_comp&quot;,&quot;attdm&quot;" Grid.ColumnSpan="1" Grid.Row="3"/>
-                <TextBox x:Name="MODservertoolautoloadmode" Grid.Row="3" Grid.Column="1" Margin="5,5,5,5" ToolTip="&quot;tdm&quot;, &quot;cp&quot;,&quot;ctf&quot;,&quot;lts&quot;,&quot;ps&quot;,&quot;ffa&quot;,&quot;speedball&quot;,&quot;mfd&quot;,&quot;ttdm&quot;,&quot;fra&quot;,&quot;gg&quot;,&quot;inf&quot;,&quot;tt&quot;,&quot;kr&quot;,&quot;fastball&quot;,&quot;arena&quot;,&quot;ctf_comp&quot;,&quot;attdm&quot;" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
+                <TextBox Name="MODservertoolautoloadmode" Grid.Row="3" Grid.Column="1" Margin="5,5,5,5" ToolTip="&quot;tdm&quot;, &quot;cp&quot;,&quot;ctf&quot;,&quot;lts&quot;,&quot;ps&quot;,&quot;ffa&quot;,&quot;speedball&quot;,&quot;mfd&quot;,&quot;ttdm&quot;,&quot;fra&quot;,&quot;gg&quot;,&quot;inf&quot;,&quot;tt&quot;,&quot;kr&quot;,&quot;fastball&quot;,&quot;arena&quot;,&quot;ctf_comp&quot;,&quot;attdm&quot;" Background="#FF212125" BorderBrush="{x:Null}" Foreground="White"/>
             </Grid>
         </GroupBox>
     </Grid>

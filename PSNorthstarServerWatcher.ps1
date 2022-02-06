@@ -98,8 +98,8 @@ function UItoNS{
 		$NorthstarServer.NS.ns_player_auth_port = $userinputarray[$ServerID].tcpport
 		$NorthstarServer.NS.ns_auth_allow_insecure = $userinputarray[$ServerID].allowinsecure
 		$NorthstarServer.NS.ns_report_server_to_masterserver = $userinputarray[$ServerID].reporttomasterserver
-		$NorthstarServer.TickRate.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
-		$NorthstarServer.TickRate.rate = $userinputarray[$ServerID].rate
+		$NorthstarServer.NetWork.sv_updaterate_mp = $userinputarray[$ServerID].tickrate
+		$NorthstarServer.NetWork.rate = $userinputarray[$ServerID].rate
 		$NorthstarServer.NetWork.net_chan_limit_mode = $userinputarray[$ServerID].net_chan_limit_mode
 		$NorthstarServer.NetWork.net_chan_limit_msec_per_sec = $userinputarray[$ServerID].net_chan_limit_msec_per_sec
 		$NorthstarServer.serverstartdelay = $userinputarray[$ServerID].serverstartdelay
@@ -157,11 +157,6 @@ function UItoNS{
 		ForEach ($varname in ($NorthstarServer.NSStrings|Get-Member -MemberType Property).Name){
 			#if($NorthstarServer.NSStrings."$varname" -ne 0){
 				$DediArgs = $DediArgs + "+$varname `"" + $Northstarserver.NSStrings."$varname" + "`" "
-			#}
-		}
-		ForEach ($varname in ($NorthstarServer.TickRate|Get-Member -MemberType Property).Name){
-			#if($NorthstarServer.NetWork."$varname" -ne 0){
-				$DediArgs = $DediArgs + "+$varname " + $Northstarserver.NetWork."$varname" + " "
 			#}
 		}
 
@@ -447,7 +442,6 @@ class NorthstarServer {
 
     [bool]$PlaylistVarOverrides = $false
     [SetplaylistVarOverrides]$SetplaylistVarOverrides = [SetplaylistVarOverrides]::new() # Ella Setto Playlisto Varro Overrido!
-    [TickRate]$TickRate = [TickRate]::new() # La Ticko Ratero Classo
     [NetWork]$NetWork = [NetWork]::new() # La Ticko Ratero Classo
     [NS]$NS = [NS]::new() # El NS class
     [NSStrings]$NSStrings = [NSStrings]::new() # El NSStrings class (name,desc,pass)
@@ -594,19 +588,16 @@ class SetplaylistVarOverrides{
 }
 
 class NetWork{
-    [int]$sv_querylimit_per_sec = 15
-    [int]$net_chan_limit_mode = 2
-    [int]$net_chan_limit_msec_per_sec = 100
-    [ValidateSet(0,1)][int]$net_data_block_enabled = 0
-    [ValidateSet(0,1)][int]$host_skip_client_dll_crc = 1
-}
-
-class TickRate{
     [double]$base_tickinterval_mp = 0.016666667 # default for 60  tick server / 20 tick client
     [int]$rate = 128000
     [int]$sv_updaterate_mp = 20 # default for 60  tick server / 20 tick client
     [int]$sv_minupdaterate = 20 # default for 60  tick server / 20 tick client
     [int]$sv_max_snapshots_multiplayer = 300 # updaterate * 15
+    [int]$sv_querylimit_per_sec = 15
+    [int]$net_chan_limit_mode = 2
+    [int]$net_chan_limit_msec_per_sec = 100
+    [ValidateSet(0,1)][int]$net_data_block_enabled = 0
+    [ValidateSet(0,1)][int]$host_skip_client_dll_crc = 1
 }
 
 Class UserInputConfig{

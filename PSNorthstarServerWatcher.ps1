@@ -472,7 +472,7 @@ class NorthstarServer {
     [string]$Directory = "1"
     [string]$AbsolutePath = ""
     [string]$BinaryFileName = "NorthstarLauncher.exe"
-    [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple -softwared3d11"
+    [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple"
     [int]$serverstartdelay = 5
 
     [bool]$PlaylistVarOverrides = $false

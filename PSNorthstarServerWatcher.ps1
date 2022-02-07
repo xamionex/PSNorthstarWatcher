@@ -656,7 +656,7 @@ Class UserInputConfig{
     [bool]$playerbleed = $false
     [string]$tcpport = "8081"
     [bool]$reporttomasterserver = $true
-    [bool]$softwared3d11 = $true
+    [bool]$softwared3d11 = $false
     [bool]$allowinsecure = $false
     [bool]$returntolobby = $false
     [bool]$playercanchangemap = $false

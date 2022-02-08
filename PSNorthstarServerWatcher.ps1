@@ -202,6 +202,10 @@ function UItoNS{
             $overridevars = $overridevars + "run_epilogue 0 "
             $NorthstarServer.PlaylistVarOverrides = $True
         }
+        #special replacements for net_chan_mode because 2=enabled and 0=disabled. needs to be in this order
+        $DediArgs = $DediArgs -replace "net_chan_limit_mode 0","net_chan_limit_mode 2"
+        $DediArgs = $DediArgs -replace "net_chan_limit_mode 1","net_chan_limit_mode 0"
+
 		$overridevars = $overridevars -replace ".$"
 		if($NorthstarServer.PlaylistVarOverrides -eq $True){
             $playlistvaroverridestring = " +setplaylistvaroverrides `""
@@ -468,7 +472,7 @@ class NorthstarServer {
     [string]$Directory = "1"
     [string]$AbsolutePath = ""
     [string]$BinaryFileName = "NorthstarLauncher.exe"
-    [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple -softwared3d11"
+    [string]$StartingArgs = "+setplaylist private_match -dedicated -multiple"
     [int]$serverstartdelay = 5
 
     [bool]$PlaylistVarOverrides = $false
@@ -652,7 +656,7 @@ Class UserInputConfig{
     [bool]$playerbleed = $false
     [string]$tcpport = "8081"
     [bool]$reporttomasterserver = $true
-    [bool]$softwared3d11 = $true
+    [bool]$softwared3d11 = $false
     [bool]$allowinsecure = $false
     [bool]$returntolobby = $false
     [bool]$playercanchangemap = $false

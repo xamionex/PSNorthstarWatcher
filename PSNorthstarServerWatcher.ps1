@@ -1355,7 +1355,7 @@ function New-Symlinks{ #creates all symlinks from global variable using admin pe
 	#Write-Host "listsrc" $symlinklistsrc
 	#Write-Host "listdst" $symlinklistdst
     if($symlinklistsrc -and $symlinklistdst){
-        Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc $symlinklistsrc -symlinklistdst $symlinklistdst" -Verb RunAs
+        Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc `"$symlinklistsrc`" -symlinklistdst `"$symlinklistdst`"" -Verb RunAs
     }
 }
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
@@ -1501,12 +1501,9 @@ function Add-Servers { #add servers / if they exist script will check if everyth
         ForEach($NorthstarServer in $server.NorthstarServers){
             #enablemods.json write to enable and disable mods
             Write-FileUtf8 -Filepath "$($NorthstarServer.AbsolutePath)\R2Northstar\enabledmods.json" -Append $false -InputVar (ConvertTo-JSON -InputObject $NorthstarServer.ModConfig.EnablemodsJSON)
-
-            $autoexecserver = "server-" + $server.NorthstarServers.count + "-autoexec.cfg"
-            $configfilepath = "$($NorthstarServer.AbsolutePath)\r2\cfg\" + $autoexecserver
-            $configfilepathr2n = "$($NorthstarServer.AbsolutePath)\R2Northstar\mods\Northstar.CustomServers\mod\cfg\autoexec_ns_server.cfg"
+            $configfilepath = "$($NorthstarServer.AbsolutePath)\R2Northstar\mods\Northstar.CustomServers\mod\cfg\autoexec_ns_server.cfg"
             Write-FileUtf8 -Append $False -InputVar "//Config file overwritten by PSNorthstarWatcher on $(get-date)" -Filepath $configfilepath
-            Write-FileUtf8 -Append $False -InputVar "ns_masterserver_hostname `"https://northstar.tf`"" -Filepath $configfilepathr2n
+            Write-FileUtf8 -Append $False -InputVar "ns_masterserver_hostname `"https://northstar.tf`"" -Filepath $configfilepath
             Write-Host "Overwriting $configfilepath"
             #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath
             $nscvararray = (($server.NorthstarServers[0].NS | Get-Member -MemberType Property)).Name

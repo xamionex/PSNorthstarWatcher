@@ -1506,28 +1506,28 @@ function Add-Servers { #add servers / if they exist script will check if everyth
             Write-FileUtf8 -Append $False -InputVar "ns_masterserver_hostname `"https://northstar.tf`"" -Filepath $configfilepath
             Write-Host "Overwriting $configfilepath"
             #Write-FileUtf8 -Append $True -InputVar $NorthstarServer.ns_server_name -Filepath $configfilepath
-            $nscvararray = (($server.NorthstarServers[0].NS | Get-Member -MemberType Property)).Name
-            $nscvararray = $nscvararray -notmatch "autoexec_ns_server"
+            #$nscvararray = (($server.NorthstarServers[0].NS | Get-Member -MemberType Property)).Name
+            #$nscvararray = $nscvararray -notmatch "autoexec_ns_server"
             #$nscvararray = $nscvararray.remove("autoexec_ns_server")
 
-            ForEach($nscvar in $nscvararray){
-                if($NorthstarServer.NS."$nscvar".gettype().Name -eq "String"){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.NS."$nscvar" + '"') -Append $True -Filepath $configfilepath
-                }
-                if($NorthstarServer.NS."$nscvar".gettype().Name -eq "Int32" -or $NorthstarServer.NS."$nscvar".gettype().Name -eq "Double"){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.NS."$nscvar") -Append $True -Filepath $configfilepath
-                }
-            }
-            $nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].Network | Get-Member -MemberType Property)).Name
+            #ForEach($nscvar in $nscvararray){
+            #    if($NorthstarServer.NS."$nscvar".gettype().Name -eq "String"){
+            #        Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.NS."$nscvar" + '"') -Append $True -Filepath $configfilepath
+            #    }
+            #    if($NorthstarServer.NS."$nscvar".gettype().Name -eq "Int32" -or $NorthstarServer.NS."$nscvar".gettype().Name -eq "Double"){
+            #        Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.NS."$nscvar") -Append $True -Filepath $configfilepath
+            #    }
+            #}
+            #$nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].Network | Get-Member -MemberType Property)).Name
             #$nstrcvararray = $nstrcvararray + (($server.NorthstarServers[0].Network | Get-Member -MemberType Property) | Where-Object -Property Name -notmatch "sv_").Name
-            ForEach($nscvar in $nstrcvararray){
-                if($NorthstarServer.Network."$nscvar".gettype().Name -eq "String"){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.Network."$nscvar" + '"') -Append $True -Filepath $configfilepath
-                }
-                if(($NorthstarServer.Network."$nscvar".gettype().Name -eq "Int32") -or ($NorthstarServer.Network."$nscvar".gettype().Name -eq "Double")){
-                    Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.Network."$nscvar") -Append $True -Filepath $configfilepath
-                }
-            }
+            #ForEach($nscvar in $nstrcvararray){
+            #    if($NorthstarServer.Network."$nscvar".gettype().Name -eq "String"){
+            #        Write-FileUtf8 -InputVar ("$nscvar" + " " + '"' + $NorthstarServer.Network."$nscvar" + '"') -Append $True -Filepath $configfilepath
+            #    }
+            #    if(($NorthstarServer.Network."$nscvar".gettype().Name -eq "Int32") -or ($NorthstarServer.Network."$nscvar".gettype().Name -eq "Double")){
+            #        Write-FileUtf8 -InputVar ("$nscvar" + " " + $NorthstarServer.Network."$nscvar") -Append $True -Filepath $configfilepath
+            #    }
+            #}
         }
         #}else{
         #    Write-Host "Keeping old autoexec_ns_server.cfg"

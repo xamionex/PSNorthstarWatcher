@@ -1355,7 +1355,7 @@ function New-Symlinks{ #creates all symlinks from global variable using admin pe
 	#Write-Host "listsrc" $symlinklistsrc
 	#Write-Host "listdst" $symlinklistdst
     if($symlinklistsrc -and $symlinklistdst){
-        Start-process SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc `"$symlinklistsrc`" -symlinklistdst `"$symlinklistdst`"" -Verb RunAs
+        Start-process -WindowStyle hidden -FilePath SymlinkHelper.exe -WorkingDirectory $ScriptPath -Argumentlist "-symlinklistsrc `"$symlinklistsrc`" -symlinklistdst `"$symlinklistdst`"" -Verb RunAs
     }
 }
 function Add-Servers { #add servers / if they exist script will check if everythings correct.
